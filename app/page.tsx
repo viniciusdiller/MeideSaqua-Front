@@ -16,112 +16,96 @@ const categories = [
     title: "Artesanato",
     color: "from-orange-400 to-red-500",
     backgroundimg: "/gatinho.jpg",
-    description: "Conheça o talento local",
   },
   {
     id: "pontos-turisticos",
     title: "Pontos Turísticos",
     color: "from-blue-400 to-purple-500",
-    backgroundimg: "",
-    description: "Lugares imperdíveis",
+    backgroundimg: "/gatinho.jpg",
   },
   {
     id: "trilhas",
     title: "Trilhas",
     color: "from-green-400 to-emerald-500",
     backgroundimg: "",
-    description: "Aventuras na natureza",
   },
   {
     id: "telefones-uteis",
     title: "Telefones Úteis",
     color: "from-red-400 to-pink-500",
     backgroundimg: "",
-    description: "Mantenha-se conectado",
   },
   {
     id: "escolas",
     title: "Escolas",
     color: "from-indigo-400 to-blue-500",
     backgroundimg: "",
-    description: "Educação de qualidade",
   },
   {
     id: "supermercados",
     title: "Supermercados",
     color: "from-yellow-400 to-orange-500",
     backgroundimg: "",
-    description: "Tudo que você precisa",
   },
   {
     id: "transporte",
     title: "Transporte Público",
     color: "from-cyan-400 to-blue-500",
     backgroundimg: "",
-    description: "Mobilidade urbana",
   },
   {
     id: "hospedagens",
     title: "Hospedagens",
     color: "from-purple-400 to-pink-500",
     backgroundimg: "",
-    description: "Conforto e acolhimento",
   },
   {
     id: "eventos",
     title: "Eventos Locais",
     color: "from-rose-400 to-red-500",
     backgroundimg: "",
-    description: "Cultura e entretenimento",
   },
   {
     id: "lazer-e-esporte",
     title: "Lazer e Esporte",
     color: "from-amber-400 to-yellow-500",
     backgroundimg: "",
-    description: "Diversão e atividades físicas",
   },
   {
     id: "espacos-culturais",
     title: "Espaços Culturais",
     color: "from-violet-400 to-purple-500",
     backgroundimg: "",
-    description: "Arte e história local",
   },
   {
     id: "praias",
     title: "Praias e Lagoas",
     color: "from-teal-400 to-cyan-500",
     backgroundimg: "",
-    description: "Paraíso natural",
   },
   {
     id: "mulheres-e-criancas",
     title: "Mulheres e Crianças",
     color: "from-pink-400 to-red-600",
     backgroundimg: "",
-    description: "Apoio e serviços essenciais",
   },
   {
     id: "compras",
     title: "Compras",
     color: "from-gray-400 to-gray-500",
     backgroundimg: "",
-    description: "Melhores lojas e serviços",
   },
   {
     id: "emergencias",
     title: "Emergências",
     color: "from-red-600 to-rose-700",
     backgroundimg: "",
-    description: "Serviços de emergência e saúde",
   },
   {
     id: "feiras",
     title: "Feiras e Produtores Rurais",
     color: "from-green-400 to-lime-300",
     backgroundimg: "",
-    description: "Serviços de saúde e bem-estar",
   },
 ];
 
@@ -248,14 +232,8 @@ export default function HomePage() {
           {/* Categories Grid */}
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5 max-w-7xl mx-auto">
             {categories
-              .filter(
-                (category) =>
-                  category.title
-                    .toLowerCase()
-                    .includes(searchTerm.toLowerCase()) ||
-                  category.description
-                    .toLowerCase()
-                    .includes(searchTerm.toLowerCase())
+              .filter((category) =>
+                category.title.toLowerCase().includes(searchTerm.toLowerCase())
               )
               .map((category, index) => {
                 const backgroundimg = category.backgroundimg;
@@ -277,29 +255,26 @@ export default function HomePage() {
                   >
                     <Link href={`/categoria/${category.id}`}>
                       <div className="group relative overflow-hidden rounded-2xl bg-white shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1 hover:scale-[1.02]">
-                        <div
-                          className={`absolute inset-0 bg-gradient-to-br ${category.color} opacity-0 group-hover:opacity-10 transition-opacity duration-300`}
-                        />
+                        <div className="relative w-full rounded-md overflow-hidden h-40  flex justify-center items-center">
+                          {backgroundimg && (
+                            <Image
+                              src={backgroundimg}
+                              alt={category.title}
+                              fill
+                              className="object-cover"
+                            />
+                          )}
 
-                        <div className="w-full">
-                          <div className="p-6">
-                            <h3 className="text-lg font-semibold text-gray-800 mb-2 group-hover:text-gray-900">
+                          {/* Overlay */}
+                          <div
+                            className={`absolute inset-0 bg-gradient-to-br ${category.color} opacity-0 group-hover:opacity-10 transition-opacity duration-300`}
+                          />
+
+                          <div className="relative p-6">
+                            <h3 className="text-lg font-bold text-white mb-auto group-hover: text-shadow-lg">
                               {category.title}
                             </h3>
-                            {backgroundimg && (
-                              <Image
-                                src={backgroundimg}
-                                alt={category.title}
-                                width={400}
-                                height={200}
-                                className="w-full h-32 object-cover rounded-md mb-4"
-                              />
-                            )}
                           </div>
-
-                          <p className="text-gray-600 text-sm">
-                            {category.description}
-                          </p>
                         </div>
 
                         <div className="absolute bottom-0 left-0 right-0 h-1 bg-gradient-to-r from-transparent via-gray-200 to-transparent group-hover:via-blue-400 transition-all duration-300" />
