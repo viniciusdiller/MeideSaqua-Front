@@ -7,138 +7,120 @@ import { ArrowUp } from "lucide-react";
 import Head from "next/head";
 import ImageCarousel from "../components/ImageCarousel";
 import { Navbar } from "./navbar";
-import {
-  UtensilsCrossed,
-  MapPin,
-  Mountain,
-  Dumbbell,
-  GraduationCap,
-  ShoppingCart,
-  Bus,
-  Hotel,
-  Calendar,
-  Building,
-  Waves,
-  Heart,
-  BriefcaseBusiness,
-  Ambulance,
-  Volleyball,
-  Cherry,
-  Search,
-  PhoneCall,
-} from "lucide-react";
+import { Search } from "lucide-react";
+
 export { categories };
 const categories = [
   {
-    id: "restaurantes",
-    title: "Restaurantes e Lanchonetes",
-    icon: UtensilsCrossed,
+    id: "artesanato",
+    title: "Artesanato",
     color: "from-orange-400 to-red-500",
-    description: "Sabores únicos da região",
+    backgroundimg: "./../public/gatinho.jpg",
+    description: "Conheça o talento local",
   },
   {
     id: "pontos-turisticos",
     title: "Pontos Turísticos",
-    icon: MapPin,
     color: "from-blue-400 to-purple-500",
+    backgroundimg: "",
     description: "Lugares imperdíveis",
   },
   {
     id: "trilhas",
     title: "Trilhas",
-    icon: Mountain,
     color: "from-green-400 to-emerald-500",
+    backgroundimg: "",
     description: "Aventuras na natureza",
   },
   {
     id: "telefones-uteis",
     title: "Telefones Úteis",
-    icon: PhoneCall,
     color: "from-red-400 to-pink-500",
+    backgroundimg: "",
     description: "Mantenha-se conectado",
   },
   {
     id: "escolas",
     title: "Escolas",
-    icon: GraduationCap,
     color: "from-indigo-400 to-blue-500",
+    backgroundimg: "",
     description: "Educação de qualidade",
   },
   {
     id: "supermercados",
     title: "Supermercados",
-    icon: ShoppingCart,
     color: "from-yellow-400 to-orange-500",
+    backgroundimg: "",
     description: "Tudo que você precisa",
   },
   {
     id: "transporte",
     title: "Transporte Público",
-    icon: Bus,
     color: "from-cyan-400 to-blue-500",
+    backgroundimg: "",
     description: "Mobilidade urbana",
   },
   {
     id: "hospedagens",
     title: "Hospedagens",
-    icon: Hotel,
     color: "from-purple-400 to-pink-500",
+    backgroundimg: "",
     description: "Conforto e acolhimento",
   },
   {
     id: "eventos",
     title: "Eventos Locais",
-    icon: Calendar,
     color: "from-rose-400 to-red-500",
+    backgroundimg: "",
     description: "Cultura e entretenimento",
   },
   {
     id: "lazer-e-esporte",
     title: "Lazer e Esporte",
-    icon: Volleyball,
     color: "from-amber-400 to-yellow-500",
+    backgroundimg: "",
     description: "Diversão e atividades físicas",
   },
   {
     id: "espacos-culturais",
     title: "Espaços Culturais",
-    icon: Building,
     color: "from-violet-400 to-purple-500",
+    backgroundimg: "",
     description: "Arte e história local",
   },
   {
     id: "praias",
     title: "Praias e Lagoas",
-    icon: Waves,
     color: "from-teal-400 to-cyan-500",
+    backgroundimg: "",
     description: "Paraíso natural",
   },
   {
     id: "mulheres-e-criancas",
     title: "Mulheres e Crianças",
-    icon: Heart,
     color: "from-pink-400 to-red-600",
+    backgroundimg: "",
     description: "Apoio e serviços essenciais",
   },
   {
     id: "compras",
     title: "Compras",
-    icon: BriefcaseBusiness,
     color: "from-gray-400 to-gray-500",
+    backgroundimg: "",
     description: "Melhores lojas e serviços",
   },
   {
     id: "emergencias",
     title: "Emergências",
-    icon: Ambulance,
     color: "from-red-600 to-rose-700",
+    backgroundimg: "",
     description: "Serviços de emergência e saúde",
   },
   {
     id: "feiras",
     title: "Feiras e Produtores Rurais",
-    icon: Cherry,
     color: "from-green-400 to-lime-300",
+    backgroundimg: "",
     description: "Serviços de saúde e bem-estar",
   },
 ];
@@ -201,20 +183,24 @@ export default function HomePage() {
         {/* Header */}
 
         {/* imagem como banner com efeito fade na parte inferior */}
+
         <Image
           src="/logo2sq.png"
           alt="Logo Prefeitura de Saquarema"
           width={2660}
           height={898}
-          className=" hidden md:hidden block mx-auto h-20 w-auto mb-5"
+          className="hidden md:hidden mx-auto h-20 w-auto mb-5"
         />
-        <Image
-          src="/LogoExplora.png"
-          alt="Logo ExploraSaquá"
-          width={2660}
-          height={898}
-          className="md:block mx-auto h-10 sm:h-12 w-auto mb-5 milecem:h-16"
-        />
+
+        <Link href="/">
+          <Image
+            src="/LogoExplora.png"
+            alt="Logo ExploraSaquá"
+            width={2660}
+            height={898}
+            className="md:block mx-auto h-10 sm:h-12 w-auto mb-5 milecem:h-16"
+          />
+        </Link>
         <ImageCarousel />
 
         {/* Hero Section */}
@@ -272,7 +258,7 @@ export default function HomePage() {
                     .includes(searchTerm.toLowerCase())
               )
               .map((category, index) => {
-                const Icon = category.icon;
+                const backgroundimg = category.backgroundimg;
                 return (
                   <motion.div
                     key={category.id}
@@ -296,12 +282,6 @@ export default function HomePage() {
                         />
 
                         <div className="p-6">
-                          <div
-                            className={`inline-flex p-3 rounded-xl bg-gradient-to-br ${category.color} mb-4 group-hover:scale-125 group-hover:brightness-110 transition-transform duration-300`}
-                          >
-                            <Icon className="w-6 h-6 text-white" />
-                          </div>
-
                           <h3 className="text-lg font-semibold text-gray-800 mb-2 group-hover:text-gray-900">
                             {category.title}
                           </h3>
