@@ -15,7 +15,7 @@ const categories = [
     id: "artesanato",
     title: "Artesanato",
     color: "from-orange-400 to-red-500",
-    backgroundimg: "./../public/gatinho.jpg",
+    backgroundimg: "/gatinho.jpg",
     description: "Conheça o talento local",
   },
   {
@@ -281,10 +281,21 @@ export default function HomePage() {
                           className={`absolute inset-0 bg-gradient-to-br ${category.color} opacity-0 group-hover:opacity-10 transition-opacity duration-300`}
                         />
 
-                        <div className="p-6">
-                          <h3 className="text-lg font-semibold text-gray-800 mb-2 group-hover:text-gray-900">
-                            {category.title}
-                          </h3>
+                        <div className="w-full">
+                          <div className="p-6">
+                            <h3 className="text-lg font-semibold text-gray-800 mb-2 group-hover:text-gray-900">
+                              {category.title}
+                            </h3>
+                            {backgroundimg && (
+                              <Image
+                                src={backgroundimg}
+                                alt={category.title}
+                                width={400}
+                                height={200}
+                                className="w-full h-32 object-cover rounded-md mb-4"
+                              />
+                            )}
+                          </div>
 
                           <p className="text-gray-600 text-sm">
                             {category.description}
