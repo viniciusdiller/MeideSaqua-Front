@@ -12,99 +12,63 @@ import { Search } from "lucide-react";
 export { categories };
 const categories = [
   {
-    id: "artesanato",
-    title: "Artesanato",
-    color: "from-orange-400 to-red-500",
-    backgroundimg: "/gatinho.jpg",
+    id: "alimentação",
+    title: "Alimentação",
+    backgroundimg: "/Alimentação.jpeg",
   },
   {
-    id: "pontos-turisticos",
-    title: "Pontos Turísticos",
-    color: "from-blue-400 to-purple-500",
-    backgroundimg: "/gatinho.jpg",
+    id: "moda",
+    title: "Moda",
+    backgroundimg: "/Moda.jpeg",
   },
   {
-    id: "trilhas",
-    title: "Trilhas",
-    color: "from-green-400 to-emerald-500",
-    backgroundimg: "",
+    id: "serviços",
+    title: "Serviços",
+    backgroundimg: "/Serviços.jpeg",
   },
   {
     id: "telefones-uteis",
     title: "Telefones Úteis",
-    color: "from-red-400 to-pink-500",
     backgroundimg: "",
   },
   {
     id: "escolas",
     title: "Escolas",
-    color: "from-indigo-400 to-blue-500",
     backgroundimg: "",
   },
   {
     id: "supermercados",
     title: "Supermercados",
-    color: "from-yellow-400 to-orange-500",
     backgroundimg: "",
   },
   {
     id: "transporte",
     title: "Transporte Público",
-    color: "from-cyan-400 to-blue-500",
     backgroundimg: "",
   },
   {
     id: "hospedagens",
     title: "Hospedagens",
-    color: "from-purple-400 to-pink-500",
     backgroundimg: "",
   },
   {
     id: "eventos",
     title: "Eventos Locais",
-    color: "from-rose-400 to-red-500",
     backgroundimg: "",
   },
   {
     id: "lazer-e-esporte",
     title: "Lazer e Esporte",
-    color: "from-amber-400 to-yellow-500",
     backgroundimg: "",
   },
   {
     id: "espacos-culturais",
     title: "Espaços Culturais",
-    color: "from-violet-400 to-purple-500",
     backgroundimg: "",
   },
   {
     id: "praias",
     title: "Praias e Lagoas",
-    color: "from-teal-400 to-cyan-500",
-    backgroundimg: "",
-  },
-  {
-    id: "mulheres-e-criancas",
-    title: "Mulheres e Crianças",
-    color: "from-pink-400 to-red-600",
-    backgroundimg: "",
-  },
-  {
-    id: "compras",
-    title: "Compras",
-    color: "from-gray-400 to-gray-500",
-    backgroundimg: "",
-  },
-  {
-    id: "emergencias",
-    title: "Emergências",
-    color: "from-red-600 to-rose-700",
-    backgroundimg: "",
-  },
-  {
-    id: "feiras",
-    title: "Feiras e Produtores Rurais",
-    color: "from-green-400 to-lime-300",
     backgroundimg: "",
   },
 ];
@@ -147,22 +111,6 @@ export default function HomePage() {
 
   return (
     <>
-      <Head>
-        <title>ExploreSaquá - Descubra Saquarema</title>
-        <meta
-          name="description"
-          content="Seu guia completo para explorar os melhores lugares, serviços e atrações de Saquarema."
-        />
-        <meta property="og:image" content="/logo2sq.png" />
-        <meta property="og:title" content="ExploreSaquá" />
-        <meta
-          property="og:description"
-          content="Descubra os encantos de Saquarema de forma gratuita."
-        />
-        <meta property="og:type" content="website" />
-        <meta property="og:url" content="https://explora-saqua.vercel.app/" />
-      </Head>
-
       <div className="min-h-screen bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-gray-100 to-white pt-8">
         {/* Header */}
 
@@ -178,8 +126,8 @@ export default function HomePage() {
 
         <Link href="/">
           <Image
-            src="/LogoExplora.png"
-            alt="Logo ExploraSaquá"
+            src="/LogoMeiDeSaqua.png"
+            alt="Logo MeideSaqua"
             width={2660}
             height={898}
             className="md:block mx-auto h-10 sm:h-12 w-auto mb-5 milecem:h-16"
@@ -196,15 +144,18 @@ export default function HomePage() {
             className="text-center mb-10"
           >
             <h2 className="text-4xl md:text-6xl font-bold text-gray-800 mb-6">
-              O que você quer{" "}
+              Portifólio de{" "}
               <span className="bg-gradient-to-r from-[#017DB9] to-[#007a73] bg-clip-text text-transparent">
-                explorar
+                MEIs
               </span>{" "}
-              hoje?
+              em Saquarema
             </h2>
             <p className="text-xl font-bold text-gray-700 md:text-gray-600 max-w-2xl mx-auto">
-              Descubra os melhores lugares de Saquarema com nosso guia completo
-              para moradores e visitantes
+              Descubra negócios locais, atrações e oportunidades no nosso guia
+              completo da cidade. Conheça os melhores{" "}
+              <span className="bg-gradient-to-r from-[#017DB9] to-[#007a73] bg-clip-text text-transparent">
+                MEIdeSaquá!
+              </span>{" "}
             </p>
             <div className="max-w-md mx-auto mt-6">
               <div className="relative">
@@ -230,7 +181,7 @@ export default function HomePage() {
           </motion.div>
 
           {/* Categories Grid */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5 max-w-7xl mx-auto">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5 max-w-7xl mx-auto black blur-50">
             {categories
               .filter((category) =>
                 category.title.toLowerCase().includes(searchTerm.toLowerCase())
@@ -254,7 +205,7 @@ export default function HomePage() {
                     }}
                   >
                     <Link href={`/categoria/${category.id}`}>
-                      <div className="group relative overflow-hidden rounded-2xl bg-white shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1 hover:scale-[1.02]">
+                      <div className="group relative overflow-hidden rounded-2xl bg-white shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1 hover:scale-[1.02] ">
                         <div className="relative w-full rounded-md overflow-hidden h-40  flex justify-center items-center">
                           {backgroundimg && (
                             <Image
@@ -267,11 +218,14 @@ export default function HomePage() {
 
                           {/* Overlay */}
                           <div
-                            className={`absolute inset-0 bg-gradient-to-br ${category.color} opacity-0 group-hover:opacity-10 transition-opacity duration-300`}
+                            className={`absolute inset-0 bg-black 
+              backdrop-blur-md 
+              opacity-30 
+              group-hover:opacity-60 transition-opacity duration-300 `}
                           />
 
                           <div className="relative p-6">
-                            <h3 className="text-lg font-bold text-white mb-auto group-hover: text-shadow-lg">
+                            <h3 className=" font-poppins text-2xl font-bold text-white mb-auto group-hover: text-shadow-lg">
                               {category.title}
                             </h3>
                           </div>

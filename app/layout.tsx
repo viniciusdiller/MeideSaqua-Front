@@ -1,38 +1,48 @@
 import type React from "react";
 import type { Metadata } from "next";
-import { Inter } from "next/font/google";
+import { Poppins } from "next/font/google"; // 1. Importado Poppins ao invés de Inter
 import "./globals.css";
 import { Navbar } from "./navbar";
 
-const inter = Inter({ subsets: ["latin"] });
+// 2. Configurado a fonte Poppins com os pesos e a variável CSS
+const poppins = Poppins({
+  subsets: ["latin"],
+  weight: ["400", "500", "700", "900"],
+  variable: "--font-poppins",
+});
 
 export const metadata: Metadata = {
-  title: "ExploreSaquá - Descubra Saquarema",
+  title: "MeideSaquá - Descubra os MEIs Saquarema",
   icons: {
     icon: "/favicon.ico",
   },
   openGraph: {
-    title: "ExploreSaquá",
+    title: "MeideSaquá",
     description:
-      "Descubra os melhores lugares de Saquarema com nosso guia completo para moradores e visitantes",
-    url: "https://explora-saqua.vercel.app/", /* change link according to domain */
+      "Seu guia completo para explorar e conhecer os MEIs que movimentam a economia de Saquarema.",
+    url: "https://explora-saqua.vercel.app/",
     siteName: "ExploreSaquá",
     images: [
       {
         url: "/logo2sq.png",
         width: 1200,
         height: 630,
-        alt: "ExploreSaquá Logo",
+        alt: "MeideSaquá Logo",
       },
     ],
     type: "website",
   },
 };
 
-export default function RootLayout({ children }: { children: React.ReactNode }) {
+export default function RootLayout({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
   return (
     <html lang="pt-BR">
-      <body className="bg-white">
+      {/* 3. Aplicado a variável da fonte no body */}
+      <body className={`${poppins.variable} bg-white`}>
         <Navbar /> {/* visible on all pages */}
         <main>{children}</main>
       </body>

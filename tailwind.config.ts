@@ -1,5 +1,7 @@
-/** @type {import('tailwindcss').Config} */
-module.exports = {
+import type { Config } from "tailwindcss";
+const defaultTheme = require("tailwindcss/defaultTheme"); // Adicionado para as fontes padrão
+
+const config: Config = {
   darkMode: ["class"],
   content: [
     "./pages/**/*.{js,ts,jsx,tsx,mdx}",
@@ -10,6 +12,10 @@ module.exports = {
   ],
   theme: {
     extend: {
+      // ADICIONADO: A nova família de fontes "Poppins"
+      fontFamily: {
+        poppins: ["var(--font-poppins)", ...defaultTheme.fontFamily.sans],
+      },
       colors: {
         background: "hsl(var(--background))",
         foreground: "hsl(var(--foreground))",
@@ -52,7 +58,7 @@ module.exports = {
       },
       screens: {
         teste: "1400px",
-        tablet: "900px", // adiciona um novo breakpoint personalizado chamado 'tablet'
+        tablet: "900px",
         milecem: "1100px",
         desktop: "1400px",
       },
@@ -60,3 +66,5 @@ module.exports = {
   },
   plugins: [require("tailwindcss-animate")],
 };
+
+export default config; // Convertido para export default do ES Modules
