@@ -115,19 +115,19 @@ export function Navbar() {
           <nav className="flex items-center gap-6">
             <Link
               href="/"
-              className="text-gray-700 hover:text-[#017DB9] transition-colors"
+              className="text-gray-700 hover:text-purple-500 transition-colors"
             >
               Home
             </Link>
             <Link
               href="/sobre"
-              className="text-gray-700 hover:text-[#017DB9] transition-colors"
+              className="text-gray-700 hover:text-purple-500 transition-colors"
             >
               Sobre o Projeto
             </Link>
             <Link
               href="/contato"
-              className="text-gray-700 hover:text-[#017DB9] transition-colors"
+              className="text-gray-700 hover:text-purple-500 transition-colors"
             >
               Contato
             </Link>
@@ -182,21 +182,21 @@ export function Navbar() {
           <nav className="flex flex-col space-y-4 px-6">
             <Link
               href="/"
-              className="text-gray-700 hover:text-[#017DB9] transition-colors font-medium"
+              className="text-gray-700 hover:text-purple-500 transition-colors font-medium"
               onClick={() => setIsOpen(false)}
             >
               Home
             </Link>
             <Link
               href="/sobre"
-              className="text-gray-700 hover:text-[#017DB9] transition-colors font-medium"
+              className="text-gray-700 hover:text-purple-500 transition-colors font-medium"
               onClick={() => setIsOpen(false)}
             >
               Sobre o Projeto
             </Link>
             <Link
               href="/contato"
-              className="text-gray-700 hover:text-[#017DB9] transition-colors font-medium"
+              className="text-gray-700 hover:text-purple-500 transition-colors font-medium"
               onClick={() => setIsOpen(false)}
             >
               Contato

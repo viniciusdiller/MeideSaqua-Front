@@ -4,7 +4,7 @@ import { motion } from "framer-motion";
 import Link from "next/link";
 import { ArrowLeft, Clock, MapPin, Phone, Globe, Search } from "lucide-react";
 import dynamic from "next/dynamic";
-import { db } from "../../firebase";
+import { db } from "../../firebasePV";
 import { collection, getDocs, query, where } from "firebase/firestore";
 import { useMap } from "react-leaflet";
 import { categories } from "../../page";
@@ -530,81 +530,83 @@ export default function CategoryPage({ params }: PageProps) {
             </div>
 
             {/*Contêiner com Barra de Rolagem */}
-            <div className="space-y-4 max-h-[70vh] overflow-y-auto px-4">
+            <div className=" max-h-[50vh] overflow-y-auto px-4">
               {filteredLocations.map((location: any, index: number) => (
-                <motion.div
-                  key={location.id}
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: index * 0.05 }}
-                  className={`bg-white rounded-xl shadow-md p-6 cursor-pointer transition-transform duration-300 hover:shadow-xl hover:scale-[1.02] ${
-                    selectedLocation?.id === location.id
-                      ? "ring-2 ring-offset-2 ring-[#017DB9] shadow-lg"
-                      : ""
-                  }`}
-                  onClick={() => focusOnLocation(location)}
-                >
-                  {location.imageUrl && (
-                    <img
-                      src={location.imageUrl}
-                      alt={location.name}
-                      className="w-full h-32 object-cover"
-                    />
-                  )}
-                  <div className="flex justify-between items-start mb-3">
-                    <h3 className="text-lg font-semibold text-gray-800">
-                      {location.name}
-                    </h3>
-                    <div className="flex items-center gap-2">
-                      {location.rating && (
-                        <div className="flex items-center gap-1">
-                          <span className="text-yellow-500">★</span>
-                          <span className="text-sm text-gray-600">
-                            {location.rating}
-                          </span>
+                <Link href={`${location.id}/MEI/`} key={location.id}>
+                  <motion.div
+                    key={location.id}
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: index * 0.05 }}
+                    className={`bg-white rounded-xl shadow-md p-6 cursor-pointer mb-4 transition-transform duration-300 hover:shadow-xl hover:scale-[1.02] ${
+                      selectedLocation?.id === location.id
+                        ? "ring-2 ring-offset-2 ring-[#017DB9] shadow-lg"
+                        : ""
+                    }`}
+                    onClick={() => focusOnLocation(location)}
+                  >
+                    {location.imageUrl && (
+                      <img
+                        src={location.imageUrl}
+                        alt={location.name}
+                        className="w-full h-32 object-cover"
+                      />
+                    )}
+                    <div className="flex justify-between items-start mb-3">
+                      <h3 className="text-lg font-semibold text-gray-800">
+                        {location.name}
+                      </h3>
+                      <div className="flex items-center gap-2">
+                        {location.rating && (
+                          <div className="flex items-center gap-1">
+                            <span className="text-yellow-500">★</span>
+                            <span className="text-sm text-gray-600">
+                              {location.rating}
+                            </span>
+                          </div>
+                        )}
+                        {selectedLocation?.id === location.id && (
+                          <div className="w-2 h-2 bg-[#017DB9] rounded-full animate-pulse"></div>
+                        )}
+                      </div>
+                    </div>
+
+                    <p className="text-gray-600 mb-4">{location.description}</p>
+
+                    <div className="space-y-2 text-sm text-gray-500">
+                      <div className="flex items-center gap-2">
+                        <MapPin className="w-4 h-4" />
+                        {location.address}
+                      </div>
+                      {location.hours && (
+                        <div className="flex items-center gap-2">
+                          <Clock className="w-4 h-4" />
+                          {location.hours}
                         </div>
                       )}
-                      {selectedLocation?.id === location.id && (
-                        <div className="w-2 h-2 bg-[#017DB9] rounded-full animate-pulse"></div>
+                      {location.phone && (
+                        <div className="flex items-center gap-2">
+                          <Phone className="w-4 h-4" />
+                          {location.phone}
+                        </div>
+                      )}
+                      {location.website && (
+                        <div className="flex items-center gap-2">
+                          <Globe className="w-4 h-4" />
+                          <a
+                            href={location.website}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="text-blue-600 hover:text-blue-800"
+                            onClick={(e) => e.stopPropagation()}
+                          >
+                            Visitar site
+                          </a>
+                        </div>
                       )}
                     </div>
-                  </div>
-
-                  <p className="text-gray-600 mb-4">{location.description}</p>
-
-                  <div className="space-y-2 text-sm text-gray-500">
-                    <div className="flex items-center gap-2">
-                      <MapPin className="w-4 h-4" />
-                      {location.address}
-                    </div>
-                    {location.hours && (
-                      <div className="flex items-center gap-2">
-                        <Clock className="w-4 h-4" />
-                        {location.hours}
-                      </div>
-                    )}
-                    {location.phone && (
-                      <div className="flex items-center gap-2">
-                        <Phone className="w-4 h-4" />
-                        {location.phone}
-                      </div>
-                    )}
-                    {location.website && (
-                      <div className="flex items-center gap-2">
-                        <Globe className="w-4 h-4" />
-                        <a
-                          href={location.website}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="text-blue-600 hover:text-blue-800"
-                          onClick={(e) => e.stopPropagation()}
-                        >
-                          Visitar site
-                        </a>
-                      </div>
-                    )}
-                  </div>
-                </motion.div>
+                  </motion.div>
+                </Link>
               ))}
             </div>
           </div>

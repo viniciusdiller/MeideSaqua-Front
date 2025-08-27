@@ -1,52 +1,37 @@
 "use client";
 
-import Image from 'next/image';
+import Image from "next/image";
 import { motion } from "framer-motion";
+import React from "react";
+
+const iframeSrc =
+  "https://workflow-iframe.colab.re/68ac97dc6df38ffecbf8a223/?connectionString=O%2FnozPB6LxDGo8FM4TxahSTY4ru3dM2CURweOqjPKFuXUwIUI%2B24Z3T%2BOE77vpZfMnPrl9mZlAobBjf3UFaUD0xGYdLPZTjokuVdFxk%2BcY6WBXqKJLe3oWOhQ3tcD9cm2Fr6Lk6rJxdv2S1vurzj7BRGdeMy6h8%2B8se7XMNRPiaCkuJ6w7FHm1ngUOuG1I4J%2FO00U00ONaKluiyTGu%2BK%2F9zwPVS%2BNaHQPjHbDhN55Iwao6c%2Fm5gHe5A3i5tqMjm%2B8qKWfjJMs9rilAmL8lyWFUAgILz9HXsnI9J97Sxy%2FjHH7U0zE6PLJF1iJz8DAepf2HuFulwGDXM52ZX9lW7Ctg%3D%3D";
 
 export default function ContatoPage() {
   return (
-    <div className="min-h-screen bg-slate-50 py-16 px-4">
-      <div className="max-w-3xl mx-auto text-center">
-        <h1 className="text-4xl font-bold text-[#017DB9] mb-6">Entre em Contato</h1>
-        <p className="text-lg text-gray-700 mb-10">
-          Gostaria de ter seu estabelecimento no site também?  
-          Faça o cadastro clicando no card abaixo.
+    <div className="min-h-screen bg-gray-50">
+      <main className="max-w-4xl mx-auto p-4 md:p-8">
+        <h1 className="text-3xl md:text-4xl font-bold text-gray-800 mb-6">
+          Entre em Contato
+        </h1>
+
+        <p className="text-gray-600 mb-8">
+          Utilize o formulário abaixo para enviar sua mensagem, sugestão ou
+          parceria.
         </p>
 
-        <a
-          href="https://www.instagram.com/micaelrobertt/"
-          target="_blank"
-          rel="noopener noreferrer"
-          aria-label="Cadastre seu estabelecimento"
-        >
-<motion.div
-        className="bg-white rounded-2xl shadow-lg overflow-hidden max-w-md mx-auto cursor-pointer border border-[#017DB9]/20 hover:border-[#017DB9] transition-all"
-        whileHover={{ scale: 1.03 }}
-        initial={{ opacity: 0, y: 30 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 1, ease: "easeOut" }}
-      >
-      <div className="relative w-full h-64">
-        <Image
-          src="/gatinho.jpg"
-          alt="Cadastro"
-          fill
-          style={{ objectFit: 'cover' }}
-          priority
-        />
-      </div>
-      <div className="p-6">
-        <h2 className="text-xl font-semibold text-[#017DB9] mb-2">
-          Cadastre seu Estabelecimento
-        </h2>
-        <p className="text-gray-600 text-sm">
-          Clique aqui e faça parte do ExploreSaquá, colocando seu negócio em destaque.
-        </p>
-      </div>
-</motion.div>
-
-        </a>
-      </div>
+        {/* Contêiner para o Iframe */}
+        <div className="w-full h-[650px] bg-white rounded-xl shadow-md overflow-hidden border-2 border-purple-500 border-opacity-50">
+          <iframe
+            src={iframeSrc}
+            title="Formulário de Contato Colab"
+            width="100%"
+            height="100%"
+            frameBorder="0" // Convertido de frameborder para frameBorder
+            allowFullScreen
+          ></iframe>
+        </div>
+      </main>
     </div>
   );
 }
