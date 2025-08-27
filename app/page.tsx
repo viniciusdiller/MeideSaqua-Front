@@ -29,7 +29,7 @@ const categories = [
   {
     id: "telefones-uteis",
     title: "Telefones Úteis",
-    backgroundimg: "",
+    backgroundimg: "/gatinho.jpg",
   },
   {
     id: "escolas",

@@ -5,10 +5,12 @@ import Link from "next/link";
 import { ArrowLeft, Clock, MapPin, Phone, Globe, Search } from "lucide-react";
 import dynamic from "next/dynamic";
 import { db } from "../../firebase";
-import { collection, query, where } from "firebase/firestore";
+import { collection, getDocs, query, where } from "firebase/firestore";
+import { useMap } from "react-leaflet";
 import { categories } from "../../page";
 import L from "leaflet";
 import { onSnapshot } from "firebase/firestore";
+import { useUserLocation } from "../../../components/userlocation";
 
 const userIcon = new L.Icon({
   iconUrl: "/person-icon.png",
@@ -64,9 +66,32 @@ function MapInstanceHandler({
 }: {
   onMapReady: (mapInstance: any) => void;
 }) {
-  // Implement functionality or remove if unused
-  // Example: If unused, you can remove this function entirely.
+  const map = useMap();
+  useEffect(() => {
+    onMapReady(map);
+  }, [map, onMapReady]);
   return null;
+}
+
+// Função para calcular distância entre coordenadas (Haversine)
+function getDistanceFromLatLonInKm(
+  lat1: number,
+  lon1: number,
+  lat2: number,
+  lon2: number
+) {
+  const R = 6371; // km
+  const dLat = ((lat2 - lat1) * Math.PI) / 180;
+  const dLon = ((lon2 - lon1) * Math.PI) / 180;
+  const a =
+    Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+    Math.cos((lat1 * Math.PI) / 180) *
+      Math.cos((lat2 * Math.PI) / 180) *
+      Math.sin(dLon / 2) *
+      Math.sin(dLon / 2);
+  const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+  const d = R * c;
+  return d;
 }
 
 export default function CategoryPage({ params }: PageProps) {
@@ -82,6 +107,17 @@ export default function CategoryPage({ params }: PageProps) {
   const [isLoading, setIsLoading] = useState(true);
   const markerRefs = useRef<Record<string, L.Marker>>({});
   const [searchTerm, setSearchTerm] = useState("");
+
+  // Novos estados para geolocalização
+  const [userLocation, setUserLocation] = useState<{
+    lat: number;
+    lng: number;
+  } | null>(null);
+  const [nearestLocations, setNearestLocations] = useState<any[]>([]);
+  const [geoLoading, setGeoLoading] = useState(false);
+  const [geoError, setGeoError] = useState<string | null>(null);
+  const userPosition = useUserLocation();
+  const [locationError, setLocationError] = useState<string | null>(null);
 
   useEffect(() => {
     setIsClient(true);
@@ -108,24 +144,26 @@ export default function CategoryPage({ params }: PageProps) {
     const cacheKey = `locations_${params.slug}`;
     setIsLoading(true);
 
+    // Tenta pegar dados do cache localStorage
     try {
       const cached = localStorage.getItem(cacheKey);
       if (cached) {
         const parsed = JSON.parse(cached);
         const cacheTimestamp = parsed.timestamp;
         const now = Date.now();
-        const oneHour = 60 * 60 * 1000;
+        const oneHour = 60 * 60 * 1000; // 1 hora
 
         if (now - cacheTimestamp < oneHour) {
           setLocations(parsed.data);
           setIsLoading(false);
-          return;
+          return; // Sai da função, cache válido
         }
       }
     } catch (err) {
       console.warn("Erro ao ler cache localStorage", err);
     }
 
+    // Se cache não válido, ou não existe, faz a consulta em tempo real com onSnapshot
     const categoryInfo = categories.find((cat) => cat.id === params.slug);
     let categoryTitle = categoryInfo ? categoryInfo.title : "";
 
@@ -170,6 +208,7 @@ export default function CategoryPage({ params }: PageProps) {
           };
         });
 
+        // Atualiza cache localStorage
         localStorage.setItem(
           cacheKey,
           JSON.stringify({
@@ -188,8 +227,57 @@ export default function CategoryPage({ params }: PageProps) {
       }
     );
 
-    return () => unsubscribe();
+    return () => unsubscribe(); // limpa listener quando componente desmontar
   }, [params.slug]);
+
+  // Obter geolocalização e calcular locais próximos quando locations mudarem
+  useEffect(() => {
+    if (!locations || locations.length === 0) {
+      setNearestLocations([]);
+      return;
+    }
+
+    if (!("geolocation" in navigator)) {
+      setGeoError("Geolocalização não é suportada pelo seu navegador.");
+      setNearestLocations([]);
+      return;
+    }
+
+    setGeoLoading(true);
+    setGeoError(null);
+
+    navigator.geolocation.getCurrentPosition(
+      (position) => {
+        const { latitude, longitude } = position.coords;
+        setUserLocation({ lat: latitude, lng: longitude });
+
+        const locationsWithDistance = locations
+          .map((loc) => {
+            if (loc.coordinates && loc.coordinates.lat && loc.coordinates.lng) {
+              const dist = getDistanceFromLatLonInKm(
+                latitude,
+                longitude,
+                loc.coordinates.lat,
+                loc.coordinates.lng
+              );
+              return { ...loc, distance: dist };
+            }
+            return { ...loc, distance: Infinity };
+          })
+          .filter((loc) => loc.distance !== Infinity)
+          .sort((a, b) => a.distance - b.distance);
+
+        setNearestLocations(locationsWithDistance.slice(0, 3));
+        setGeoLoading(false);
+      },
+      (error) => {
+        setGeoError("Não foi possível obter sua localização.");
+        setNearestLocations([]);
+        setGeoLoading(false);
+      },
+      { enableHighAccuracy: true, timeout: 7000 }
+    );
+  }, [locations]);
 
   const focusOnLocation = (location: any) => {
     setSelectedLocation(location);
@@ -302,14 +390,12 @@ export default function CategoryPage({ params }: PageProps) {
               Voltar
             </Link>
             <div className="flex items-center gap-3">
-              <div className={`p-2 rounded-lg bg-gradient-to-br`}>
-                <h1 className="w-6 h-6 text-white"> qq coisa</h1>
-              </div>
+              <div className={`p-2 rounded-lg bg-gradient-to-br $`}>a</div>
               <div>
                 <h1 className="text-xl md:text-2xl font-bold text-gray-800 capitalize">
                   {category.title}
                 </h1>
-                <p className="text-gray-600 text-sm">qq coisa</p>
+                <p className="text-gray-600 text-sm"></p>
               </div>
             </div>
           </div>
@@ -317,7 +403,89 @@ export default function CategoryPage({ params }: PageProps) {
       </header>
 
       <div className="container mx-auto px-4 py-8">
-        {/* --- SEÇÃO DE LOCAIS MAIS PRÓXIMOS REMOVIDA --- */}
+        {/* --- NOVA SEÇÃO LOCAIS MAIS PRÓXIMOS --- */}
+        {geoLoading && (
+          <p className="text-center text-gray-600 mb-6">
+            Buscando sua localização...
+          </p>
+        )}
+        {geoError && (
+          <div className="text-center text-red-600 mb-6">
+            {geoError} <br />
+            Para usar a função de locais mais próximos, por favor habilite a
+            localização no seu navegador.
+          </div>
+        )}
+        {!geoLoading && !geoError && nearestLocations.length > 0 && (
+          <section className="mb-14 px-4">
+            <motion.h2
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5 }}
+              className="text-2xl md:text-3xl font-semibold tracking-tight text-[#017DB9] mb-6 border-l-4 border-[#017DB9] pl-4"
+            >
+              Explore os locais mais próximos de você
+            </motion.h2>
+
+            <motion.div
+              initial="hidden"
+              animate="visible"
+              variants={{
+                hidden: { opacity: 0 },
+                visible: {
+                  opacity: 1,
+                  transition: {
+                    staggerChildren: 0.15,
+                  },
+                },
+              }}
+              className="flex flex-col md:flex-row gap-6 overflow-y-auto md:overflow-x-auto md:pb-3 max-h-[80vh]"
+            >
+              {nearestLocations.map((loc, i) => (
+                <motion.div
+                  key={loc.id}
+                  variants={{
+                    hidden: { opacity: 0, y: 20 },
+                    visible: { opacity: 1, y: 0 },
+                  }}
+                  className="min-w-[250px] bg-white text-gray-800 rounded-2xl shadow-md hover:shadow-xl border border-[#017DB9]/20 p-4 cursor-pointer flex-shrink-0 hover:scale-[1.03] transition-all duration-300"
+                  onClick={() => focusOnLocation(loc)}
+                >
+                  {loc.imageUrl && (
+                    <img
+                      src={loc.imageUrl}
+                      alt={loc.name}
+                      className="w-full h-36 object-cover rounded-xl mb-4 border border-[#017DB9]/30"
+                    />
+                  )}
+                  <h3 className="text-lg font-semibold text-[#017DB9] mb-1">
+                    {loc.name}
+                  </h3>
+                  <p className="text-sm text-gray-600">{loc.address}</p>
+                  <div className="flex justify-between items-center mt-3">
+                    <p className="text-sm font-medium text-[#017DB9]">
+                      {loc.distance.toFixed(2)} km
+                    </p>
+                    {loc.rating && (
+                      <div className="flex items-center gap-1 text-yellow-500 text-sm font-semibold">
+                        <svg
+                          xmlns="http://www.w3.org/2000/svg"
+                          className="w-4 h-4 fill-yellow-500"
+                          viewBox="0 0 24 24"
+                        >
+                          <path d="M12 .587l3.668 7.571L24 9.748l-6 5.853 1.417 8.269L12 18.896 4.583 23.87 6 15.6 0 9.748l8.332-1.59z" />
+                        </svg>
+                        <span>{loc.rating}</span>
+                      </div>
+                    )}
+                  </div>
+                </motion.div>
+              ))}
+            </motion.div>
+            {/* Linha divisória elegante */}
+            <div className="h-px w-full bg-gradient-to-r from-transparent via-gray-300 to-transparent my-5" />
+          </section>
+        )}
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
           <div className="flex flex-col">
@@ -503,6 +671,7 @@ export default function CategoryPage({ params }: PageProps) {
                             click: () => {
                               setSelectedLocation(location);
 
+                              // Aguarda o DOM atualizar antes de abrir o popup
                               setTimeout(() => {
                                 const marker = markerRefs.current[location.id];
                                 if (marker) marker.openPopup();
@@ -556,6 +725,17 @@ export default function CategoryPage({ params }: PageProps) {
                         </Marker>
                       );
                     })}
+
+                  {userPosition && (
+                    <Marker
+                      position={[userPosition.lat, userPosition.lng]}
+                      icon={userIcon}
+                    >
+                      <Popup>Você está aqui</Popup>
+                    </Marker>
+                  )}
+
+                  <MapInstanceHandler onMapReady={setMapInstance} />
                 </MapContainer>
               ) : (
                 <div className="h-full flex items-center justify-center bg-gray-100">
