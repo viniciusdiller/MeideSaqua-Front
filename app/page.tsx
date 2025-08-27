@@ -13,16 +13,16 @@ export { categories };
 const categories = [
   {
     id: "restaurantes",
-    title: "Restaurantes e Lanchonetes",
+    title: "Alimentos",
     backgroundimg: "/Alimentação.jpeg",
   },
   {
-    id: "moda",
+    id: "pontos-turisticos",
     title: "Moda",
     backgroundimg: "/Moda.jpeg",
   },
   {
-    id: "serviços",
+    id: "trilhas",
     title: "Serviços",
     backgroundimg: "/Serviços.jpeg",
   },
@@ -145,7 +145,7 @@ export default function HomePage() {
           >
             <h2 className="text-4xl md:text-6xl font-bold text-gray-800 mb-6">
               Portifólio de{" "}
-              <span className="bg-gradient-to-r from-[#017DB9] to-[#007a73] bg-clip-text text-transparent">
+              <span className="bg-gradient-to-r from-purple-600 to-orange-500 bg-clip-text text-transparent">
                 MEIs
               </span>{" "}
               em Saquarema
@@ -153,7 +153,7 @@ export default function HomePage() {
             <p className="text-xl font-bold text-gray-700 md:text-gray-600 max-w-2xl mx-auto">
               Descubra negócios locais, atrações e oportunidades no nosso guia
               completo da cidade. Conheça os melhores{" "}
-              <span className="bg-gradient-to-r from-[#017DB9] to-[#007a73] bg-clip-text text-transparent">
+              <span className="bg-gradient-to-r from-purple-600 to-orange-500 bg-clip-text text-transparent">
                 MEIdeSaquá!
               </span>{" "}
             </p>
@@ -169,7 +169,7 @@ export default function HomePage() {
                   className="
                 w-full pl-12 pr-4 py-3
                 rounded-2xl border border-gray-200 bg-white shadow-sm
-                focus:outline-none focus:ring-2 focus:ring-[#017DB9] focus:border-transparent
+                focus:outline-none focus:ring-2 focus:ring-purple-600 focus:border-transparent
                 transition-all duration-300 placeholder-gray-400 text-sm
                 hover:shadow-md
               "
@@ -231,7 +231,7 @@ export default function HomePage() {
                           </div>
                         </div>
 
-                        <div className="absolute bottom-0 left-0 right-0 h-1 bg-gradient-to-r from-transparent via-gray-200 to-transparent group-hover:via-blue-400 transition-all duration-300" />
+                        <div className="absolute bottom-0 left-0 right-0 h-1 bg-gradient-to-r from-transparent via-purple-500 to-transparent group-hover:via-orange-500 transition-all duration-300" />
                       </div>
                     </Link>
                   </motion.div>
@@ -249,7 +249,7 @@ export default function HomePage() {
             onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}
             className="
             fixed bottom-6 left-6 z-50 
-            bg-[#017DB9] hover:bg-blue-800 
+            bg-purple-600 hover:bg-orange-500
             text-white font-semibold font-sans 
             px-5 py-3 rounded-full 
             shadow-lg shadow-blue-600/50 

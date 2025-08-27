@@ -390,7 +390,7 @@ export default function CategoryPage({ params }: PageProps) {
               Voltar
             </Link>
             <div className="flex items-center gap-3">
-              <div className={`p-2 rounded-lg bg-gradient-to-br $`}>a</div>
+              <div className={`p-2 rounded-lg bg-gradient-to-br $`}>ICON</div>
               <div>
                 <h1 className="text-xl md:text-2xl font-bold text-gray-800 capitalize">
                   {category.title}
