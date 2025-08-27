@@ -12,8 +12,8 @@ import { Search } from "lucide-react";
 export { categories };
 const categories = [
   {
-    id: "alimentação",
-    title: "Alimentação",
+    id: "restaurantes",
+    title: "Restaurantes e Lanchonetes",
     backgroundimg: "/Alimentação.jpeg",
   },
   {

@@ -289,8 +289,6 @@ export default function CategoryPage({ params }: PageProps) {
     );
   }
 
-  const CategoryIcon = category.icon;
-
   return (
     <div className="min-h-screen bg-slate-50">
       <header className="bg-white shadow-sm border-b">
@@ -304,16 +302,14 @@ export default function CategoryPage({ params }: PageProps) {
               Voltar
             </Link>
             <div className="flex items-center gap-3">
-              <div
-                className={`p-2 rounded-lg bg-gradient-to-br ${category.color}`}
-              >
-                <CategoryIcon className="w-6 h-6 text-white" />
+              <div className={`p-2 rounded-lg bg-gradient-to-br`}>
+                <h1 className="w-6 h-6 text-white"> qq coisa</h1>
               </div>
               <div>
                 <h1 className="text-xl md:text-2xl font-bold text-gray-800 capitalize">
                   {category.title}
                 </h1>
-                <p className="text-gray-600 text-sm">{category.description}</p>
+                <p className="text-gray-600 text-sm">qq coisa</p>
               </div>
             </div>
           </div>
