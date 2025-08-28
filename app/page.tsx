@@ -269,19 +269,22 @@ export default function HomePage() {
           <div className="container mx-auto px-4 py-8">
             <div className="text-center">
               <h3 className="text-lg font-semibold text-gray-800 mb-2">
-                ExploreSaquá
+                MEIdeSaquá
               </h3>
               <p className="text-gray-600 mb-4">
                 {" "}
                 {/* mb-4 aqui para espaçar o parágrafo de descrição */}
-                Seu guia completo para descobrir o melhor de Saquarema
+                Seu guia completo para descobrir o melhor do mercado local
               </p>
               {/* Linha horizontal sutil */}
               <hr className="w-16 mx-auto border-gray-300 mb-4" />{" "}
               {/*  uma linha divisória curta e centralizada */}
               <p className="text-gray-500 text-sm">
-                © Desenvolvido por{" "}
-                <span className="font-medium text-gray-600">Micael Robert</span>
+                © Desenvolvido pela{" "}
+                <span className="font-medium text-gray-600">
+                  Secretaria Municipal de Governança e Sustentabilidade de
+                  Saquarema
+                </span>
               </p>
             </div>
           </div>

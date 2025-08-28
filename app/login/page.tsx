@@ -67,7 +67,7 @@ export default function LoginPage() {
                   onChange={(e) => setEmail(e.target.value)}
                   className="w-full py-2
                 rounded-2xl border border-gray-200 bg-white shadow-sm
-                focus:ring-2 focus:border-purple-600/70 transition-all duration-300
+                focus:ring-2 focus:border-orange-500/70 transition-all duration-300
                 "
                 />
               </div>
@@ -82,7 +82,7 @@ export default function LoginPage() {
                   onChange={(e) => setPassword(e.target.value)}
                   className="w-full py-2
                 rounded-2xl border border-gray-200 bg-white shadow-sm
-                focus:ring-2 focus:border-purple-600/70 transition-all duration-300
+                focus:ring-2 focus:border-orange-500/70 transition-all duration-300
                 "
                 />
               </div>
@@ -90,7 +90,7 @@ export default function LoginPage() {
             <CardFooter>
               <Button
                 type="submit"
-                className="hover:bg-purple-500 rounded-2xl hover:text-white flex justify-center mx-auto px-10  text-gray-700 border border-purple-600/70"
+                className="hover:bg-orange-500 rounded-2xl hover:text-white flex justify-center mx-auto px-10  text-gray-700 border border-purple-600/70"
               >
                 Entrar
               </Button>

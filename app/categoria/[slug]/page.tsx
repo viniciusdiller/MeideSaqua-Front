@@ -505,7 +505,7 @@ export default function CategoryPage({ params }: PageProps) {
                 className="
                   w-full pl-12 pr-4 py-3
                   rounded-2xl border border-gray-200 bg-white shadow-sm
-                  focus:outline-none focus:ring-2 focus:ring-[#017DB9] focus:border-transparent
+                  focus:outline-none focus:ring-2 focus:ring-purple-600/80 focus:border-transparent
                   transition-all duration-300 placeholder-gray-400 text-sm
                   hover:shadow-md
                 "
