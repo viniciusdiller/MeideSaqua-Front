@@ -4,6 +4,7 @@ import { categories } from "../../../page";
 import Link from "next/link";
 import { ArrowLeft, Star, MapPin, Phone, Globe } from "lucide-react";
 import React from "react";
+import { SwiperCarousel } from "../../../../components/CarouselMEI";
 
 // --- DADOS DE EXEMPLO (SUBSTITUA PELA SUA BUSCA NO FIREBASE) ---
 // Simula os dados que viriam do seu banco de dados para um MEI específico.
@@ -77,7 +78,6 @@ export default function MeiDetailPage({
   // e substituir o objeto 'mei' de exemplo acima.
 
   // Busca a categoria correta usando o slug dos parâmetros
-  const category = categories.find((cat) => cat.slug === params.slug);
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -106,6 +106,7 @@ export default function MeiDetailPage({
               {/* COLOQUE SEU COMPONENTE DE CARROSSEL AQUI 
                 Exemplo: <ImageCarousel images={mei.images} />
               */}
+              <SwiperCarousel />
               <img
                 src={mei.images[0]}
                 alt={mei.name}
