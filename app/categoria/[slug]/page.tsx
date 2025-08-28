@@ -3,6 +3,7 @@ import { useState, useEffect, useRef } from "react";
 import { motion } from "framer-motion";
 import Link from "next/link";
 import { ArrowLeft, Clock, MapPin, Phone, Globe, Search } from "lucide-react";
+import Image from "next/image";
 import dynamic from "next/dynamic";
 import { db } from "../../firebasePV";
 import { collection, getDocs, query, where } from "firebase/firestore";
@@ -97,7 +98,7 @@ function getDistanceFromLatLonInKm(
 export default function CategoryPage({ params }: PageProps) {
   const [locations, setLocations] = useState<any[]>([]);
   const [selectedLocation, setSelectedLocation] = useState<any>(null);
-  const [isClient, setIsClient] = useState(false);
+
   const [mapKey, setMapKey] = useState(0);
   const [mapCenter, setMapCenter] = useState<[number, number]>([
     -22.9249, -42.5084,
@@ -120,25 +121,9 @@ export default function CategoryPage({ params }: PageProps) {
   const [locationError, setLocationError] = useState<string | null>(null);
 
   useEffect(() => {
-    setIsClient(true);
     const timer = setTimeout(() => setMapKey((prev) => prev + 1), 500);
     return () => clearTimeout(timer);
   }, []);
-
-  useEffect(() => {
-    if (typeof window !== "undefined") {
-      const L = require("leaflet");
-      delete (L.Icon.Default.prototype as any)._getIconUrl;
-      L.Icon.Default.mergeOptions({
-        iconRetinaUrl:
-          "https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-icon-2x.png",
-        iconUrl:
-          "https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-icon.png",
-        shadowUrl:
-          "https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-shadow.png",
-      });
-    }
-  }, [isClient]);
 
   useEffect(() => {
     const cacheKey = `locations_${params.slug}`;
@@ -530,7 +515,7 @@ export default function CategoryPage({ params }: PageProps) {
             </div>
 
             {/*Contêiner com Barra de Rolagem */}
-            <div className=" max-h-[50vh] overflow-y-auto px-4">
+            <div className=" max-h-[50vh] overflow-y-auto px-4 lg:grid grid-cols-2 gap-2">
               {filteredLocations.map((location: any, index: number) => (
                 <Link href={`${location.id}/MEI/`} key={location.id}>
                   <motion.div
@@ -538,7 +523,7 @@ export default function CategoryPage({ params }: PageProps) {
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ delay: index * 0.05 }}
-                    className={`bg-white rounded-xl shadow-md p-6 cursor-pointer mb-4 transition-transform duration-300 hover:shadow-xl hover:scale-[1.02] ${
+                    className={`lg:max-w-100px bg-white rounded-xl max-h-[20vh] shadow-md p-6 cursor-pointer mb-4 transition-transform duration-300 hover:shadow-xl hover:scale-[1.02] ${
                       selectedLocation?.id === location.id
                         ? "ring-2 ring-offset-2 ring-[#017DB9] shadow-lg"
                         : ""
@@ -619,176 +604,16 @@ export default function CategoryPage({ params }: PageProps) {
               className="mb-4"
             >
               <h2 className="text-3xl font-bold text-gray-800 flex items-center gap-2">
-                <MapPin className="w-6 h-6 text-blue-600" /> Veja no mapa
+                <MapPin className="w-6 h-6 text-blue-600" /> {category.title}
               </h2>
               <p className="text-gray-500 text-sm mt-1">
                 Clique em um ponto para saber mais
               </p>
             </motion.div>
-
             <div
-              className="bg-white rounded-2xl shadow-lg overflow-hidden border border-gray-200"
-              style={{ height: "500px" }}
-            >
-              {isClient ? (
-                <MapContainer
-                  key={mapKey}
-                  center={mapCenter}
-                  zoom={mapZoom}
-                  style={{ height: "100%", width: "100%" }}
-                  className="z-0"
-                  scrollWheelZoom={true}
-                  zoomControl={true}
-                >
-                  <TileLayer
-                    attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-                    url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-                    maxZoom={19}
-                    tileSize={256}
-                  />
-
-                  {filteredLocations
-                    .filter(
-                      (location) =>
-                        location.coordinates &&
-                        location.coordinates.lat != null &&
-                        location.coordinates.lng != null
-                    )
-                    .map((location) => {
-                      const position: [number, number] = [
-                        location.coordinates.lat,
-                        location.coordinates.lng,
-                      ];
-
-                      return (
-                        <Marker
-                          key={location.id}
-                          position={position}
-                          icon={
-                            selectedLocation?.id === location.id
-                              ? selectedIcon
-                              : defaultIcon
-                          }
-                          eventHandlers={{
-                            click: () => {
-                              setSelectedLocation(location);
-
-                              // Aguarda o DOM atualizar antes de abrir o popup
-                              setTimeout(() => {
-                                const marker = markerRefs.current[location.id];
-                                if (marker) marker.openPopup();
-                              }, 0);
-                            },
-                          }}
-                          ref={(ref) => {
-                            if (ref) markerRefs.current[location.id] = ref;
-                          }}
-                        >
-                          <Popup
-                            autoPan={true}
-                            eventHandlers={{
-                              remove: () => setSelectedLocation(null),
-                            }}
-                          >
-                            <div className="p-2 min-w-[200px]">
-                              <h3 className="font-semibold text-gray-800 mb-1">
-                                {location.name}
-                              </h3>
-                              <p className="text-sm text-gray-600 mb-2">
-                                {location.description}
-                              </p>
-                              <p className="text-xs text-gray-500 mb-2">
-                                {location.address}
-                              </p>
-                              {location.rating && (
-                                <div className="flex items-center gap-1">
-                                  <span className="text-yellow-500 text-sm">
-                                    ★
-                                  </span>
-                                  <span className="text-sm text-gray-600">
-                                    {location.rating}
-                                  </span>
-                                </div>
-                              )}
-
-                              <a
-                                href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(
-                                  location.name + ", " + location.address
-                                )}`}
-                                target="_blank"
-                                rel="noopener noreferrer"
-                                className="mt-2 inline-block text-sm text-blue-600 hover:underline"
-                                onClick={(e) => e.stopPropagation()}
-                              >
-                                Abrir no Maps
-                              </a>
-                            </div>
-                          </Popup>
-                        </Marker>
-                      );
-                    })}
-
-                  {userPosition && (
-                    <Marker
-                      position={[userPosition.lat, userPosition.lng]}
-                      icon={userIcon}
-                    >
-                      <Popup>Você está aqui</Popup>
-                    </Marker>
-                  )}
-
-                  <MapInstanceHandler onMapReady={setMapInstance} />
-                </MapContainer>
-              ) : (
-                <div className="h-full flex items-center justify-center bg-gray-100">
-                  <div className="text-center">
-                    <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
-                    <p className="text-gray-600">Carregando mapa...</p>
-                  </div>
-                </div>
-              )}
-            </div>
-            {!selectedLocation && (
-              <motion.div
-                initial={{ opacity: 0, y: 10 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.4, delay: 0.3 }}
-                className="mt-4 text-center block lg:hidden"
-              >
-                <a
-                  href="#map-container"
-                  className="inline-block bg-[#017DB9] text-white px-6 py-2 rounded-full shadow-md hover:bg-blue-700 transition"
-                >
-                  Explorar no mapa
-                </a>
-              </motion.div>
-            )}
-
-            {selectedLocation && (
-              <motion.div
-                initial={{ opacity: 0, scale: 0.95 }}
-                animate={{ opacity: 1, scale: 1 }}
-                transition={{ duration: 0.5 }}
-                className="mt-4 bg-blue-50 rounded-2xl p-4 border border-blue-200 shadow"
-              >
-                <div className="flex items-center justify-between">
-                  <div>
-                    <h3 className="font-semibold text-blue-800 mb-1">
-                      Local Selecionado
-                    </h3>
-                    <p className="text-blue-700 text-sm">
-                      {selectedLocation.name} - {selectedLocation.address}
-                    </p>
-                  </div>
-                  <button
-                    onClick={resetMapView}
-                    className="text-blue-600 hover:text-blue-800 text-sm underline"
-                  >
-                    Limpar
-                  </button>
-                </div>
-              </motion.div>
-            )}
+              className="rounded-2xl shadow-lg overflow-hidden border border-purple-600 w-full h-[300px] md:h-[500px] bg-cover bg-center bg-no-repeat"
+              style={{ backgroundImage: `url(${category.backgroundimg})` }}
+            ></div>
           </div>
         </div>
       </div>
