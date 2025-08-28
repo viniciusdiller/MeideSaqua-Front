@@ -101,12 +101,12 @@ export default function MeiDetailPage({
       <main className="max-w-4xl mx-auto p-4 md:p-6">
         <div className="space-y-8">
           {/* Seção do Carrossel de Imagens */}
+          {/* COLOQUE SEU COMPONENTE DE CARROSSEL AQUI 
           <section>
             <div className="w-full h-64 md:h-80 bg-gray-200 rounded-lg overflow-hidden relative shadow-lg">
-              {/* COLOQUE SEU COMPONENTE DE CARROSSEL AQUI 
                 Exemplo: <ImageCarousel images={mei.images} />
-              */}
-              <SwiperCarousel />
+                <SwiperCarousel />
+
               <img
                 src={mei.images[0]}
                 alt={mei.name}
@@ -119,6 +119,7 @@ export default function MeiDetailPage({
               </div>
             </div>
           </section>
+          */}
 
           {/* Seção de Informações Principais */}
           <section className="bg-white p-6 rounded-lg shadow-md">

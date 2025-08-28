@@ -4,10 +4,9 @@ import { MotionConfig, motion } from "framer-motion";
 import Image from "next/image";
 import { useState } from "react";
 import Link from "next/link";
-import { Instagram, Globe } from "lucide-react";
+import { Instagram, Globe, LogIn } from "lucide-react"; // Importado o ícone de Login
 
 // (O código do VARIANTS e do AnimatedHamburgerButton continua o mesmo...)
-// VARIANTS para a animação do botão
 const VARIANTS = {
   top: {
     open: {
@@ -41,7 +40,6 @@ const VARIANTS = {
   },
 };
 
-// Componente do botão animado
 type AnimatedHamburgerButtonProps = {
   active: boolean;
   onClick: () => void;
@@ -95,9 +93,8 @@ export function Navbar() {
 
   return (
     <header className="bg-white/90 backdrop-blur-sm border-b border-blue-100 sticky top-0 z-50 shadow-md">
-      {/* MUDANÇA: 'justify-between' agora organiza os grupos de desktop */}
       <div className="relative container mx-auto px-4 py-1 sm:py-1 md:py-1 flex items-center justify-between">
-        {/* GRUPO ESQUERDA: Logo + Navegação (Aparece apenas no desktop) */}
+        {/* GRUPO ESQUERDA: Logo + Navegação */}
         <div className="hidden teste:flex items-center gap-10">
           <Link
             href="https://www.saquarema.rj.gov.br/"
@@ -108,7 +105,7 @@ export function Navbar() {
               alt="Logo Prefeitura de Saquarema"
               width={2660}
               height={898}
-              className="block w-auto h-12" // Tamanho fixo para desktop
+              className="block w-auto h-12"
             />
           </Link>
 
@@ -134,7 +131,7 @@ export function Navbar() {
           </nav>
         </div>
 
-        {/* LOGO CENTRALIZADO (Aparece apenas no mobile) */}
+        {/* LOGO CENTRALIZADO (Mobile) */}
         <div className="teste:hidden w-full">
           <Link href="/" aria-label="Página Inicial">
             <Image
@@ -147,7 +144,7 @@ export function Navbar() {
           </Link>
         </div>
 
-        {/* GRUPO DIREITA: Ícones Sociais (Aparece apenas no desktop) */}
+        {/* GRUPO DIREITA: Ícones Sociais e Botão de Login (Desktop) */}
         <div className="hidden teste:flex items-center space-x-4">
           <a
             href="https://www.instagram.com/prefeiturasaquarema/?hl=en"
@@ -165,9 +162,17 @@ export function Navbar() {
           >
             <Globe size={24} strokeWidth={2} />
           </a>
+
+          {/* ===== BOTÃO DE LOGIN ADICIONADO AQUI (DESKTOP) ===== */}
+          <Link href="/login">
+            <button className=" bg-purple-600 text-white px-4 py-2 rounded-full text-sm font-semibold hover:bg-orange-500 transition-colors">
+              Login
+            </button>
+          </Link>
+          {/* ======================================================= */}
         </div>
 
-        {/* Botão de Menu (Aparece apenas no mobile, posicionado de forma absoluta) */}
+        {/* Botão de Menu (Mobile) */}
         <div className="teste:hidden absolute right-4 top-1/2 -translate-y-1/2">
           <AnimatedHamburgerButton
             active={isOpen}
@@ -201,6 +206,20 @@ export function Navbar() {
             >
               Contato
             </Link>
+
+            <hr className="border-gray-200" />
+
+            {/* ===== LINK DE LOGIN ADICIONADO AQUI (MOBILE) ===== */}
+            <Link
+              href="/login"
+              className="flex items-center gap-3 text-gray-700 hover:text-purple-500 transition-colors font-medium"
+              onClick={() => setIsOpen(false)}
+            >
+              <LogIn size={20} />
+              Efetuar Login
+            </Link>
+            {/* ======================================================= */}
+
             <a
               href="https://www.instagram.com/prefeiturasaquarema/?hl=en"
               target="_blank"
