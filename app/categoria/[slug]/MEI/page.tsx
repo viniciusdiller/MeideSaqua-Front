@@ -1,25 +1,23 @@
 "use client";
 
-import { categories } from "../../../page";
 import Link from "next/link";
 import { ArrowLeft, Star, MapPin, Phone, Globe } from "lucide-react";
-import React from "react";
+import React, { useState, useEffect } from "react";
 import { SwiperCarousel } from "../../../../components/CarouselMEI";
 
+// Importações do Mapa
+import dynamic from "next/dynamic";
+import L from "leaflet";
+import "leaflet/dist/leaflet.css";
+
 // --- DADOS DE EXEMPLO (SUBSTITUA PELA SUA BUSCA NO FIREBASE) ---
-// Simula os dados que viriam do seu banco de dados para um MEI específico.
 const mei = {
   name: "Art's & Crochê",
   rating: 4.7,
   reviewsCount: 23,
-  description:
-    "Art's & Crochê é um espaço dedicado à arte do crochê, oferecendo desde peças de decoração únicas até roupas e amigurumis feitos com amor e carinho. Tudo produzido à mão, com material de alta qualidade.",
+  description: "Art's & Crochê é um espaço dedicado à arte do crochê...",
   category: "telefones-uteis",
-  images: [
-    "/placeholder.jpg", // Substitua pelos caminhos das suas imagens
-    "/gatinho.jpg",
-    "/placeholder.jpg",
-  ],
+  images: ["/placeholder.jpg", "/gatinho.jpg", "/placeholder.jpg"],
   address: "Rua das Artes, 123 - Centro, Saquarema - RJ",
   phone: "(22) 99999-8888",
   website: "http://googleusercontent.com/instagram.com/artsecroche",
@@ -28,23 +26,43 @@ const mei = {
     lng: -42.509,
   },
   reviews: [
-    {
-      id: 1,
-      user: "Maria S.",
-      rating: 5,
-      comment:
-        "Peças maravilhosas, tudo com um capricho sem igual. Amei meu novo amigurumi!",
-    },
+    { id: 1, user: "Maria S.", rating: 5, comment: "Peças maravilhosas..." },
     {
       id: 2,
       user: "João P.",
       rating: 4,
-      comment:
-        "O atendimento foi ótimo e o produto é de qualidade. A entrega demorou um pouco, mas valeu a pena.",
+      comment: "O atendimento foi ótimo...",
     },
   ],
 };
 // --- FIM DOS DADOS DE EXEMPLO ---
+
+// Configuração dos ícones do mapa
+const defaultIcon = new L.Icon({
+  iconUrl: "/marker-icon-blue.png",
+  shadowUrl: "/marker-shadow.png",
+  iconSize: [25, 41],
+  iconAnchor: [12, 41],
+  popupAnchor: [1, -34],
+  shadowSize: [41, 41],
+});
+
+// Componentes do Mapa carregados dinamicamente
+const MapContainer = dynamic(
+  () => import("react-leaflet").then((mod) => mod.MapContainer),
+  { ssr: false }
+);
+const TileLayer = dynamic(
+  () => import("react-leaflet").then((mod) => mod.TileLayer),
+  { ssr: false }
+);
+const Marker = dynamic(
+  () => import("react-leaflet").then((mod) => mod.Marker),
+  { ssr: false }
+);
+const Popup = dynamic(() => import("react-leaflet").then((mod) => mod.Popup), {
+  ssr: false,
+});
 
 // Componente para renderizar as estrelas de avaliação
 const StarRating = ({ rating }: { rating: number }) => {
@@ -52,7 +70,6 @@ const StarRating = ({ rating }: { rating: number }) => {
   const fullStars = Math.floor(rating);
   const halfStar = rating % 1 !== 0;
   const emptyStars = totalStars - fullStars - (halfStar ? 1 : 0);
-
   return (
     <div className="flex items-center">
       {[...Array(fullStars)].map((_, i) => (
@@ -74,18 +91,21 @@ export default function MeiDetailPage({
 }: {
   params: { slug: string };
 }) {
-  // TODO: Adicione aqui sua lógica para buscar os dados do MEI do Firebase usando o `params.slug`
-  // e substituir o objeto 'mei' de exemplo acima.
+  // Estado para garantir que o mapa só renderize no lado do cliente
+  const [isClient, setIsClient] = useState(false);
 
-  // Busca a categoria correta usando o slug dos parâmetros
+  useEffect(() => {
+    setIsClient(true);
+  }, []);
+
+  // TODO: Adicione aqui sua lógica para buscar os dados do MEI do Firebase
 
   return (
     <div className="min-h-screen bg-gray-50">
-      {/* Cabeçalho com Botão de Voltar */}
       <header className="sticky top-0 bg-white shadow-sm z-10">
         <div className="max-w-4xl mx-auto px-4 py-3 flex items-center">
           <Link
-            href={`/categoria/${mei.category}`} // ALTERAR PARA BUSAR NO BANCO DE DADOS
+            href={`/categoria/${mei.category}`}
             className="flex items-center gap-2 text-gray-600 hover:text-gray-800 transition-colors"
           >
             <ArrowLeft className="w-5 h-5" />
@@ -97,31 +117,10 @@ export default function MeiDetailPage({
         </div>
       </header>
 
-      {/* Conteúdo da Página */}
       <main className="max-w-4xl mx-auto p-4 md:p-6">
         <div className="space-y-8">
-          {/* Seção do Carrossel de Imagens */}
-          {/* COLOQUE SEU COMPONENTE DE CARROSSEL AQUI 
-          <section>
-            <div className="w-full h-64 md:h-80 bg-gray-200 rounded-lg overflow-hidden relative shadow-lg">
-                Exemplo: <ImageCarousel images={mei.images} />
-                <SwiperCarousel />
+          {/* ... Seção do Carrossel ... */}
 
-              <img
-                src={mei.images[0]}
-                alt={mei.name}
-                className="w-full h-full object-cover"
-              />
-              <div className="absolute bottom-4 left-1/2 -translate-x-1/2 flex gap-2">
-                <span className="block w-2 h-2 bg-white rounded-full"></span>
-                <span className="block w-2 h-2 bg-white/50 rounded-full"></span>
-                <span className="block w-2 h-2 bg-white/50 rounded-full"></span>
-              </div>
-            </div>
-          </section>
-          */}
-
-          {/* Seção de Informações Principais */}
           <section className="bg-white p-6 rounded-lg shadow-md">
             <h2 className="text-3xl font-bold text-gray-900">{mei.name}</h2>
             <div className="flex items-center gap-2 mt-2">
@@ -138,18 +137,35 @@ export default function MeiDetailPage({
             </p>
           </section>
 
-          {/* Seção de Localização e Contato */}
+          {/* ===== SEÇÃO DO MAPA MOVIDA PARA CÁ ===== */}
           <section className="bg-white p-6 rounded-lg shadow-md">
             <h3 className="text-2xl font-bold text-gray-900 mb-4">
               Localização e Contato
             </h3>
-            <div className="w-full h-64 bg-gray-200 rounded-lg overflow-hidden mb-4">
-              {/* COLOQUE SEU COMPONENTE DE MAPA AQUI
-                 Exemplo: <LeafletMap coordinates={mei.coordinates} />
-               */}
-              <p className="flex items-center justify-center h-full text-gray-500">
-                Componente do Mapa aqui
-              </p>
+            <div className="w-full h-80 bg-gray-200 rounded-lg overflow-hidden mb-4 border">
+              {isClient && mei.coordinates ? (
+                <MapContainer
+                  center={[mei.coordinates.lat, mei.coordinates.lng]}
+                  zoom={15}
+                  style={{ height: "100%", width: "100%" }}
+                  scrollWheelZoom={false}
+                >
+                  <TileLayer
+                    url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+                    attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+                  />
+                  <Marker
+                    position={[mei.coordinates.lat, mei.coordinates.lng]}
+                    icon={defaultIcon}
+                  >
+                    <Popup>{mei.name}</Popup>
+                  </Marker>
+                </MapContainer>
+              ) : (
+                <p className="flex items-center justify-center h-full text-gray-500">
+                  Carregando mapa...
+                </p>
+              )}
             </div>
             <div className="space-y-3 text-gray-700">
               <div className="flex items-start gap-3">
@@ -173,8 +189,8 @@ export default function MeiDetailPage({
               </div>
             </div>
           </section>
+          {/* ======================================= */}
 
-          {/* Seção de Avaliações */}
           <section className="bg-white p-6 rounded-lg shadow-md">
             <h3 className="text-2xl font-bold text-gray-900 mb-6">
               Avaliações
@@ -182,9 +198,7 @@ export default function MeiDetailPage({
             <div className="space-y-6">
               {mei.reviews.map((review) => (
                 <div key={review.id} className="flex gap-4">
-                  <div className="w-12 h-12 bg-gray-200 rounded-full flex-shrink-0">
-                    {/* Placeholder para foto do usuário */}
-                  </div>
+                  <div className="w-12 h-12 bg-gray-200 rounded-full flex-shrink-0"></div>
                   <div>
                     <p className="font-semibold text-gray-800">{review.user}</p>
                     <div className="flex items-center gap-1 my-1">
