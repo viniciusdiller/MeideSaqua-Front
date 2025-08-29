@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { ArrowLeft, Star, MapPin, Phone, Globe } from "lucide-react";
+import { ArrowLeft, Star, MapPin, Phone, Globe, Instagram } from "lucide-react";
 import React, { useState, useEffect } from "react";
 import { SwiperCarousel } from "../../../../components/CarouselMEI";
 import dynamic from "next/dynamic";
@@ -22,11 +22,12 @@ const mei = {
     "1.✨ Peças exclusivas feitas à mão, com amor, autenticidade e dedicação em cada detalhe.\n" +
     "2.🛍️ Produtos únicos, artesanais e cheios de significado. Mais que peças, histórias feitas à mão.\n" +
     "3.💖 Artesanato exclusivo: cada peça é feita à mão com carinho, originalidade e qualidade incomparável.",
+  instagram: "https://www.instagram.com/vinicius.diller/?hl=en",
   category: "telefones-uteis",
   images: ["/placeholder.jpg", "/gatinho.jpg", "/placeholder.jpg"],
   address: "Rua das Artes, 123 - Centro, Saquarema - RJ",
-  phone: "(22) 99999-8888",
-  website: "http://googleusercontent.com/instagram.com/artsecroche",
+  phone: "(22) 97794-8763",
+  website: "https://github.com/",
   coordinates: {
     lat: -22.921,
     lng: -42.509,
@@ -148,25 +149,54 @@ export default function MeiDetailPage({
                 </div>
 
                 {/* Container para a Descrição */}
-                <div>
-                  <p className="text-gray-700 leading-relaxed">
-                    {mei.description}
-                  </p>
-                </div>
-                <div>
-                  <p className="text-gray-700 leading-relaxed mt-3">
-                    {mei.description_diferencial
-                      .split("\n")
-                      .map((line, idx) => (
-                        <React.Fragment key={idx}>
-                          {line}
-                          <br />
-                        </React.Fragment>
-                      ))}
-                  </p>
+                <div className="milecem:pl-10 milecem:mt-6 flex flex-col h-full ">
+                  <div>
+                    <p className="text-gray-700 leading-relaxed">
+                      {mei.description}
+                    </p>
+                  </div>
+                  <div>
+                    <p className="text-gray-700 leading-relaxed mt-6">
+                      <strong>
+                        {mei.description_diferencial
+                          .split("\n")
+                          .map((line, idx) => (
+                            <React.Fragment key={idx}>
+                              {line}
+                              <br />
+                            </React.Fragment>
+                          ))}
+                      </strong>
+                    </p>
+                  </div>
+                  <div className="hidden quinhentos:mt-6 quinhentos:flex items-center md:mt-10 milesetecentos:mt-auto milesetecentos:mb-[5%]">
+                    <span>Instagram:</span>
+                    <a
+                      href={mei.instagram}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-gray-600 hover:text-pink-600 transition-colors ml-1"
+                    >
+                      <Instagram size={26} strokeWidth={2} />
+                    </a>
+
+                    <span className="ml-2.5 milecem:ml-5 desktop:ml-10">
+                      Website:
+                    </span>
+                    <a
+                      href={mei.website}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-gray-600 hover:text-blue-600 transition-colors ml-1"
+                    >
+                      <Globe size={26} strokeWidth={2} />
+                    </a>
+                  </div>
                 </div>
               </div>
-              <div className="md:col-span-1">
+
+              {/*Logo */}
+              <div className="flex items-center justify-center md:block md:col-span-1 ">
                 <Image
                   src={mei.logo}
                   alt={`Logo de ${mei.name}`}
@@ -174,6 +204,27 @@ export default function MeiDetailPage({
                   height={300}
                   className="w-auto h-auto object-cover rounded-3xl border-2 border-gray-200"
                 />
+              </div>
+              <div className="mt-6 flex items-center quinhentos:hidden">
+                <span>Instagram:</span>
+                <a
+                  href={mei.instagram}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-gray-600 hover:text-pink-600 transition-colors ml-1"
+                >
+                  <Instagram size={26} strokeWidth={2} />
+                </a>
+
+                <span className="ml-2.5 milecem:ml-5 desktop:ml-10">Site:</span>
+                <a
+                  href={mei.website}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-gray-600 hover:text-pink-600 transition-colors ml-1"
+                >
+                  <Globe size={26} strokeWidth={2} />
+                </a>
               </div>
             </div>
           </section>
@@ -216,17 +267,6 @@ export default function MeiDetailPage({
               <div className="flex items-center gap-3">
                 <Phone className="w-5 h-5 text-gray-500 flex-shrink-0" />
                 <span>{mei.phone}</span>
-              </div>
-              <div className="flex items-center gap-3">
-                <Globe className="w-5 h-5 text-gray-500 flex-shrink-0" />
-                <a
-                  href={mei.website}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="text-blue-600 hover:underline"
-                >
-                  Visitar site ou rede social
-                </a>
               </div>
             </div>
           </section>
