@@ -96,11 +96,7 @@ export function Navbar() {
       <div className="relative container mx-auto px-4 py-1 sm:py-1 md:py-1 flex items-center justify-between">
         {/* GRUPO ESQUERDA: Logo + Navegação */}
         <div className="hidden teste:flex items-center gap-10">
-          <a
-            href="https://www.saquarema.rj.gov.br/"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
+  
             <Link
               href="https://www.saquarema.rj.gov.br/"
               aria-label="Página da Prefeitura de Saquarema"
@@ -113,7 +109,7 @@ export function Navbar() {
                 className="block w-auto h-12"
               />
             </Link>
-          </a>
+          
           <nav className="flex items-center gap-6">
             <Link
               href="/"
