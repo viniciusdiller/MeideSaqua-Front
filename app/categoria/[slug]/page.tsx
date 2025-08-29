@@ -273,49 +273,9 @@ export default function CategoryPage({ params }: PageProps) {
     );
   }, [locations]);
 
-  const focusOnLocation = (location: any) => {
-    setSelectedLocation(location);
-    if (
-      location.coordinates &&
-      typeof location.coordinates.lat === "number" &&
-      typeof location.coordinates.lng === "number"
-    ) {
-      const newCenter: [number, number] = [
-        location.coordinates.lat,
-        location.coordinates.lng,
-      ];
-      setMapCenter(newCenter);
-      setMapZoom(16);
+ 
 
-      if (mapInstance) {
-        mapInstance.flyTo(newCenter, 16, { duration: 1.5, easeLinearity: 0.1 });
-      }
-    } else {
-      console.warn("Coordenadas inválidas para o local selecionado:", location);
-      resetMapView();
-    }
-
-    if (window.innerWidth < 1024) {
-      const mapElement = document.getElementById("map-container");
-      if (mapElement) {
-        mapElement.scrollIntoView({ behavior: "smooth", block: "start" });
-      }
-    }
-  };
-
-  const resetMapView = () => {
-    const defaultCenter: [number, number] = [-22.9249, -42.5084];
-    setMapCenter(defaultCenter);
-    setMapZoom(13);
-    setSelectedLocation(null);
-
-    if (mapInstance) {
-      mapInstance.flyTo(defaultCenter, 13, {
-        duration: 1.5,
-        easeLinearity: 0.1,
-      });
-    }
-  };
+ 
 
   const category = categories.find((cat) => cat.id === params.slug);
 
@@ -443,7 +403,7 @@ export default function CategoryPage({ params }: PageProps) {
                     visible: { opacity: 1, y: 0 },
                   }}
                   className="min-w-[250px] bg-white text-gray-800 rounded-2xl shadow-md hover:shadow-xl border border-[#017DB9]/20 p-4 cursor-pointer flex-shrink-0 hover:scale-[1.03] transition-all duration-300"
-                  onClick={() => focusOnLocation(loc)}
+                  
                 >
                   {loc.imageUrl && (
                     <img
@@ -492,14 +452,7 @@ export default function CategoryPage({ params }: PageProps) {
               >
                 Locais Recomendados
               </motion.h2>
-              {selectedLocation && (
-                <button
-                  onClick={resetMapView}
-                  className="text-sm text-blue-600 hover:text-blue-800 underline"
-                >
-                  Ver todos no mapa
-                </button>
-              )}
+    
             </div>
 
             {/*Barra de Pesquisa */}
@@ -528,6 +481,7 @@ export default function CategoryPage({ params }: PageProps) {
               {filteredLocations.map((location: any, index: number) => (
                 <Link href={`${location.id}/MEI/`} key={location.id}>
                   <motion.div
+                  
                     key={location.id}
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
@@ -537,7 +491,7 @@ export default function CategoryPage({ params }: PageProps) {
                         ? "ring-2 ring-offset-2 ring-[#017DB9] shadow-lg"
                         : ""
                     }`}
-                    onClick={() => focusOnLocation(location)}
+                    
                   >
                     {location.imageUrl && (
                       <img
@@ -624,7 +578,13 @@ export default function CategoryPage({ params }: PageProps) {
             
             {/* 3. Substitua a div com a imagem de fundo pelo componente do carrossel */}
           <div className="w-full h-[300px] md:h-[500px] rounded-2xl shadow-lg overflow-hidden border border-purple-600">
-          <ModernCarousel images={carouselImages} interval={4000} />
+          <ModernCarousel
+              slides={[
+                { imageUrl: "/gatinho.jpg", label: "Ver Gatinho mau" },
+                { imageUrl: "/Alimentação.jpeg", label: "Comer até não aguentar" },
+                { imageUrl: "/Moda.jpeg", label: "Ver roupas" },
+              ]}
+            />
 
         </div>
           </div>
