@@ -108,7 +108,7 @@ export default function MeiDetailPage({
   // TODO: Adicione aqui sua lógica para buscar os dados do MEI do Firebase
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-purple-400 to-orange-300">
+    <div className="min-h-screen bg-gradient-to-br from-purple-400 to-orange-400">
       <header className="sticky top-0 bg-white shadow-sm z-10">
         <div className="max-w-4xl mx-auto px-4 py-3 flex items-center">
           <Link
