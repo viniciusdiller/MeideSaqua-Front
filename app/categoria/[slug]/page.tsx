@@ -10,6 +10,7 @@ import { collection, getDocs, query, where } from "firebase/firestore";
 import { useMap } from "react-leaflet";
 import { categories } from "../../page";
 import L from "leaflet";
+import ModernCarousel from "@/components/ModernCarousel";
 import { onSnapshot } from "firebase/firestore";
 import { useUserLocation } from "../../../components/userlocation";
 
@@ -564,7 +565,6 @@ export default function CategoryPage({ params }: PageProps) {
                 Clique em um ponto para saber mais
               </p>
             </motion.div>
-<<<<<<< HEAD
             
             {/* 3. Substitua a div com a imagem de fundo pelo componente do carrossel */}
           <div className="w-full h-[300px] md:h-[500px] rounded-2xl shadow-lg overflow-hidden border border-purple-600">
@@ -577,12 +577,6 @@ export default function CategoryPage({ params }: PageProps) {
             />
 
         </div>
-=======
-            <div
-              className="rounded-2xl shadow-lg overflow-hidden border border-purple-600 w-full h-[300px] md:h-[500px] bg-cover bg-center bg-no-repeat"
-              style={{ backgroundImage: `url(${category.backgroundimg})` }}
-            ></div>
->>>>>>> 29b984ce9c4118c8b68f3a8b9323f1241c1b517a
           </div>
         </div>
       </div>
