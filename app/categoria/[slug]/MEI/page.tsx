@@ -6,6 +6,7 @@ import React, { useState, useEffect } from "react";
 import { SwiperCarousel } from "../../../../components/CarouselMEI";
 import dynamic from "next/dynamic";
 import L from "leaflet";
+import { TiltImage } from "@/components/ui/TiltImage";
 import "leaflet/dist/leaflet.css";
 import { categories } from "@/app/page";
 import Image from "next/image";
@@ -14,7 +15,7 @@ import Image from "next/image";
 const mei = {
   name: "Art's & Crochê",
   rating: 4.7,
-  logo: "/gatinho.jpg",
+  logo: "/logo2sq.png",
   reviewsCount: 23,
   description:
     "Art's & Crochê é um espaço dedicado à arte do crochê, onde cada peça é criada com carinho, criatividade e atenção aos detalhes. Mais do que um simples ateliê, é um lugar que valoriza o trabalho manual e transforma linhas em arte, oferecendo produtos exclusivos que carregam histórias, afeto e autenticidade, feitos especialmente para quem aprecia o verdadeiro valor do artesanal.",
@@ -169,7 +170,7 @@ export default function MeiDetailPage({
                       </strong>
                     </p>
                   </div>
-                  <div className="hidden quinhentos:mt-6 quinhentos:flex items-center md:mt-10 milesetecentos:mt-auto milesetecentos:mb-[5%]">
+                  <div className="hidden quinhentos:mt-6 quinhentos:flex items-center md:mt-10 ">
                     <span>Instagram:</span>
                     <a
                       href={mei.instagram}
@@ -195,15 +196,17 @@ export default function MeiDetailPage({
                 </div>
               </div>
 
-              {/*Logo */}
-              <div className="flex items-center justify-center md:block md:col-span-1 ">
-                <Image
-                  src={mei.logo}
-                  alt={`Logo de ${mei.name}`}
-                  width={200}
-                  height={300}
-                  className="w-auto h-auto object-cover rounded-3xl border-2 border-gray-200"
-                />
+            {/* Logo */}
+              <div className="flex items-center justify-center md:col-span-1">
+                <div className="w-auto h-auto rounded-lg">
+                  <TiltImage
+                    src={mei.logo}
+                    alt={`Logo de ${mei.name}`}
+                    width={500} 
+                    height={500} 
+                    className="w-full h-full object-contain" 
+                  />
+                </div>
               </div>
               <div className="mt-6 flex items-center quinhentos:hidden">
                 <span>Instagram:</span>

@@ -63,6 +63,7 @@ const config: Config = {
         milecem: "1100px",
         milesetecentos: "1700px",
         quinhentos: "500px",
+        telona: "3000px"
       },
     },
   },
