@@ -59,8 +59,10 @@ const config: Config = {
       screens: {
         teste: "1400px",
         tablet: "900px",
-        milecem: "1100px",
         desktop: "1400px",
+        milecem: "1100px",
+        milesetecentos: "1700px",
+        quinhentos: "500px",
       },
     },
   },
