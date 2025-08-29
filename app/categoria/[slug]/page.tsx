@@ -2,6 +2,7 @@
 import { useState, useEffect, useRef } from "react";
 import { motion } from "framer-motion";
 import Link from "next/link";
+import  ModernCarousel from "@/components/ModernCarousel";
 import { ArrowLeft, Clock, MapPin, Phone, Globe, Search } from "lucide-react";
 import Image from "next/image";
 import dynamic from "next/dynamic";
@@ -40,6 +41,14 @@ const selectedIcon = new L.Icon({
   shadowSize: [41, 41],
 });
 
+
+  //    mudar para buscar lógica para buscar images no banco de dados
+  const carouselImages = [
+    "/saquarema.jpeg", // Imagem da sua pasta /public
+    "/Alimentação.jpeg", // Imagem da sua pasta /public
+    "/Moda.jpeg",       // Imagem da sua pasta /public
+    
+  ];
 const MapContainer = dynamic(
   () => import("react-leaflet").then((mod) => mod.MapContainer),
   { ssr: false }
@@ -596,7 +605,8 @@ export default function CategoryPage({ params }: PageProps) {
             </div>
           </div>
 
-          <div className="lg:sticky lg:top-0 h-fit" id="map-container">
+           {/* Coluna da direita com o carrossel */}
+          <div className="lg:sticky lg:top-0 h-fit" id="carousel-container">
             <motion.div
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
@@ -604,16 +614,19 @@ export default function CategoryPage({ params }: PageProps) {
               className="mb-4"
             >
               <h2 className="text-3xl font-bold text-gray-800 flex items-center gap-2">
+                {/* Você pode manter o título da categoria ou criar um novo */}
                 <MapPin className="w-6 h-6 text-blue-600" /> {category.title}
               </h2>
               <p className="text-gray-500 text-sm mt-1">
-                Clique em um ponto para saber mais
+                Veja os destaques da região
               </p>
             </motion.div>
-            <div
-              className="rounded-2xl shadow-lg overflow-hidden border border-purple-600 w-full h-[300px] md:h-[500px] bg-cover bg-center bg-no-repeat"
-              style={{ backgroundImage: `url(${category.backgroundimg})` }}
-            ></div>
+            
+            {/* 3. Substitua a div com a imagem de fundo pelo componente do carrossel */}
+          <div className="w-full h-[300px] md:h-[500px] rounded-2xl shadow-lg overflow-hidden border border-purple-600">
+          <ModernCarousel images={carouselImages} interval={4000} />
+
+        </div>
           </div>
         </div>
       </div>
