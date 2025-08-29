@@ -4,18 +4,24 @@ import Link from "next/link";
 import { ArrowLeft, Star, MapPin, Phone, Globe } from "lucide-react";
 import React, { useState, useEffect } from "react";
 import { SwiperCarousel } from "../../../../components/CarouselMEI";
-
-// Importações do Mapa
 import dynamic from "next/dynamic";
 import L from "leaflet";
 import "leaflet/dist/leaflet.css";
+import { categories } from "@/app/page";
+import Image from "next/image";
 
 // --- DADOS DE EXEMPLO (SUBSTITUA PELA SUA BUSCA NO FIREBASE) ---
 const mei = {
   name: "Art's & Crochê",
   rating: 4.7,
+  logo: "/gatinho.jpg",
   reviewsCount: 23,
-  description: "Art's & Crochê é um espaço dedicado à arte do crochê...",
+  description:
+    "Art's & Crochê é um espaço dedicado à arte do crochê, onde cada peça é criada com carinho, criatividade e atenção aos detalhes. Mais do que um simples ateliê, é um lugar que valoriza o trabalho manual e transforma linhas em arte, oferecendo produtos exclusivos que carregam histórias, afeto e autenticidade, feitos especialmente para quem aprecia o verdadeiro valor do artesanal.",
+  description_diferencial:
+    "1.✨ Peças exclusivas feitas à mão, com amor, autenticidade e dedicação em cada detalhe.\n" +
+    "2.🛍️ Produtos únicos, artesanais e cheios de significado. Mais que peças, histórias feitas à mão.\n" +
+    "3.💖 Artesanato exclusivo: cada peça é feita à mão com carinho, originalidade e qualidade incomparável.",
   category: "telefones-uteis",
   images: ["/placeholder.jpg", "/gatinho.jpg", "/placeholder.jpg"],
   address: "Rua das Artes, 123 - Centro, Saquarema - RJ",
@@ -101,12 +107,12 @@ export default function MeiDetailPage({
   // TODO: Adicione aqui sua lógica para buscar os dados do MEI do Firebase
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-gradient-to-br from-purple-400 to-orange-300">
       <header className="sticky top-0 bg-white shadow-sm z-10">
         <div className="max-w-4xl mx-auto px-4 py-3 flex items-center">
           <Link
             href={`/categoria/${mei.category}`}
-            className="flex items-center gap-2 text-gray-600 hover:text-gray-800 transition-colors"
+            className="flex items-center gap-2 text-gray-600 hover:text-purple-600 transition-colors"
           >
             <ArrowLeft className="w-5 h-5" />
             Voltar
@@ -117,32 +123,67 @@ export default function MeiDetailPage({
         </div>
       </header>
 
-      <main className="max-w-4xl mx-auto p-4 md:p-6">
+      <main className="w-full p-4 md:p-6 ">
         <div className="space-y-8">
-          {/* ... Seção do Carrossel ... */}
+          <section className="bg-white p-6 rounded-3xl shadow-md md:mx-auto md:max-w-[85%]">
+            {/* Grid principal com 3 colunas */}
 
-          <section className="bg-white p-6 rounded-lg shadow-md">
-            <h2 className="text-3xl font-bold text-gray-900">{mei.name}</h2>
-            <div className="flex items-center gap-2 mt-2">
-              <StarRating rating={mei.rating} />
-              <span className="text-gray-600 font-semibold">
-                {mei.rating.toFixed(1)}
-              </span>
-              <span className="text-gray-500">
-                ({mei.reviewsCount} avaliações)
-              </span>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+              {/* Coluna 2: Nome, Avaliações e Descrição (ocupando 2 colunas) */}
+              <div className="md:col-span-2 flex flex-col">
+                {/* Container para Nome e Avaliações */}
+                <div className="mb-4 text-center">
+                  <h2 className="text-3xl font-bold text-gray-900">
+                    {mei.name}
+                  </h2>
+                  <div className="flex items-center gap-2 mt-2 px-auto justify-center">
+                    <StarRating rating={mei.rating} />
+                    <span className="text-gray-600 font-semibold">
+                      {mei.rating.toFixed(1)}
+                    </span>
+                    <span className="text-gray-500">
+                      ({mei.reviewsCount} avaliações)
+                    </span>
+                  </div>
+                </div>
+
+                {/* Container para a Descrição */}
+                <div>
+                  <p className="text-gray-700 leading-relaxed">
+                    {mei.description}
+                  </p>
+                </div>
+                <div>
+                  <p className="text-gray-700 leading-relaxed mt-3">
+                    {mei.description_diferencial
+                      .split("\n")
+                      .map((line, idx) => (
+                        <React.Fragment key={idx}>
+                          {line}
+                          <br />
+                        </React.Fragment>
+                      ))}
+                  </p>
+                </div>
+              </div>
+              <div className="md:col-span-1">
+                <Image
+                  src={mei.logo}
+                  alt={`Logo de ${mei.name}`}
+                  width={200}
+                  height={300}
+                  className="w-auto h-auto object-cover rounded-3xl border-2 border-gray-200"
+                />
+              </div>
             </div>
-            <p className="text-gray-700 mt-4 leading-relaxed">
-              {mei.description}
-            </p>
           </section>
 
           {/* ===== SEÇÃO DO MAPA MOVIDA PARA CÁ ===== */}
-          <section className="bg-white p-6 rounded-lg shadow-md">
+          <section className="bg-white p-6 rounded-3xl shadow-md md:mx-auto md:max-w-[85%]">
             <h3 className="text-2xl font-bold text-gray-900 mb-4">
               Localização e Contato
             </h3>
-            <div className="w-full h-80 bg-gray-200 rounded-lg overflow-hidden mb-4 border">
+            <div className="w-full h-80 bg-gray-200 rounded-3xl overflow-hidden mb-4 border">
               {isClient && mei.coordinates ? (
                 <MapContainer
                   center={[mei.coordinates.lat, mei.coordinates.lng]}
@@ -191,7 +232,7 @@ export default function MeiDetailPage({
           </section>
           {/* ======================================= */}
 
-          <section className="bg-white p-6 rounded-lg shadow-md">
+          <section className="bg-white p-6 rounded-3xl shadow-md md:mx-auto md:max-w-[85%]">
             <h3 className="text-2xl font-bold text-gray-900 mb-6">
               Avaliações
             </h3>

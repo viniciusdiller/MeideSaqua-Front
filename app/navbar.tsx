@@ -96,19 +96,24 @@ export function Navbar() {
       <div className="relative container mx-auto px-4 py-1 sm:py-1 md:py-1 flex items-center justify-between">
         {/* GRUPO ESQUERDA: Logo + Navegação */}
         <div className="hidden teste:flex items-center gap-10">
-          <Link
+          <a
             href="https://www.saquarema.rj.gov.br/"
-            aria-label="Página da Prefeitura de Saquarema"
+            target="_blank"
+            rel="noopener noreferrer"
           >
-            <Image
-              src="/logo2sq.png"
-              alt="Logo Prefeitura de Saquarema"
-              width={2660}
-              height={898}
-              className="block w-auto h-12"
-            />
-          </Link>
-
+            <Link
+              href="https://www.saquarema.rj.gov.br/"
+              aria-label="Página da Prefeitura de Saquarema"
+            >
+              <Image
+                src="/logo2sq.png"
+                alt="Logo Prefeitura de Saquarema"
+                width={2660}
+                height={898}
+                className="block w-auto h-12"
+              />
+            </Link>
+          </a>
           <nav className="flex items-center gap-6">
             <Link
               href="/"
@@ -133,7 +138,7 @@ export function Navbar() {
 
         {/* LOGO CENTRALIZADO (Mobile) */}
         <div className="teste:hidden w-full">
-          <Link href="/" aria-label="Página Inicial">
+          <Link href="/" target="_blank" aria-label="Página Inicial">
             <Image
               src="/logo2sq.png"
               alt="Logo Prefeitura de Saquarema"

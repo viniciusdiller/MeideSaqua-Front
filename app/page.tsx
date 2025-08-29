@@ -124,7 +124,7 @@ export default function HomePage() {
           className="hidden md:hidden mx-auto h-20 w-auto mb-5"
         />
 
-        <Link href="/">
+        <Link href="/" target="about:blank">
           <Image
             src="/LogoMeiDeSaqua.png"
             alt="Logo MeideSaqua"
