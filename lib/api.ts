@@ -1,10 +1,9 @@
-
 const API_URL =
   typeof process !== 'undefined' && process.env.NEXT_PUBLIC_API_URL
     ? process.env.NEXT_PUBLIC_API_URL
     : (typeof window !== 'undefined' && (window as any).NEXT_PUBLIC_API_URL)
-      ? (window as any).NEXT_PUBLIC_API_URL
-      : '';
+    ? (window as any).NEXT_PUBLIC_API_URL
+    : '';
 
 // Função genérica para chamadas à API
 async function fetchApi(path: string, options: RequestInit = {}) {
@@ -22,10 +21,10 @@ async function fetchApi(path: string, options: RequestInit = {}) {
     throw new Error(`API error: ${response.statusText}`);
   }
 
-  return response.json();
+  const text = await response.text();
+  return text ? JSON.parse(text) : {};
 }
 
-// Funções para cada endpoint da API
 
 // --- AUTENTICAÇÃO ---
 export const registerUser = (data: any) => fetchApi('/api/auth/cadastro', {
@@ -36,20 +35,27 @@ export const registerUser = (data: any) => fetchApi('/api/auth/cadastro', {
 export const loginUser = (data: any) => fetchApi('/api/auth/login', {
   method: 'POST',
   body: JSON.stringify(data),
-  // A documentação menciona Basic Auth, mas a resposta é JSON.
-  // Se for Basic Auth, o header seria:
-  // headers: { 'Authorization': 'Basic ' + btoa(`${data.username}:${data.senha}`) }
+});
+
+/**
+ * Envia um pedido de recuperação de senha.
+ *  '/api/auth/recuperar-senha' vinicius precisa criar.*/
+export const requestPasswordReset = (data: any) => fetchApi('/api/auth/recuperar-senha', {
+    method: 'POST',
+    body: JSON.stringify(data),
 });
 
 
-// --- ESTABELECIMENTOS ---
+
 export const getAllEstablishments = () => fetchApi('/api/estabelecimentos');
 
 export const getEstablishmentById = (id: string) => fetchApi(`/api/estabelecimentos/${id}`);
 
+export const getEstablishmentRating = (id: string) => fetchApi(`/api/estabelecimentos/${id}/media`);
+
 export const searchEstablishmentsByName = (name: string) => fetchApi(`/api/estabelecimentos/buscar?nome=${name}`);
 
-// --- AVALIAÇÕES ---
+// AVALIAÇÕES 
 export const getReviewsByEstablishment = (id: string) => fetchApi(`/api/avaliacoes/estabelecimento/${id}`);
 
 export const submitReview = (data: any) => fetchApi('/api/avaliacoes', {
