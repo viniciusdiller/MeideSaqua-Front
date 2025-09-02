@@ -1,4 +1,4 @@
-//CADASTRO
+//LOGIN
 
 "use client";
 
@@ -16,37 +16,39 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import Link from "next/link";
 import Image from "next/image";
-import { registerUser } from "@/lib/api"; //FUNCAO API
+import { loginUser } from "@/lib/api"; // função da API
 
-export default function Cadastro() {
-  const [email, setEmail] = useState("");
+export default function LoginPage() {
+  const [email, setEmail] = useState(""); // Este valor será usado como 'username'
   const [password, setPassword] = useState("");
-  const [username, setUsername] = useState("");
-  const [nome_completo_user, setNomeCompleto] = useState("");
-  const [error, setError] = useState<string | null>(null); //  Estado para guardar a mensagem de erro
+  const [error, setError] = useState<string | null>(null); // 2. Estado para a mensagem de erro
 
-  //  Função atualizada para lidar com o registro
-  const handleRegister = async (e: React.FormEvent) => {
+  // 3. Função atualizada para lidar com o login
+  const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
-    setError(null); // Limpa erros anteriores
+    setError(null);
 
-    //  Monta o objeto com os dados para enviar à API
-    const userData = {
-      nomeCompleto: nome_completo_user,
-      username: username,
-      email: email,
-      password: password,
+    // 4. Monta o objeto com os dados para enviar à API
+    const loginData = {
+      username: email, // Usando o email do formulário como username
+      senha: password,
     };
 
     try {
-      // Chama a função da API
-      await registerUser(userData);
-      alert("Cadastro realizado com sucesso!");
-      //  Redireciona para a página de login após o sucesso
-      window.location.href = '/login';
+      // 5. Chama a função da API e aguarda a resposta
+      const userData = await loginUser(loginData);
+      
+      alert("Login bem-sucedido!");
+
+      // 6. Salva os dados do usuário no localStorage para manter a sessão
+      localStorage.setItem('user', JSON.stringify(userData));
+
+      // 7. Redireciona para a página inicial
+      window.location.href = '/'; 
+
     } catch (err) {
-      //  caso der erro, aparece a msg de erro
-      setError("Erro ao realizar o cadastro. Verifique os dados e tente novamente.");
+      // 8. Em caso de erro, define a mensagem para o usuário
+      setError("Email ou senha inválidos. Tente novamente.");
       console.error(err);
     }
   };
@@ -72,45 +74,14 @@ export default function Cadastro() {
                    hover:shadow-md"
         >
           <CardHeader className="text-center">
-            <CardTitle className="text-2xl">Crie seu Cadastro</CardTitle>
+            <CardTitle className="text-2xl">Efetue o Login</CardTitle>
             <CardDescription>
-              Insira suas credenciais para ter a possibilidade de avaliar os
+              Entre com suas credenciais para ter a possibilidade de avaliar os
               estabelecimentos.
             </CardDescription>
           </CardHeader>
-          {/*  O formulário chama handleRegister */}
-          <form onSubmit={handleRegister}>
+          <form onSubmit={handleLogin}>
             <CardContent className="space-y-4">
-              <div className="space-y-2">
-                <Label htmlFor="username">Nome de usuário</Label>
-                <Input
-                  id="username" 
-                  type="text"
-                  placeholder="Digite seu nome de usuário"
-                  required
-                  value={username}
-                  onChange={(e) => setUsername(e.target.value)}
-                  className="w-full py-2
-                  rounded-2xl border border-gray-200 bg-white shadow-sm
-                  focus:ring-2 focus:border-orange-500/70 transition-all duration-300
-                  "
-                />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="nome_completo_user">Nome Completo</Label>
-                <Input
-                  id="nome_completo_user"
-                  type="text"
-                  placeholder="Digite seu nome completo"
-                  required
-                  value={nome_completo_user}
-                  onChange={(e) => setNomeCompleto(e.target.value)}
-                  className="w-full py-2
-                  rounded-2xl border border-gray-200 bg-white shadow-sm
-                  focus:ring-2 focus:border-orange-500/70 transition-all duration-300
-                  "
-                />
-              </div>
               <div className="space-y-2">
                 <Label htmlFor="email">Email</Label>
                 <Input
@@ -141,19 +112,34 @@ export default function Cadastro() {
                   "
                 />
               </div>
-               {/* Exibe a mensagem de erro, se houver */}
-               {error && <p className="text-red-500 text-sm text-center">{error}</p>}
+              {/* 9. Exibe a mensagem de erro, se houver */}
+              {error && <p className="text-red-500 text-sm text-center">{error}</p>}
             </CardContent>
-            <CardFooter>
+            <CardFooter className="flex flex-col items-center space-y-4">
               <Button
                 type="submit"
                 className="hover:bg-orange-500 rounded-2xl hover:text-white flex justify-center mx-auto px-10  text-gray-700 border border-purple-600/70"
               >
-                Criar Conta
+                Entrar
               </Button>
+              <Link href="/cadastro" className=" text-gray-600 ">
+                Novo por aqui?{" "}
+                <strong className="underline hover:text-purple-800">
+                  {" "}
+                  Cadastre-se
+                </strong>
+              </Link>
             </CardFooter>
           </form>
         </Card>
+        <div className="mt-4 text-center text-sm">
+          <Link
+            href="./cadastro" // pode ser modificada
+            className="underline text-gray-600 hover:text-purple-800"
+          >
+            Esqueceu sua senha?
+          </Link>
+        </div>
       </div>
     </div>
   );
