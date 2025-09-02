@@ -1,4 +1,4 @@
-//LOGIN
+//CADASTRO
 
 "use client";
 
@@ -16,38 +16,33 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import Link from "next/link";
 import Image from "next/image";
-import { loginUser } from "@/lib/api"; // função da API
+import { registerUser } from "@/lib/api"; //FUNCAO API
 
-export default function LoginPage() {
-  const [email, setEmail] = useState(""); // Este valor será usado como 'username'
-  const [password, setPassword] = useState("");
-  const [error, setError] = useState<string | null>(null); // 2. Estado para a mensagem de erro
+export default function NovaSenha() {
+  const [email, setEmail] = useState("");
+  const [nome_completo_user, setNomeCompleto] = useState("");
+  const [error, setError] = useState<string | null>(null); //  Estado para guardar a mensagem de erro
 
-  // 3. Função atualizada para lidar com o login
-  const handleLogin = async (e: React.FormEvent) => {
+  //  Função atualizada para lidar com o registro
+  const handleRegister = async (e: React.FormEvent) => {
     e.preventDefault();
-    setError(null);
+    setError(null); // Limpa erros anteriores
 
-    // 4. Monta o objeto com os dados para enviar à API
-    const loginData = {
-      username: email, // Usando o email do formulário como username
-      senha: password,
+    //  Monta o objeto com os dados para enviar à API
+    const userData = {
+      nomeCompleto: nome_completo_user,
+      email: email,
     };
 
     try {
-      // 5. Chama a função da API e aguarda a resposta
-      const userData = await loginUser(loginData);
-
-      alert("Login bem-sucedido!");
-
-      // 6. Salva os dados do usuário no localStorage para manter a sessão
-      localStorage.setItem("user", JSON.stringify(userData));
-
-      // 7. Redireciona para a página inicial
-      window.location.href = "/";
+      // Chama a função da API
+      await registerUser(userData);
+      alert("Email Enviado com Sucesso! Verifique sua caixa de entrada.");
+      //  Redireciona para a página de login após o sucesso
+      window.location.href = "/login";
     } catch (err) {
-      // 8. Em caso de erro, define a mensagem para o usuário
-      setError("Email ou senha inválidos. Tente novamente.");
+      //  caso der erro, aparece a msg de erro
+      setError("Erro ao procurar dados. Verifique os dados e tente novamente.");
       console.error(err);
     }
   };
@@ -73,14 +68,29 @@ export default function LoginPage() {
                    hover:shadow-md"
         >
           <CardHeader className="text-center">
-            <CardTitle className="text-2xl">Efetue o Login</CardTitle>
+            <CardTitle className="text-2xl">Recupere sua senha</CardTitle>
             <CardDescription>
-              Entre com suas credenciais para ter a possibilidade de avaliar os
-              estabelecimentos.
+              Insira suas credenciais corretamente para modificar sua senha.
             </CardDescription>
           </CardHeader>
-          <form onSubmit={handleLogin}>
+          {/*  O formulário chama handleRegister */}
+          <form onSubmit={handleRegister}>
             <CardContent className="space-y-4">
+              <div className="space-y-2">
+                <Label htmlFor="nome_completo_user">Nome Completo</Label>
+                <Input
+                  id="nome_completo_user"
+                  type="text"
+                  placeholder="Digite seu nome completo"
+                  required
+                  value={nome_completo_user}
+                  onChange={(e) => setNomeCompleto(e.target.value)}
+                  className="w-full py-2
+                  rounded-2xl border border-gray-200 bg-white shadow-sm
+                  focus:ring-2 focus:border-orange-500/70 transition-all duration-300
+                  "
+                />
+              </div>
               <div className="space-y-2">
                 <Label htmlFor="email">Email</Label>
                 <Input
@@ -96,51 +106,21 @@ export default function LoginPage() {
                   "
                 />
               </div>
-              <div className="space-y-2">
-                <Label htmlFor="password">Senha</Label>
-                <Input
-                  id="password"
-                  type="password"
-                  placeholder="Sua senha"
-                  required
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  className="w-full py-2
-                  rounded-2xl border border-gray-200 bg-white shadow-sm
-                  focus:ring-2 focus:border-orange-500/70 transition-all duration-300
-                  "
-                />
-              </div>
-              {/* 9. Exibe a mensagem de erro, se houver */}
+              {/* Exibe a mensagem de erro, se houver */}
               {error && (
                 <p className="text-red-500 text-sm text-center">{error}</p>
               )}
             </CardContent>
-            <CardFooter className="flex flex-col items-center space-y-4">
+            <CardFooter>
               <Button
                 type="submit"
                 className="hover:bg-orange-500 rounded-2xl hover:text-white flex justify-center mx-auto px-10  text-gray-700 border border-purple-600/70"
               >
-                Entrar
+                Enviar email
               </Button>
-              <Link href="/cadastro" className=" text-gray-600 ">
-                Novo por aqui?{" "}
-                <strong className="underline hover:text-purple-800">
-                  {" "}
-                  Cadastre-se
-                </strong>
-              </Link>
             </CardFooter>
           </form>
         </Card>
-        <div className="mt-4 text-center text-sm">
-          <Link
-            href="./esqueci-senha" // pode ser modificada
-            className="underline text-gray-600 hover:text-purple-800"
-          >
-            Esqueceu sua senha?
-          </Link>
-        </div>
       </div>
     </div>
   );
