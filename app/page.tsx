@@ -12,63 +12,63 @@ import { Search } from "lucide-react";
 export { categories };
 const categories = [
   {
-    id: "restaurantes",
-    title: "Alimentos",
-    backgroundimg: "/Alimentação.jpeg",
+    id: "artesanato",
+    title: "Artesanato e Criação Manual",
+    backgroundimg: "/categorias/Artesanato.png",
   },
   {
-    id: "pontos-turisticos",
-    title: "Moda",
-    backgroundimg: "/Moda.jpeg",
+    id: "beleza",
+    title: "Beleza, Moda e Estética",
+    backgroundimg: "/categorias/Moda.jpeg",
   },
   {
-    id: "trilhas",
-    title: "Serviços",
-    backgroundimg: "/Serviços.jpeg",
+    id: "comercio",
+    title: "Comércio Local e Vendas",
+    backgroundimg: "/categorias/Comércio.jpg",
   },
   {
-    id: "telefones-uteis",
-    title: "Telefones Úteis",
-    backgroundimg: "/gatinho.jpg",
+    id: "construcao",
+    title: "Construção, Reforma e Manutenção",
+    backgroundimg: "/categorias/Construção.jpg",
   },
   {
-    id: "escolas",
-    title: "Escolas",
-    backgroundimg: "",
+    id: "festas",
+    title: "Festas e Eventos",
+    backgroundimg: "/categorias/Festa.jpeg",
   },
   {
-    id: "supermercados",
-    title: "Supermercados",
-    backgroundimg: "",
+    id: "gastronomia",
+    title: "Gastronomia e Alimentação",
+    backgroundimg: "/categorias/Alimentação.jpeg",
   },
   {
-    id: "transporte",
-    title: "Transporte Público",
-    backgroundimg: "",
+    id: "saude",
+    title: "Saúde, Bem-estar e Fitness",
+    backgroundimg: "/categorias/Saúde.jpg",
   },
   {
-    id: "hospedagens",
-    title: "Hospedagens",
-    backgroundimg: "",
+    id: "servicos-administrativos",
+    title: "Serviços Administrativos e Apoio",
+    backgroundimg: "/categorias/Serviços.jpeg",
   },
   {
-    id: "eventos",
-    title: "Eventos Locais",
-    backgroundimg: "",
+    id: "servicos-automotivos",
+    title: "Serviços Automotivos e Reparos",
+    backgroundimg: "/categorias/Serviços Automotivos.jpg",
   },
   {
     id: "lazer-e-esporte",
     title: "Lazer e Esporte",
+    backgroundimg: "/gatinho.jpg",
+  },
+  {
+    id: "tecnologia",
+    title: "Tecnologia e Serviços Digitais",
     backgroundimg: "",
   },
   {
-    id: "espacos-culturais",
-    title: "Espaços Culturais",
-    backgroundimg: "",
-  },
-  {
-    id: "praias",
-    title: "Praias e Lagoas",
+    id: "turismo",
+    title: "Turismo, Cultura e Lazer",
     backgroundimg: "",
   },
 ];
@@ -273,8 +273,9 @@ export default function HomePage() {
               </h3>
               <p className="text-gray-600 mb-4">
                 {" "}
-                {/* mb-4 aqui para espaçar o parágrafo de descrição */}
-                Seu guia completo para descobrir o melhor do mercado local
+                {/* mb-4 aqui para espaçar o parágrafo de descrição */}A vitrine
+                digital que valoriza o empreendedor local e fortalece a economia
+                de Saquarema
               </p>
               {/* Linha horizontal sutil */}
               <hr className="w-16 mx-auto border-gray-300 mb-4" />{" "}

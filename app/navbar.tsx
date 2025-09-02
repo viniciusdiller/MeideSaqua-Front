@@ -126,7 +126,13 @@ export function Navbar() {
               href="/contato"
               className="text-gray-700 hover:text-purple-500 transition-colors"
             >
-              Contato
+              Fale Conosco
+            </Link>
+            <Link
+              href="/cadastro-mei"
+              className="text-gray-700 hover:text-purple-500 transition-colors"
+            >
+              Cadastro MEI
             </Link>
           </nav>
         </div>
@@ -204,7 +210,14 @@ export function Navbar() {
               className="text-gray-700 hover:text-purple-500 transition-colors font-medium"
               onClick={() => setIsOpen(false)}
             >
-              Contato
+              Fale Conosco
+            </Link>
+            <Link
+              href="/cadastro-mei"
+              className="text-gray-700 hover:text-purple-500 transition-colors font-medium"
+              onClick={() => setIsOpen(false)}
+            >
+              Cadastro MEI
             </Link>
 
             <hr className="border-gray-200" />
