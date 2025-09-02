@@ -1,3 +1,4 @@
+//CATEGORIA
 "use client";
 import { useState, useEffect, useRef } from "react";
 import { motion } from "framer-motion";
@@ -5,14 +6,11 @@ import Link from "next/link";
 import { ArrowLeft, Clock, MapPin, Phone, Globe, Search } from "lucide-react";
 import Image from "next/image";
 import dynamic from "next/dynamic";
-import { db } from "../../firebasePV";
-import { collection, getDocs, query, where } from "firebase/firestore";
-import { useMap } from "react-leaflet";
 import { categories } from "../../page";
 import L from "leaflet";
 import ModernCarousel from "@/components/ModernCarousel";
-import { onSnapshot } from "firebase/firestore";
 import { useUserLocation } from "../../../components/userlocation";
+import { getAllEstablishments } from "@/lib/api"; // função da API
 
 const userIcon = new L.Icon({
   iconUrl: "/person-icon.png",
@@ -75,7 +73,6 @@ function MapInstanceHandler({
   return null;
 }
 
-// Função para calcular distância entre coordenadas (Haversine)
 function getDistanceFromLatLonInKm(
   lat1: number,
   lon1: number,
@@ -99,18 +96,9 @@ function getDistanceFromLatLonInKm(
 export default function CategoryPage({ params }: PageProps) {
   const [locations, setLocations] = useState<any[]>([]);
   const [selectedLocation, setSelectedLocation] = useState<any>(null);
-
   const [mapKey, setMapKey] = useState(0);
-  const [mapCenter, setMapCenter] = useState<[number, number]>([
-    -22.9249, -42.5084,
-  ]);
-  const [mapZoom, setMapZoom] = useState(13);
-  const [mapInstance, setMapInstance] = useState<any>(null);
   const [isLoading, setIsLoading] = useState(true);
-  const markerRefs = useRef<Record<string, L.Marker>>({});
   const [searchTerm, setSearchTerm] = useState("");
-
-  // Novos estados para geolocalização
   const [userLocation, setUserLocation] = useState<{
     lat: number;
     lng: number;
@@ -118,105 +106,47 @@ export default function CategoryPage({ params }: PageProps) {
   const [nearestLocations, setNearestLocations] = useState<any[]>([]);
   const [geoLoading, setGeoLoading] = useState(false);
   const [geoError, setGeoError] = useState<string | null>(null);
-  const userPosition = useUserLocation();
-  const [locationError, setLocationError] = useState<string | null>(null);
 
   useEffect(() => {
     const timer = setTimeout(() => setMapKey((prev) => prev + 1), 500);
     return () => clearTimeout(timer);
   }, []);
 
+  // Busca os dados da API
   useEffect(() => {
-    const cacheKey = `locations_${params.slug}`;
-    setIsLoading(true);
+    const fetchLocations = async () => {
+      setIsLoading(true);
+      try {
+        // Encontra o título da categoria com base no slug da URL
+        const categoryInfo = categories.find((cat) => cat.id === params.slug);
+        const categoryTitle = categoryInfo ? categoryInfo.title : "";
 
-    // Tenta pegar dados do cache localStorage
-    try {
-      const cached = localStorage.getItem(cacheKey);
-      if (cached) {
-        const parsed = JSON.parse(cached);
-        const cacheTimestamp = parsed.timestamp;
-        const now = Date.now();
-        const oneHour = 60 * 60 * 1000; // 1 hora
-
-        if (now - cacheTimestamp < oneHour) {
-          setLocations(parsed.data);
-          setIsLoading(false);
-          return; // Sai da função, cache válido
+        if (!categoryTitle) {
+          setLocations([]);
+          return;
         }
-      }
-    } catch (err) {
-      console.warn("Erro ao ler cache localStorage", err);
-    }
 
-    // Se cache não válido, ou não existe, faz a consulta em tempo real com onSnapshot
-    const categoryInfo = categories.find((cat) => cat.id === params.slug);
-    let categoryTitle = categoryInfo ? categoryInfo.title : "";
+        // Chama a API para buscar todos os estabelecimentos
+        const allEstablishments = await getAllEstablishments();
 
-    if (!categoryTitle) {
-      setLocations([]);
-      setIsLoading(false);
-      return;
-    }
-
-    const locationsRef = collection(db, "locations");
-    const q = query(locationsRef, where("category", "==", categoryTitle));
-
-    const unsubscribe = onSnapshot(
-      q,
-      (querySnapshot) => {
-        const data = querySnapshot.docs.map((doc) => {
-          const docData = doc.data();
-          let parsedCoordinates = null;
-
-          if (typeof docData.coordinates === "string") {
-            try {
-              parsedCoordinates = JSON.parse(docData.coordinates);
-            } catch (e) {
-              console.error(
-                "Erro ao fazer parse das coordenadas:",
-                docData.coordinates,
-                e
-              );
-              parsedCoordinates = null;
-            }
-          } else if (
-            typeof docData.coordinates === "object" &&
-            docData.coordinates !== null
-          ) {
-            parsedCoordinates = docData.coordinates;
-          }
-
-          return {
-            id: doc.id,
-            ...docData,
-            coordinates: parsedCoordinates,
-          };
-        });
-
-        // Atualiza cache localStorage
-        localStorage.setItem(
-          cacheKey,
-          JSON.stringify({
-            timestamp: Date.now(),
-            data,
-          })
+        // Filtra os estabelecimentos para manter apenas os da categoria atual
+        const filteredData = allEstablishments.filter(
+          (loc: any) => loc.categoria === categoryTitle
         );
 
-        setLocations(data);
-        setIsLoading(false);
-      },
-      (error) => {
-        console.error("Erro no onSnapshot:", error);
+        setLocations(filteredData);
+      } catch (error) {
+        console.error("Erro ao buscar estabelecimentos da API:", error);
         setLocations([]);
+      } finally {
         setIsLoading(false);
       }
-    );
+    };
 
-    return () => unsubscribe(); // limpa listener quando componente desmontar
+    fetchLocations();
   }, [params.slug]);
 
-  // Obter geolocalização e calcular locais próximos quando locations mudarem
+  // Lógica para obter geolocalização e calcular locais próximos
   useEffect(() => {
     if (!locations || locations.length === 0) {
       setNearestLocations([]);
@@ -265,21 +195,13 @@ export default function CategoryPage({ params }: PageProps) {
     );
   }, [locations]);
 
- 
-
- 
-
   const category = categories.find((cat) => cat.id === params.slug);
 
-  // Filtra os locais com base no termo de busca
   const filteredLocations = locations.filter(
     (location) =>
-      (location.name &&
-        typeof location.name === "string" &&
-        location.name.toLowerCase().includes(searchTerm.toLowerCase())) ||
-      (location.description &&
-        typeof location.description === "string" &&
-        location.description.toLowerCase().includes(searchTerm.toLowerCase()))
+      (location.nomeFantasia &&
+        typeof location.nomeFantasia === "string" &&
+        location.nomeFantasia.toLowerCase().includes(searchTerm.toLowerCase()))
   );
 
   if (!category) {
@@ -336,7 +258,7 @@ export default function CategoryPage({ params }: PageProps) {
               Voltar
             </Link>
             <div className="flex items-center gap-3">
-              <div className={`p-2 rounded-lg bg-gradient-to-br $`}>ICON</div>
+              <div className={`p-2 rounded-lg bg-gradient-to-br`}>ICON</div>
               <div>
                 <h1 className="text-xl md:text-2xl font-bold text-gray-800 capitalize">
                   {category.title}
@@ -349,7 +271,6 @@ export default function CategoryPage({ params }: PageProps) {
       </header>
 
       <div className="container mx-auto px-4 py-8">
-        {/* --- NOVA SEÇÃO LOCAIS MAIS PRÓXIMOS --- */}
         {geoLoading && (
           <p className="text-center text-gray-600 mb-6">
             Buscando sua localização...
@@ -395,19 +316,18 @@ export default function CategoryPage({ params }: PageProps) {
                     visible: { opacity: 1, y: 0 },
                   }}
                   className="min-w-[250px] bg-white text-gray-800 rounded-2xl shadow-md hover:shadow-xl border border-[#017DB9]/20 p-4 cursor-pointer flex-shrink-0 hover:scale-[1.03] transition-all duration-300"
-                  
                 >
                   {loc.imageUrl && (
                     <img
                       src={loc.imageUrl}
-                      alt={loc.name}
+                      alt={loc.nomeFantasia}
                       className="w-full h-36 object-cover rounded-xl mb-4 border border-[#017DB9]/30"
                     />
                   )}
                   <h3 className="text-lg font-semibold text-[#017DB9] mb-1">
-                    {loc.name}
+                    {loc.nomeFantasia}
                   </h3>
-                  <p className="text-sm text-gray-600">{loc.address}</p>
+                  <p className="text-sm text-gray-600">{loc.endereco}</p>
                   <div className="flex justify-between items-center mt-3">
                     <p className="text-sm font-medium text-[#017DB9]">
                       {loc.distance.toFixed(2)} km
@@ -428,7 +348,6 @@ export default function CategoryPage({ params }: PageProps) {
                 </motion.div>
               ))}
             </motion.div>
-            {/* Linha divisória elegante */}
             <div className="h-px w-full bg-gradient-to-r from-transparent via-gray-300 to-transparent my-5" />
           </section>
         )}
@@ -444,10 +363,8 @@ export default function CategoryPage({ params }: PageProps) {
               >
                 Locais Recomendados
               </motion.h2>
-    
             </div>
 
-            {/*Barra de Pesquisa */}
             <div className="relative mb-6">
               <Search
                 className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none"
@@ -468,33 +385,30 @@ export default function CategoryPage({ params }: PageProps) {
               />
             </div>
 
-            {/*Contêiner com Barra de Rolagem */}
             <div className=" max-h-[50vh] overflow-y-auto px-4 lg:grid grid-cols-2 gap-2">
               {filteredLocations.map((location: any, index: number) => (
-                <Link href={`${location.id}/MEI/`} key={location.id}>
+                <Link href={`${location.estabelecimentoId}/MEI/`} key={location.estabelecimentoId}>
                   <motion.div
-                  
-                    key={location.id}
+                    key={location.estabelecimentoId}
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ delay: index * 0.05 }}
                     className={`lg:max-w-100px bg-white rounded-xl max-h-[20vh] shadow-md p-6 cursor-pointer mb-4 transition-transform duration-300 hover:shadow-xl hover:scale-[1.02] ${
-                      selectedLocation?.id === location.id
+                      selectedLocation?.id === location.estabelecimentoId
                         ? "ring-2 ring-offset-2 ring-[#017DB9] shadow-lg"
                         : ""
                     }`}
-                    
                   >
                     {location.imageUrl && (
                       <img
                         src={location.imageUrl}
-                        alt={location.name}
+                        alt={location.nomeFantasia}
                         className="w-full h-32 object-cover"
                       />
                     )}
                     <div className="flex justify-between items-start mb-3">
                       <h3 className="text-lg font-semibold text-gray-800">
-                        {location.name}
+                        {location.nomeFantasia}
                       </h3>
                       <div className="flex items-center gap-2">
                         {location.rating && (
@@ -505,29 +419,29 @@ export default function CategoryPage({ params }: PageProps) {
                             </span>
                           </div>
                         )}
-                        {selectedLocation?.id === location.id && (
+                        {selectedLocation?.id === location.estabelecimentoId && (
                           <div className="w-2 h-2 bg-[#017DB9] rounded-full animate-pulse"></div>
                         )}
                       </div>
                     </div>
 
-                    <p className="text-gray-600 mb-4">{location.description}</p>
+                    <p className="text-gray-600 mb-4">{location.descricao}</p>
 
                     <div className="space-y-2 text-sm text-gray-500">
                       <div className="flex items-center gap-2">
                         <MapPin className="w-4 h-4" />
-                        {location.address}
+                        {location.endereco}
                       </div>
-                      {location.hours && (
+                      {location.horarioFuncionamento && (
                         <div className="flex items-center gap-2">
                           <Clock className="w-4 h-4" />
-                          {location.hours}
+                          {location.horarioFuncionamento}
                         </div>
                       )}
-                      {location.phone && (
+                      {location.contatoEstabelecimento && (
                         <div className="flex items-center gap-2">
                           <Phone className="w-4 h-4" />
-                          {location.phone}
+                          {location.contatoEstabelecimento}
                         </div>
                       )}
                       {location.website && (
@@ -565,21 +479,23 @@ export default function CategoryPage({ params }: PageProps) {
                 Clique em um ponto para saber mais
               </p>
             </motion.div>
-            
-            {/* 3. Substitua a div com a imagem de fundo pelo componente do carrossel */}
-          <div className="w-full h-[300px] md:h-[500px] rounded-2xl shadow-lg overflow-hidden border border-purple-600">
-          <ModernCarousel
-              slides={[
-                { imageUrl: "/gatinho.jpg", label: "Ver Gatinho mau" },
-                { imageUrl: "/Alimentação.jpeg", label: "Comer até não aguentar" },
-                { imageUrl: "/Moda.jpeg", label: "Ver roupas" },
-              ]}
-            />
 
-        </div>
+            <div className="w-full h-[300px] md:h-[500px] rounded-2xl shadow-lg overflow-hidden border border-purple-600">
+              <ModernCarousel
+                slides={[
+                  { imageUrl: "/gatinho.jpg", label: "Ver Gatinho mau" },
+                  { imageUrl: "/Alimentação.jpeg", label: "Comer até não aguentar" },
+                  { imageUrl: "/Moda.jpeg", label: "Ver roupas" },
+                ]}
+              />
+            </div>
           </div>
         </div>
       </div>
     </div>
   );
+}
+
+function useMap() {
+  throw new Error("Function not implemented.");
 }

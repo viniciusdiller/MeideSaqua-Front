@@ -1,3 +1,5 @@
+//CADASTRO
+
 "use client";
 
 import { useState } from "react";
@@ -14,17 +16,39 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import Link from "next/link";
 import Image from "next/image";
+import { registerUser } from "@/lib/api"; //FUNCAO API
 
-export default function LoginPage() {
+export default function Cadastro() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [username, setUsername] = useState("");
+  const [nome_completo_user, setNomeCompleto] = useState("");
+  const [error, setError] = useState<string | null>(null); //  Estado para guardar a mensagem de erro
 
-  const handleLogin = (e: React.FormEvent) => {
+  //  Função atualizada para lidar com o registro
+  const handleRegister = async (e: React.FormEvent) => {
     e.preventDefault();
-    // TODO: Adicione aqui a sua lógica de autenticação com o Firebase
-    console.log("Email:", email);
-    console.log("Senha:", password);
-    alert("Lógica de login a ser implementada!");
+    setError(null); // Limpa erros anteriores
+
+    //  Monta o objeto com os dados para enviar à API
+    const userData = {
+      nomeCompleto: nome_completo_user,
+      username: username,
+      email: email,
+      password: password,
+    };
+
+    try {
+      // Chama a função da API
+      await registerUser(userData);
+      alert("Cadastro realizado com sucesso!");
+      //  Redireciona para a página de login após o sucesso
+      window.location.href = '/login';
+    } catch (err) {
+      //  caso der erro, aparece a msg de erro
+      setError("Erro ao realizar o cadastro. Verifique os dados e tente novamente.");
+      console.error(err);
+    }
   };
 
   return (
@@ -43,19 +67,50 @@ export default function LoginPage() {
         </div>
         <Card
           className="rounded-2xl border border-purple-600/70 bg-white shadow-lg
-                focus:outline-none focus:ring-2 focus:border-transparent
-                transition-all duration-300 placeholder-gray-400 text-sm
-                hover:shadow-md"
+                   focus:outline-none focus:ring-2 focus:border-transparent
+                   transition-all duration-300 placeholder-gray-400 text-sm
+                   hover:shadow-md"
         >
           <CardHeader className="text-center">
-            <CardTitle className="text-2xl">Efetue o Login</CardTitle>
+            <CardTitle className="text-2xl">Crie seu Cadastro</CardTitle>
             <CardDescription>
-              Entre com suas credenciais para ter a possibilidade de avaliar os
+              Insira suas credenciais para ter a possibilidade de avaliar os
               estabelecimentos.
             </CardDescription>
           </CardHeader>
-          <form onSubmit={handleLogin}>
+          {/*  O formulário chama handleRegister */}
+          <form onSubmit={handleRegister}>
             <CardContent className="space-y-4">
+              <div className="space-y-2">
+                <Label htmlFor="username">Nome de usuário</Label>
+                <Input
+                  id="username" 
+                  type="text"
+                  placeholder="Digite seu nome de usuário"
+                  required
+                  value={username}
+                  onChange={(e) => setUsername(e.target.value)}
+                  className="w-full py-2
+                  rounded-2xl border border-gray-200 bg-white shadow-sm
+                  focus:ring-2 focus:border-orange-500/70 transition-all duration-300
+                  "
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="nome_completo_user">Nome Completo</Label>
+                <Input
+                  id="nome_completo_user"
+                  type="text"
+                  placeholder="Digite seu nome completo"
+                  required
+                  value={nome_completo_user}
+                  onChange={(e) => setNomeCompleto(e.target.value)}
+                  className="w-full py-2
+                  rounded-2xl border border-gray-200 bg-white shadow-sm
+                  focus:ring-2 focus:border-orange-500/70 transition-all duration-300
+                  "
+                />
+              </div>
               <div className="space-y-2">
                 <Label htmlFor="email">Email</Label>
                 <Input
@@ -66,9 +121,9 @@ export default function LoginPage() {
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   className="w-full py-2
-                rounded-2xl border border-gray-200 bg-white shadow-sm
-                focus:ring-2 focus:border-orange-500/70 transition-all duration-300
-                "
+                  rounded-2xl border border-gray-200 bg-white shadow-sm
+                  focus:ring-2 focus:border-orange-500/70 transition-all duration-300
+                  "
                 />
               </div>
               <div className="space-y-2">
@@ -81,37 +136,24 @@ export default function LoginPage() {
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   className="w-full py-2
-                rounded-2xl border border-gray-200 bg-white shadow-sm
-                focus:ring-2 focus:border-orange-500/70 transition-all duration-300
-                "
+                  rounded-2xl border border-gray-200 bg-white shadow-sm
+                  focus:ring-2 focus:border-orange-500/70 transition-all duration-300
+                  "
                 />
               </div>
+               {/* Exibe a mensagem de erro, se houver */}
+               {error && <p className="text-red-500 text-sm text-center">{error}</p>}
             </CardContent>
-            <CardFooter className="flex flex-col items-center space-y-4">
+            <CardFooter>
               <Button
                 type="submit"
                 className="hover:bg-orange-500 rounded-2xl hover:text-white flex justify-center mx-auto px-10  text-gray-700 border border-purple-600/70"
               >
-                Entrar
+                Criar Conta
               </Button>
-              <Link href="/cadastro" className=" text-gray-600 ">
-                Novo por aqui?{" "}
-                <strong className="underline hover:text-purple-800">
-                  {" "}
-                  Cadastre-se
-                </strong>
-              </Link>
             </CardFooter>
           </form>
         </Card>
-        <div className="mt-4 text-center text-sm">
-          <Link
-            href="./cadastro"
-            className="underline text-gray-600 hover:text-purple-800"
-          >
-            Esqueceu sua senha?
-          </Link>
-        </div>
       </div>
     </div>
   );

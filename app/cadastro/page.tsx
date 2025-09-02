@@ -1,3 +1,5 @@
+//CADASTRO
+
 "use client";
 
 import { useState } from "react";
@@ -14,21 +16,39 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import Link from "next/link";
 import Image from "next/image";
+import { registerUser } from "@/lib/api"; //FUNCAO API
 
 export default function Cadastro() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [username, setUsername] = useState("");
   const [nome_completo_user, setNomeCompleto] = useState("");
+  const [error, setError] = useState<string | null>(null); //  Estado para guardar a mensagem de erro
 
-  const handleLogin = (e: React.FormEvent) => {
+  //  Função atualizada para lidar com o registro
+  const handleRegister = async (e: React.FormEvent) => {
     e.preventDefault();
-    // TODO: Adicione aqui a sua lógica de autenticação com o Firebase
-    console.log("Email:", email);
-    console.log("Senha:", password);
-    console.log("Username:", username);
-    console.log("Nome Completo:", nome_completo_user);
-    alert("Lógica de login a ser implementada!");
+    setError(null); // Limpa erros anteriores
+
+    //  Monta o objeto com os dados para enviar à API
+    const userData = {
+      nomeCompleto: nome_completo_user,
+      username: username,
+      email: email,
+      password: password,
+    };
+
+    try {
+      // Chama a função da API
+      await registerUser(userData);
+      alert("Cadastro realizado com sucesso!");
+      //  Redireciona para a página de login após o sucesso
+      window.location.href = '/login';
+    } catch (err) {
+      //  caso der erro, aparece a msg de erro
+      setError("Erro ao realizar o cadastro. Verifique os dados e tente novamente.");
+      console.error(err);
+    }
   };
 
   return (
@@ -47,9 +67,9 @@ export default function Cadastro() {
         </div>
         <Card
           className="rounded-2xl border border-purple-600/70 bg-white shadow-lg
-                focus:outline-none focus:ring-2 focus:border-transparent
-                transition-all duration-300 placeholder-gray-400 text-sm
-                hover:shadow-md"
+                   focus:outline-none focus:ring-2 focus:border-transparent
+                   transition-all duration-300 placeholder-gray-400 text-sm
+                   hover:shadow-md"
         >
           <CardHeader className="text-center">
             <CardTitle className="text-2xl">Crie seu Cadastro</CardTitle>
@@ -58,21 +78,22 @@ export default function Cadastro() {
               estabelecimentos.
             </CardDescription>
           </CardHeader>
-          <form onSubmit={handleLogin}>
+          {/*  O formulário chama handleRegister */}
+          <form onSubmit={handleRegister}>
             <CardContent className="space-y-4">
               <div className="space-y-2">
                 <Label htmlFor="username">Nome de usuário</Label>
                 <Input
-                  id="usernamo"
+                  id="username" 
                   type="text"
                   placeholder="Digite seu nome de usuário"
                   required
                   value={username}
                   onChange={(e) => setUsername(e.target.value)}
                   className="w-full py-2
-                rounded-2xl border border-gray-200 bg-white shadow-sm
-                focus:ring-2 focus:border-orange-500/70 transition-all duration-300
-                "
+                  rounded-2xl border border-gray-200 bg-white shadow-sm
+                  focus:ring-2 focus:border-orange-500/70 transition-all duration-300
+                  "
                 />
               </div>
               <div className="space-y-2">
@@ -85,9 +106,9 @@ export default function Cadastro() {
                   value={nome_completo_user}
                   onChange={(e) => setNomeCompleto(e.target.value)}
                   className="w-full py-2
-                rounded-2xl border border-gray-200 bg-white shadow-sm
-                focus:ring-2 focus:border-orange-500/70 transition-all duration-300
-                "
+                  rounded-2xl border border-gray-200 bg-white shadow-sm
+                  focus:ring-2 focus:border-orange-500/70 transition-all duration-300
+                  "
                 />
               </div>
               <div className="space-y-2">
@@ -100,9 +121,9 @@ export default function Cadastro() {
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   className="w-full py-2
-                rounded-2xl border border-gray-200 bg-white shadow-sm
-                focus:ring-2 focus:border-orange-500/70 transition-all duration-300
-                "
+                  rounded-2xl border border-gray-200 bg-white shadow-sm
+                  focus:ring-2 focus:border-orange-500/70 transition-all duration-300
+                  "
                 />
               </div>
               <div className="space-y-2">
@@ -115,11 +136,13 @@ export default function Cadastro() {
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   className="w-full py-2
-                rounded-2xl border border-gray-200 bg-white shadow-sm
-                focus:ring-2 focus:border-orange-500/70 transition-all duration-300
-                "
+                  rounded-2xl border border-gray-200 bg-white shadow-sm
+                  focus:ring-2 focus:border-orange-500/70 transition-all duration-300
+                  "
                 />
               </div>
+               {/* Exibe a mensagem de erro, se houver */}
+               {error && <p className="text-red-500 text-sm text-center">{error}</p>}
             </CardContent>
             <CardFooter>
               <Button

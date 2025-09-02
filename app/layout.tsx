@@ -1,10 +1,10 @@
 import type React from "react";
 import type { Metadata } from "next";
-import { Poppins } from "next/font/google"; // 1. Importado Poppins ao invés de Inter
+import { Poppins } from "next/font/google"; 
 import "./globals.css";
 import { Navbar } from "./navbar";
 
-// 2. Configurado a fonte Poppins com os pesos e a variável CSS
+
 const poppins = Poppins({
   subsets: ["latin"],
   weight: ["400", "500", "700", "900"],
@@ -21,7 +21,7 @@ export const metadata: Metadata = {
     description:
       "Seu guia completo para explorar e conhecer os MEIs que movimentam a economia de Saquarema.",
     url: "https://explora-saqua.vercel.app/",
-    siteName: "ExploreSaquá",
+    siteName: "MeideSaquá",
     images: [
       {
         url: "/logo2sq.png",
@@ -41,9 +41,8 @@ export default function RootLayout({
 }) {
   return (
     <html lang="pt-BR">
-      {/* 3. Aplicado a variável da fonte no body */}
       <body className={`${poppins.variable} bg-white`}>
-        <Navbar /> {/* visible on all pages */}
+        <Navbar /> 
         <main>{children}</main>
       </body>
     </html>

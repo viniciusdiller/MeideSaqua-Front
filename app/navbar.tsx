@@ -4,9 +4,8 @@ import { MotionConfig, motion } from "framer-motion";
 import Image from "next/image";
 import { useState } from "react";
 import Link from "next/link";
-import { Instagram, Globe, LogIn } from "lucide-react"; // Importado o ícone de Login
+import { Instagram, Globe, LogIn } from "lucide-react"; 
 
-// (O código do VARIANTS e do AnimatedHamburgerButton continua o mesmo...)
 const VARIANTS = {
   top: {
     open: {

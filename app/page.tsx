@@ -143,16 +143,15 @@ export default function HomePage() {
             transition={{ duration: 0.8 }}
             className="text-center mb-10"
           >
-            <h2 className="text-4xl md:text-6xl font-bold text-gray-800 mb-6">
-              Portifólio de{" "}
+             <h2 className="text-4xl md:text-6xl font-bold text-gray-800 mb-6">
+              Vitrine de{" "}
               <span className="bg-gradient-to-r from-purple-600 to-orange-500 bg-clip-text text-transparent">
                 MEIs
               </span>{" "}
-              em Saquarema
+              de Saquarema
             </h2>
             <p className="text-xl font-bold text-gray-700 md:text-gray-600 max-w-2xl mx-auto">
-              Descubra negócios locais, atrações e oportunidades no nosso guia
-              completo da cidade. Conheça os melhores{" "}
+              A vitrine digital de quem faz a economia local acontecer. Conheça os{" "}
               <span className="bg-gradient-to-r from-purple-600 to-orange-500 bg-clip-text text-transparent">
                 MEIdeSaquá!
               </span>{" "}

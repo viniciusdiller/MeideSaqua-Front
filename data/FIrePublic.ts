@@ -2,7 +2,7 @@
 import { initializeApp } from "firebase/app";
 import { getFirestore } from "firebase/firestore";
 
-// 🔐 Pegue essas infos no Firebase Console > Configurações do Projeto > Seu app > SDK
+// Pegue essas infos no Firebase Console > Configurações do Projeto > Seu app > SDK
 
 const firebaseConfig = {
   apiKey: "Insira",

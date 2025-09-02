@@ -1,1 +1,1 @@
-//firebase.ts
+//antes usavamos firebase, tivemos que mudar para mysql

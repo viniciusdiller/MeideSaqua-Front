@@ -1,3 +1,4 @@
+//MEI/CATEGORIA
 "use client";
 
 import Link from "next/link";
@@ -10,40 +11,8 @@ import { TiltImage } from "@/components/ui/TiltImage";
 import "leaflet/dist/leaflet.css";
 import { categories } from "@/app/page";
 import Image from "next/image";
+import { getEstablishmentById, getReviewsByEstablishment } from "@/lib/api";
 
-// --- DADOS DE EXEMPLO (SUBSTITUA PELA SUA BUSCA NO FIREBASE) ---
-const mei = {
-  name: "Art's & Crochê",
-  rating: 4.7,
-  logo: "/logo2sq.png",
-  reviewsCount: 23,
-  description:
-    "Art's & Crochê é um espaço dedicado à arte do crochê, onde cada peça é criada com carinho, criatividade e atenção aos detalhes. Mais do que um simples ateliê, é um lugar que valoriza o trabalho manual e transforma linhas em arte, oferecendo produtos exclusivos que carregam histórias, afeto e autenticidade, feitos especialmente para quem aprecia o verdadeiro valor do artesanal.",
-  description_diferencial:
-    "1.✨ Peças exclusivas feitas à mão, com amor, autenticidade e dedicação em cada detalhe.\n" +
-    "2.🛍️ Produtos únicos, artesanais e cheios de significado. Mais que peças, histórias feitas à mão.\n" +
-    "3.💖 Artesanato exclusivo: cada peça é feita à mão com carinho, originalidade e qualidade incomparável.",
-  instagram: "https://www.instagram.com/vinicius.diller/?hl=en",
-  category: "telefones-uteis",
-  images: ["/placeholder.jpg", "/gatinho.jpg", "/placeholder.jpg"],
-  address: "Rua das Artes, 123 - Centro, Saquarema - RJ",
-  phone: "(22) 97794-8763",
-  website: "https://github.com/",
-  coordinates: {
-    lat: -22.921,
-    lng: -42.509,
-  },
-  reviews: [
-    { id: 1, user: "Maria S.", rating: 5, comment: "Peças maravilhosas..." },
-    {
-      id: 2,
-      user: "João P.",
-      rating: 4,
-      comment: "O atendimento foi ótimo...",
-    },
-  ],
-};
-// --- FIM DOS DADOS DE EXEMPLO ---
 
 // Configuração dos ícones do mapa
 const defaultIcon = new L.Icon({
@@ -97,30 +66,78 @@ const StarRating = ({ rating }: { rating: number }) => {
 export default function MeiDetailPage({
   params,
 }: {
-  params: { slug: string };
+  params: { slug: string; id: string }; // O 'slug' aqui é o ID do MEI
 }) {
-  // Estado para garantir que o mapa só renderize no lado do cliente
+  // 2. Estados para armazenar os dados da API
+  const [meiDetails, setMeiDetails] = useState<any>(null);
+  const [reviews, setReviews] = useState<any[]>([]);
+  const [rating, setRating] = useState(0);
+  const [isLoading, setIsLoading] = useState(true);
   const [isClient, setIsClient] = useState(false);
 
+  // 3. Busca os dados na API quando o componente carregar
   useEffect(() => {
-    setIsClient(true);
-  }, []);
+    const fetchMeiData = async () => {
+      // O 'id' vem do slug da URL
+      const meiId = params.id;
+      if (!meiId) return;
 
-  // TODO: Adicione aqui sua lógica para buscar os dados do MEI do Firebase
+      try {
+        setIsLoading(true);
+        const detailsData = await getEstablishmentById(meiId);
+        const reviewsData = await getReviewsByEstablishment(meiId);
+        
+        setMeiDetails(detailsData);
+        setReviews(reviewsData);
+        setRating(detailsData.media || 0); // Ajuste: usa 'media' do detailsData ou 0
+      } catch (error) {
+        console.error("Falha ao buscar dados do MEI:", error);
+        setMeiDetails(null); // Define como nulo em caso de erro
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchMeiData();
+    setIsClient(true);
+  }, [params.id]);
+
+  // 4. Exibe o estado de carregamento
+  if (isLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gray-100">
+        <p>Carregando...</p>
+      </div>
+    );
+  }
+
+  // 5. Exibe se o MEI não for encontrado
+  if (!meiDetails) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gray-100">
+        <p>Estabelecimento não encontrado.</p>
+        <Link href="/">Voltar</Link>
+      </div>
+    );
+  }
+
+  // Encontra o 'id' da categoria para o link de "Voltar"
+  const categoryInfo = categories.find(cat => cat.title === meiDetails.categoria);
+  const categorySlug = categoryInfo ? categoryInfo.id : '';
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-purple-400 to-orange-400">
       <header className="sticky top-0 bg-white shadow-sm z-10">
         <div className="max-w-4xl mx-auto px-4 py-3 flex items-center">
           <Link
-            href={`/categoria/${mei.category}`}
+            href={`/categoria/${categorySlug}`}
             className="flex items-center gap-2 text-gray-600 hover:text-purple-600 transition-colors"
           >
             <ArrowLeft className="w-5 h-5" />
             Voltar
           </Link>
           <h1 className="flex-1 text-center text-lg font-semibold text-gray-800 truncate pr-12">
-            {mei.name}
+            {meiDetails.nomeFantasia}
           </h1>
         </div>
       </header>
@@ -128,64 +145,45 @@ export default function MeiDetailPage({
       <main className="w-full p-4 md:p-6 ">
         <div className="space-y-8">
           <section className="bg-white p-6 rounded-3xl shadow-md md:mx-auto md:max-w-[85%]">
-            {/* Grid principal com 3 colunas */}
-
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-              {/* Coluna 2: Nome, Avaliações e Descrição (ocupando 2 colunas) */}
               <div className="md:col-span-2 flex flex-col">
-                {/* Container para Nome e Avaliações */}
                 <div className="mb-4 text-center">
                   <h2 className="text-3xl font-bold text-gray-900">
-                    {mei.name}
+                    {meiDetails.nomeFantasia}
                   </h2>
                   <div className="flex items-center gap-2 mt-2 px-auto justify-center">
-                    <StarRating rating={mei.rating} />
+                    <StarRating rating={rating} />
                     <span className="text-gray-600 font-semibold">
-                      {mei.rating.toFixed(1)}
+                      {rating.toFixed(1)}
                     </span>
                     <span className="text-gray-500">
-                      ({mei.reviewsCount} avaliações)
+                      ({reviews.length} avaliações)
                     </span>
                   </div>
                 </div>
 
-                {/* Container para a Descrição */}
                 <div className="milecem:pl-10 milecem:mt-6 flex flex-col h-full ">
                   <div>
                     <p className="text-gray-700 leading-relaxed">
-                      {mei.description}
+                      {meiDetails.descricao}
                     </p>
                   </div>
-                  <div>
-                    <p className="text-gray-700 leading-relaxed mt-6">
-                      <strong>
-                        {mei.description_diferencial
-                          .split("\n")
-                          .map((line, idx) => (
-                            <React.Fragment key={idx}>
-                              {line}
-                              <br />
-                            </React.Fragment>
-                          ))}
-                      </strong>
-                    </p>
-                  </div>
+                  {/* Se houver um campo de diferencial, pode ser adicionado aqui */}
                   <div className="hidden quinhentos:mt-6 quinhentos:flex items-center md:mt-10 ">
                     <span>Instagram:</span>
                     <a
-                      href={mei.instagram}
+                      href={meiDetails.instagram}
                       target="_blank"
                       rel="noopener noreferrer"
                       className="text-gray-600 hover:text-pink-600 transition-colors ml-1"
                     >
                       <Instagram size={26} strokeWidth={2} />
                     </a>
-
                     <span className="ml-2.5 milecem:ml-5 desktop:ml-10">
                       Website:
                     </span>
                     <a
-                      href={mei.website}
+                      href={meiDetails.website}
                       target="_blank"
                       rel="noopener noreferrer"
                       className="text-gray-600 hover:text-blue-600 transition-colors ml-1"
@@ -196,22 +194,21 @@ export default function MeiDetailPage({
                 </div>
               </div>
 
-            {/* Logo */}
               <div className="flex items-center justify-center md:col-span-1">
                 <div className="w-auto h-auto rounded-lg">
                   <TiltImage
-                    src={mei.logo}
-                    alt={`Logo de ${mei.name}`}
-                    width={500} 
-                    height={500} 
-                    className="w-full h-full object-contain" 
+                    src={meiDetails.logoUrl || "/placeholder-logo.png"} // Usa um placeholder se não houver logo
+                    alt={`Logo de ${meiDetails.nomeFantasia}`}
+                    width={500}
+                    height={500}
+                    className="w-full h-full object-contain"
                   />
                 </div>
               </div>
               <div className="mt-6 flex items-center quinhentos:hidden">
                 <span>Instagram:</span>
                 <a
-                  href={mei.instagram}
+                  href={meiDetails.instagram}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="text-gray-600 hover:text-pink-600 transition-colors ml-1"
@@ -221,7 +218,7 @@ export default function MeiDetailPage({
 
                 <span className="ml-2.5 milecem:ml-5 desktop:ml-10">Site:</span>
                 <a
-                  href={mei.website}
+                  href={meiDetails.website}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="text-gray-600 hover:text-pink-600 transition-colors ml-1"
@@ -232,15 +229,14 @@ export default function MeiDetailPage({
             </div>
           </section>
 
-          {/* ===== SEÇÃO DO MAPA MOVIDA PARA CÁ ===== */}
           <section className="bg-white p-6 rounded-3xl shadow-md md:mx-auto md:max-w-[85%]">
             <h3 className="text-2xl font-bold text-gray-900 mb-4">
               Localização e Contato
             </h3>
             <div className="w-full h-80 bg-gray-200 rounded-3xl overflow-hidden mb-4 border">
-              {isClient && mei.coordinates ? (
+              {isClient && meiDetails.coordenadas ? (
                 <MapContainer
-                  center={[mei.coordinates.lat, mei.coordinates.lng]}
+                  center={[meiDetails.coordenadas.lat, meiDetails.coordenadas.lng]}
                   zoom={15}
                   style={{ height: "100%", width: "100%" }}
                   scrollWheelZoom={false}
@@ -250,10 +246,10 @@ export default function MeiDetailPage({
                     attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
                   />
                   <Marker
-                    position={[mei.coordinates.lat, mei.coordinates.lng]}
+                    position={[meiDetails.coordenadas.lat, meiDetails.coordenadas.lng]}
                     icon={defaultIcon}
                   >
-                    <Popup>{mei.name}</Popup>
+                    <Popup>{meiDetails.nomeFantasia}</Popup>
                   </Marker>
                 </MapContainer>
               ) : (
@@ -265,33 +261,36 @@ export default function MeiDetailPage({
             <div className="space-y-3 text-gray-700">
               <div className="flex items-start gap-3">
                 <MapPin className="w-5 h-5 mt-1 text-gray-500 flex-shrink-0" />
-                <span>{mei.address}</span>
+                <span>{meiDetails.endereco}</span>
               </div>
               <div className="flex items-center gap-3">
                 <Phone className="w-5 h-5 text-gray-500 flex-shrink-0" />
-                <span>{mei.phone}</span>
+                <span>{meiDetails.contatoEstabelecimento}</span>
               </div>
             </div>
           </section>
-          {/* ======================================= */}
 
           <section className="bg-white p-6 rounded-3xl shadow-md md:mx-auto md:max-w-[85%]">
             <h3 className="text-2xl font-bold text-gray-900 mb-6">
               Avaliações
             </h3>
             <div className="space-y-6">
-              {mei.reviews.map((review) => (
-                <div key={review.id} className="flex gap-4">
-                  <div className="w-12 h-12 bg-gray-200 rounded-full flex-shrink-0"></div>
-                  <div>
-                    <p className="font-semibold text-gray-800">{review.user}</p>
-                    <div className="flex items-center gap-1 my-1">
-                      <StarRating rating={review.rating} />
+              {reviews.length > 0 ? (
+                reviews.map((review) => (
+                  <div key={review.avaliacoesId} className="flex gap-4">
+                    <div className="w-12 h-12 bg-gray-200 rounded-full flex-shrink-0"></div>
+                    <div>
+                      <p className="font-semibold text-gray-800">{review.Usuario}</p>
+                      <div className="flex items-center gap-1 my-1">
+                        <StarRating rating={review.nota} />
+                      </div>
+                      <p className="text-gray-600">{review.comentario}</p>
                     </div>
-                    <p className="text-gray-600">{review.comment}</p>
                   </div>
-                </div>
-              ))}
+                ))
+              ) : (
+                <p className="text-gray-500">Ainda não há avaliações para este local.</p>
+              )}
             </div>
           </section>
         </div>
