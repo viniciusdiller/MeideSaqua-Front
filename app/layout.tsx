@@ -3,7 +3,7 @@ import type { Metadata } from "next";
 import { Poppins } from "next/font/google"; 
 import "./globals.css";
 import { Navbar } from "./navbar";
-
+import { AuthProvider } from "@/context/AuthContext"; 
 
 const poppins = Poppins({
   subsets: ["latin"],
@@ -42,8 +42,11 @@ export default function RootLayout({
   return (
     <html lang="pt-BR">
       <body className={`${poppins.variable} bg-white`}>
-        <Navbar /> 
-        <main>{children}</main>
+        {/* conteúdo principal com o AuthProvider */}
+        <AuthProvider>
+          <Navbar /> 
+          <main>{children}</main>
+        </AuthProvider>
       </body>
     </html>
   );
