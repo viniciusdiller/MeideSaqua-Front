@@ -162,13 +162,24 @@ export function Navbar() {
             <div className="h-9 w-24 bg-gray-200 rounded-full animate-pulse" />
           ) : user ? (
             <div className="flex items-center gap-3">
-              <Link
-                href="/perfil"
-                className="flex items-center gap-2 text-gray-700 hover:text-purple-500 transition-colors"
-              >
+             <Link
+              href="/perfil"
+              className="flex items-center gap-3 text-gray-700 hover:text-purple-500 transition-colors"
+            >
+              {/*  AVATAR  */}
+              {user.chosenAvatar ? (
+                <Image
+                  src={`/avatars/${user.chosenAvatar}`}
+                  alt="Avatar do usuário"
+                  width={32}
+                  height={32}
+                  className="rounded-full object-cover border-2 border-purple-200"
+                />
+              ) : (
                 <UserIcon size={22} />
-                <span className="font-medium">{user.username}</span>
-              </Link>
+              )}
+              <span className="font-medium">{user.username}</span>
+            </Link>
               <button
                 onClick={logout}
                 className="bg-red-500 text-white px-4 py-2 rounded-full text-sm font-semibold hover:bg-red-600 transition-colors"
@@ -236,7 +247,19 @@ export function Navbar() {
                   className="flex items-center gap-3 text-gray-700 hover:text-purple-500 transition-colors font-medium"
                   onClick={() => setIsOpen(false)}
                 >
-                  <UserIcon size={20} /> Meu Perfil ({user.username})
+                  {/* LÓGICA DO AVATAR AQUI */}
+                  {user.chosenAvatar ? (
+                    <Image
+                      src={`/avatars/${user.chosenAvatar}`}
+                      alt="Avatar do usuário"
+                      width={24}
+                      height={24}
+                      className="rounded-full object-cover"
+                    />
+                  ) : (
+                    <UserIcon size={20} />
+                  )}
+                  Meu Perfil ({user.username})
                 </Link>
                 <button
                   onClick={() => {

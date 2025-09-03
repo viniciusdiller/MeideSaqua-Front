@@ -68,12 +68,30 @@ export const updateUserProfile = (data: any, token: string) => fetchApi('/api/us
     body: JSON.stringify(data),
 });
 
+
+export const changePassword = (data: any, token: string) => fetchApi('/api/users/password', { // <- Sua última função atual
+    method: 'PUT',
+    headers: {
+      'Authorization': `Bearer ${token}`
+    },
+    body: JSON.stringify(data),
+});
+
+// NOVA FUNÇÃO PARA ATUALIZAR O AVATAR
+export const updateUserAvatar = (avatar: string, token: string) => fetchApi('/api/users/avatar', {
+    method: 'PUT',
+    headers: {
+      'Authorization': `Bearer ${token}`
+    },
+    body: JSON.stringify({ avatar }), // O backend espera {"avatar": "nome-do-arquivo.png"}
+});
+
 /**
  * Altera a senha do usuário logado.
  *  O endpoint '/api/users/change-password' é uma possibilidade, precisa ser criado.
  * Requer um token de autenticação.
  */
-export const changePassword = (data: any, token: string) => fetchApi('/api/users/change-password', {
+export const changePasswordLogged = (data: any, token: string) => fetchApi('/api/users/change-password', {
     method: 'PUT',
     headers: {
       'Authorization': `Bearer ${token}`

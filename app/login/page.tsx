@@ -46,7 +46,7 @@ export default function LoginPage() {
 
     const loginData = {
       username: email,
-      senha: password,
+      password: password,
     };
 
     try {
