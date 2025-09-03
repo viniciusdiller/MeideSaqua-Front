@@ -20,6 +20,7 @@ import Image from "next/image";
 import { registerUser } from "@/lib/api";
 import { AnimatePresence } from "framer-motion";
 import { Notification, NotificationType } from "@/components/ui/notification";
+import { ArrowLeft } from "lucide-react";
 
 export default function Cadastro() {
   const [email, setEmail] = useState("");
@@ -98,6 +99,15 @@ export default function Cadastro() {
                 height={150}
                 className="mx-auto"
               />
+            </Link>
+          </div>
+          <div className="mb-4">
+            <Link
+              href="/login"
+              className="flex items-center gap-2 text-gray-600 hover:text-purple-600 transition-colors"
+            >
+              <ArrowLeft className="w-5 h-5" />
+              <span>Voltar</span>
             </Link>
           </div>
           <Card

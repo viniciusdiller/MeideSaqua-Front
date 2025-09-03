@@ -19,13 +19,14 @@ import Image from "next/image";
 import { loginUser } from "@/lib/api";
 import { AnimatePresence } from "framer-motion";
 import { Notification, NotificationType } from "@/components/ui/notification";
-import { useAuth } from "@/context/AuthContext"; 
+import { useAuth } from "@/context/AuthContext";
+import { ArrowLeft } from "lucide-react";
 
 export default function LoginPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [notifications, setNotifications] = useState<NotificationType[]>([]);
-  const { login } = useAuth(); 
+  const { login } = useAuth();
 
   const addNotification = (text: string, type: "success" | "error") => {
     const newNotif: NotificationType = {
@@ -50,7 +51,7 @@ export default function LoginPage() {
 
     try {
       const userData = await loginUser(loginData);
-      
+
       addNotification("Login bem-sucedido! Redirecionando...", "success");
 
       // Usa a função do contexto para gerenciar o estado do usuário e o localStorage
@@ -59,7 +60,6 @@ export default function LoginPage() {
       setTimeout(() => {
         window.location.href = "/";
       }, 2000);
-
     } catch (err) {
       addNotification("Email ou senha inválidos. Tente novamente.", "error");
       console.error(err);
@@ -87,6 +87,15 @@ export default function LoginPage() {
                 height={150}
                 className="mx-auto"
               />
+            </Link>
+          </div>
+          <div className="mb-4">
+            <Link
+              href="/"
+              className="flex items-center gap-2 text-gray-600 hover:text-purple-600 transition-colors"
+            >
+              <ArrowLeft className="w-5 h-5" />
+              <span>Voltar</span>
             </Link>
           </div>
           <Card
