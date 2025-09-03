@@ -4,7 +4,7 @@ import { MotionConfig, motion } from "framer-motion";
 import Image from "next/image";
 import { useState } from "react";
 import Link from "next/link";
-import { Instagram, Globe, LogIn } from "lucide-react"; 
+import { Instagram, Globe, LogIn } from "lucide-react";
 
 const VARIANTS = {
   top: {
@@ -122,16 +122,16 @@ export function Navbar() {
               Sobre o Projeto
             </Link>
             <Link
-              href="/contato"
-              className="text-gray-700 hover:text-purple-500 transition-colors"
-            >
-              Fale Conosco
-            </Link>
-            <Link
               href="/cadastro-mei"
               className="text-gray-700 hover:text-purple-500 transition-colors"
             >
               Cadastro MEI
+            </Link>
+            <Link
+              href="/contato"
+              className="text-gray-700 hover:text-purple-500 transition-colors"
+            >
+              Fale Conosco
             </Link>
           </nav>
         </div>
@@ -205,18 +205,18 @@ export function Navbar() {
               Sobre o Projeto
             </Link>
             <Link
-              href="/contato"
-              className="text-gray-700 hover:text-purple-500 transition-colors font-medium"
-              onClick={() => setIsOpen(false)}
-            >
-              Fale Conosco
-            </Link>
-            <Link
               href="/cadastro-mei"
               className="text-gray-700 hover:text-purple-500 transition-colors font-medium"
               onClick={() => setIsOpen(false)}
             >
               Cadastro MEI
+            </Link>
+            <Link
+              href="/contato"
+              className="text-gray-700 hover:text-purple-500 transition-colors font-medium"
+              onClick={() => setIsOpen(false)}
+            >
+              Fale Conosco
             </Link>
 
             <hr className="border-gray-200" />

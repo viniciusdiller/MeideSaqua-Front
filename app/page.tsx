@@ -57,11 +57,6 @@ const categories = [
     backgroundimg: "/categorias/Serviços Automotivos.jpg",
   },
   {
-    id: "lazer-e-esporte",
-    title: "Lazer e Esporte",
-    backgroundimg: "/gatinho.jpg",
-  },
-  {
     id: "tecnologia",
     title: "Tecnologia e Serviços Digitais",
     backgroundimg: "",
@@ -80,11 +75,14 @@ export default function HomePage() {
 
   // Animação progressiva dos cards
   useEffect(() => {
+    // Adicionei +1 para garantir que o card estático também seja revelado
+    const totalItems = categories.length + 1;
     const timer = setInterval(() => {
       setVisibleCards((prev) => {
-        if (prev < categories.length) {
+        if (prev < totalItems) {
           return prev + 1;
         }
+        clearInterval(timer);
         return prev;
       });
     }, 150);
@@ -108,6 +106,11 @@ export default function HomePage() {
     window.addEventListener("scroll", handleScroll);
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
+
+  // 1. Criamos a variável com as categorias filtradas ANTES do return.
+  const filteredCategories = categories.filter((category) =>
+    category.title.toLowerCase().includes(searchTerm.toLowerCase())
+  );
 
   return (
     <>
@@ -143,7 +146,7 @@ export default function HomePage() {
             transition={{ duration: 0.8 }}
             className="text-center mb-10"
           >
-             <h2 className="text-4xl md:text-6xl font-bold text-gray-800 mb-6">
+            <h2 className="text-4xl md:text-6xl font-bold text-gray-800 mb-6">
               Vitrine de{" "}
               <span className="bg-gradient-to-r from-purple-600 to-orange-500 bg-clip-text text-transparent">
                 MEIs
@@ -151,7 +154,8 @@ export default function HomePage() {
               de Saquarema
             </h2>
             <p className="text-xl font-bold text-gray-700 md:text-gray-600 max-w-2xl mx-auto">
-              A vitrine digital de quem faz a economia local acontecer. Conheça os{" "}
+              A vitrine digital de quem faz a economia local acontecer. Conheça
+              os{" "}
               <span className="bg-gradient-to-r from-purple-600 to-orange-500 bg-clip-text text-transparent">
                 MEIdeSaquá!
               </span>{" "}
@@ -180,62 +184,98 @@ export default function HomePage() {
           </motion.div>
 
           {/* Categories Grid */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5 max-w-7xl mx-auto black blur-50">
-            {categories
-              .filter((category) =>
-                category.title.toLowerCase().includes(searchTerm.toLowerCase())
-              )
-              .map((category, index) => {
-                const backgroundimg = category.backgroundimg;
-                return (
-                  <motion.div
-                    key={category.id}
-                    initial={{ opacity: 0, y: 50, scale: 0.9 }}
-                    animate={
-                      index < visibleCards
-                        ? { opacity: 1, y: 0, scale: 1 }
-                        : { opacity: 0, y: 50, scale: 0.9 }
-                    }
-                    transition={{
-                      duration: 0.5,
-                      delay: index * 0.1,
-                      type: "spring",
-                      stiffness: 100,
-                    }}
-                  >
-                    <Link href={`/categoria/${category.id}`}>
-                      <div className="group relative overflow-hidden rounded-2xl bg-white shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1 hover:scale-[1.02] ">
-                        <div className="relative w-full rounded-md overflow-hidden h-40  flex justify-center items-center">
-                          {backgroundimg && (
-                            <Image
-                              src={backgroundimg}
-                              alt={category.title}
-                              fill
-                              className="object-cover"
-                            />
-                          )}
-
-                          {/* Overlay */}
-                          <div
-                            className={`absolute inset-0 bg-black 
-              backdrop-blur-md 
-              opacity-30 
-              group-hover:opacity-60 transition-opacity duration-300 `}
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5 max-w-7xl mx-auto">
+            {/* O .map() agora usa a variável 'filteredCategories' */}
+            {filteredCategories.map((category, index) => {
+              const backgroundimg = category.backgroundimg;
+              return (
+                <motion.div
+                  key={category.id}
+                  initial={{ opacity: 0, y: 50, scale: 0.9 }}
+                  animate={
+                    index < visibleCards
+                      ? { opacity: 1, y: 0, scale: 1 }
+                      : { opacity: 0, y: 50, scale: 0.9 }
+                  }
+                  transition={{
+                    duration: 0.5,
+                    delay: index * 0.1,
+                    type: "spring",
+                    stiffness: 100,
+                  }}
+                >
+                  <Link href={`/categoria/${category.id}`}>
+                    <div className="group relative overflow-hidden rounded-2xl bg-white shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1 hover:scale-[1.02] ">
+                      <div className="relative w-full rounded-md overflow-hidden h-40  flex justify-center items-center">
+                        {backgroundimg && (
+                          <Image
+                            src={backgroundimg}
+                            alt={category.title}
+                            fill
+                            className="object-cover"
                           />
+                        )}
 
-                          <div className="relative p-6">
-                            <h3 className=" font-poppins text-2xl font-bold text-white mb-auto group-hover: text-shadow-lg">
-                              {category.title}
-                            </h3>
-                          </div>
+                        {/* Overlay */}
+                        <div
+                          className={`absolute inset-0 bg-black 
+                                         backdrop-blur-md 
+                                         opacity-30 
+                                         group-hover:opacity-60 transition-opacity duration-300 `}
+                        />
+
+                        <div className="relative p-6">
+                          <h3 className=" font-poppins text-2xl font-bold text-white mb-auto group-hover: text-shadow-lg">
+                            {category.title}
+                          </h3>
                         </div>
-
-                        <div className="absolute bottom-0 left-0 right-0 h-1 bg-gradient-to-r from-transparent via-purple-500 to-transparent group-hover:via-orange-500 transition-all duration-300" />
                       </div>
-                    </Link>
-                  </motion.div>
-                );
-              })}
+
+                      <div className="absolute bottom-0 left-0 right-0 h-1 bg-gradient-to-r from-transparent via-purple-500 to-transparent group-hover:via-orange-500 transition-all duration-300" />
+                    </div>
+                  </Link>
+                </motion.div>
+              );
+            })}
+
+            {/* 2. CARD "ESPAÇO MEI" MOVIDO PARA FORA DO .map() E COM ANIMAÇÃO DINÂMICA */}
+            <motion.div
+              key="espaco-mei"
+              initial={{ opacity: 0, y: 50, scale: 0.9 }}
+              animate={
+                filteredCategories.length < visibleCards
+                  ? { opacity: 1, y: 0, scale: 1 }
+                  : { opacity: 0, y: 50, scale: 0.9 }
+              }
+              transition={{
+                duration: 0.5,
+                delay: filteredCategories.length * 0.1,
+                type: "spring",
+                stiffness: 100,
+              }}
+            >
+              <Link href="/espaco-mei">
+                <div className="group relative overflow-hidden rounded-2xl bg-white shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1 hover:scale-[1.02]">
+                  <div className="relative w-full rounded-md overflow-hidden h-40 flex justify-center items-center">
+                    <Image
+                      src="/gatooculos.jpg"
+                      alt="Espaço Mei"
+                      fill
+                      className="object-cover"
+                    />
+                    <div
+                      className={`absolute inset-0 bg-black backdrop-blur-md opacity-30 group-hover:opacity-60 transition-opacity duration-300`}
+                    />
+                    <div className="relative p-6">
+                      <h3 className="font-poppins text-2xl font-bold text-white mb-auto group-hover:text-shadow-lg">
+                        Espaço MEI
+                      </h3>
+                    </div>
+                  </div>
+                  <div className="absolute bottom-0 left-0 right-0 h-1 bg-gradient-to-r from-transparent via-purple-500 to-transparent group-hover:via-orange-500 transition-all duration-300" />
+                </div>
+              </Link>
+            </motion.div>
           </div>
         </section>
         {/* Botão "Voltar ao topo" */}
@@ -272,13 +312,10 @@ export default function HomePage() {
               </h3>
               <p className="text-gray-600 mb-4">
                 {" "}
-                {/* mb-4 aqui para espaçar o parágrafo de descrição */}A vitrine
-                digital que valoriza o empreendedor local e fortalece a economia
-                de Saquarema
+                A vitrine digital que valoriza o empreendedor local e fortalece
+                a economia de Saquarema
               </p>
-              {/* Linha horizontal sutil */}
               <hr className="w-16 mx-auto border-gray-300 mb-4" />{" "}
-              {/*  uma linha divisória curta e centralizada */}
               <p className="text-gray-500 text-sm">
                 © Desenvolvido pela{" "}
                 <span className="font-medium text-gray-600">
