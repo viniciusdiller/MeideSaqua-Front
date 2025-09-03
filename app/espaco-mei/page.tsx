@@ -1,4 +1,4 @@
-//SOBRE
+// EPAÇO MEI
 import Link from "next/link";
 
 export default function SobrePage() {
