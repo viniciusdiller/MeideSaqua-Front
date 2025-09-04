@@ -70,7 +70,7 @@ export default function SobrePage() {
               Cursos e Capacitações disponíveis:
             </span>
           </h2>
-          <div className="grid grid-cols-1 sm:grid-cols-4 lg:grid-cols-4 gap-8">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
             {/* Exemplo de Item Clicável */}
             <Link
               href="https://sebrae.com.br/sites/PortalSebrae/cursosonline/como-agir-de-maneira-empreendedora,2ac0b8a6a28bb610VgnVCM1000004c00210aRCRD"

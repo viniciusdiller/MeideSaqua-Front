@@ -388,7 +388,7 @@ export default function CategoryPage({ params }: PageProps) {
             <div className=" max-h-[50vh] overflow-y-auto px-4 lg:grid grid-cols-2 gap-2">
               {filteredLocations.map((location: any, index: number) => (
                 <Link
-                  href={`${location.nomeFantasia}/MEI/`}
+                  href={`${location.estabelecimentoId}/MEI/`}
                   key={location.estabelecimentoId}
                 >
                   <motion.div
@@ -491,10 +491,10 @@ export default function CategoryPage({ params }: PageProps) {
                 slides={[
                   { imageUrl: "/gatinho.jpg", label: "Ver Gatinho mau" },
                   {
-                    imageUrl: "/Alimentação.jpeg",
+                    imageUrl: "/categorias/Alimentação.jpeg",
                     label: "Comer até não aguentar",
                   },
-                  { imageUrl: "/Moda.jpeg", label: "Ver roupas" },
+                  { imageUrl: "/categorias/Moda.jpeg", label: "Ver roupas" },
                 ]}
               />
             </div>

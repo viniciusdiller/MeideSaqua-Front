@@ -63,23 +63,19 @@ const StarRating = ({ rating }: { rating: number }) => {
   );
 };
 
-export default function MeiDetailPage({
-  params,
-}: {
-  params: { slug: string; id: string }; // O 'slug' aqui é o ID do MEI
-}) {
-  // 2. Estados para armazenar os dados da API
+export default function MeiDetailPage({ params }: { params: { slug: string }; }) {
+  //  Estados para armazenar os dados da API
   const [meiDetails, setMeiDetails] = useState<any>(null);
   const [reviews, setReviews] = useState<any[]>([]);
   const [rating, setRating] = useState(0);
   const [isLoading, setIsLoading] = useState(true);
   const [isClient, setIsClient] = useState(false);
 
-  // 3. Busca os dados na API quando o componente carregar
+
   useEffect(() => {
     const fetchMeiData = async () => {
       // O 'id' vem do slug da URL
-      const meiId = params.id;
+      const meiId = params.slug;
       if (!meiId) return;
 
       try {
@@ -100,9 +96,8 @@ export default function MeiDetailPage({
 
     fetchMeiData();
     setIsClient(true);
-  }, [params.id]);
+  }, [params.slug]);
 
-  // 4. Exibe o estado de carregamento
   if (isLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gray-100">
@@ -111,7 +106,6 @@ export default function MeiDetailPage({
     );
   }
 
-  // 5. Exibe se o MEI não for encontrado
   if (!meiDetails) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gray-100">
