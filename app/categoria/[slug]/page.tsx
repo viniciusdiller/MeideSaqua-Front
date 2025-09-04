@@ -10,7 +10,7 @@ import { categories } from "../../page";
 import L from "leaflet";
 import ModernCarousel from "@/components/ModernCarousel";
 import { useUserLocation } from "../../../components/userlocation";
-import { getAllEstablishments } from "@/lib/api"; // função da API
+import { getAllEstablishments } from "@/lib/api";
 
 const userIcon = new L.Icon({
   iconUrl: "/person-icon.png",
@@ -61,18 +61,6 @@ interface PageProps {
   };
 }
 
-function MapInstanceHandler({
-  onMapReady,
-}: {
-  onMapReady: (mapInstance: any) => void;
-}) {
-  const map = useMap();
-  useEffect(() => {
-    onMapReady(map);
-  }, [map, onMapReady]);
-  return null;
-}
-
 function getDistanceFromLatLonInKm(
   lat1: number,
   lon1: number,
@@ -112,28 +100,20 @@ export default function CategoryPage({ params }: PageProps) {
     return () => clearTimeout(timer);
   }, []);
 
-  // Busca os dados da API
   useEffect(() => {
     const fetchLocations = async () => {
       setIsLoading(true);
       try {
-        // Encontra o título da categoria com base no slug da URL
         const categoryInfo = categories.find((cat) => cat.id === params.slug);
         const categoryTitle = categoryInfo ? categoryInfo.title : "";
-
         if (!categoryTitle) {
           setLocations([]);
           return;
         }
-
-        // Chama a API para buscar todos os estabelecimentos
         const allEstablishments = await getAllEstablishments();
-
-        // Filtra os estabelecimentos para manter apenas os da categoria atual
         const filteredData = allEstablishments.filter(
           (loc: any) => loc.categoria === categoryTitle
         );
-
         setLocations(filteredData);
       } catch (error) {
         console.error("Erro ao buscar estabelecimentos da API:", error);
@@ -142,31 +122,25 @@ export default function CategoryPage({ params }: PageProps) {
         setIsLoading(false);
       }
     };
-
     fetchLocations();
   }, [params.slug]);
 
-  // Lógica para obter geolocalização e calcular locais próximos
   useEffect(() => {
     if (!locations || locations.length === 0) {
       setNearestLocations([]);
       return;
     }
-
     if (!("geolocation" in navigator)) {
       setGeoError("Geolocalização não é suportada pelo seu navegador.");
       setNearestLocations([]);
       return;
     }
-
     setGeoLoading(true);
     setGeoError(null);
-
     navigator.geolocation.getCurrentPosition(
       (position) => {
         const { latitude, longitude } = position.coords;
         setUserLocation({ lat: latitude, lng: longitude });
-
         const locationsWithDistance = locations
           .map((loc) => {
             if (loc.coordinates && loc.coordinates.lat && loc.coordinates.lng) {
@@ -182,7 +156,6 @@ export default function CategoryPage({ params }: PageProps) {
           })
           .filter((loc) => loc.distance !== Infinity)
           .sort((a, b) => a.distance - b.distance);
-
         setNearestLocations(locationsWithDistance.slice(0, 3));
         setGeoLoading(false);
       },
@@ -271,6 +244,7 @@ export default function CategoryPage({ params }: PageProps) {
       </header>
 
       <div className="container mx-auto px-4 py-8">
+        {/* Seção "Locais Próximos" (sem alterações) */}
         {geoLoading && (
           <p className="text-center text-gray-600 mb-6">
             Buscando sua localização...
@@ -293,7 +267,6 @@ export default function CategoryPage({ params }: PageProps) {
             >
               Explore os locais mais próximos de você
             </motion.h2>
-
             <motion.div
               initial="hidden"
               animate="visible"
@@ -364,7 +337,6 @@ export default function CategoryPage({ params }: PageProps) {
                 Locais Recomendados
               </motion.h2>
             </div>
-
             <div className="relative mb-6">
               <Search
                 className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none"
@@ -385,79 +357,71 @@ export default function CategoryPage({ params }: PageProps) {
               />
             </div>
 
-            <div className=" max-h-[50vh] overflow-y-auto px-4 lg:grid grid-cols-2 gap-2">
+            {/* --- ÁREA DAS ALTERAÇÕES --- */}
+            <div className="max-h-[50vh] overflow-y-auto px-2 space-y-4 lg:grid lg:grid-cols-2 lg:gap-4 lg:space-y-0">
               {filteredLocations.map((location: any, index: number) => (
                 <Link
                   href={`${location.estabelecimentoId}/MEI/`}
                   key={location.estabelecimentoId}
+                  className="block" // Garante que o Link ocupe o espaço do card
                 >
                   <motion.div
-                    key={location.estabelecimentoId}
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ delay: index * 0.05 }}
-                    className={`lg:max-w-100px bg-white rounded-xl max-h-[20vh] shadow-md p-6 cursor-pointer mb-4 transition-transform duration-300 hover:shadow-xl hover:scale-[1.02] ${
+                    className={`bg-white rounded-xl shadow-md p-4 cursor-pointer mb-4 transition-all duration-300 hover:shadow-xl hover:scale-[1.02] flex flex-col h-full ${
                       selectedLocation?.id === location.estabelecimentoId
                         ? "ring-2 ring-offset-2 ring-[#017DB9] shadow-lg"
                         : ""
                     }`}
                   >
-                    {location.imageUrl && (
-                      <img
-                        src={location.imageUrl}
-                        alt={location.nomeFantasia}
-                        className="w-full h-32 object-cover"
-                      />
-                    )}
-                    <div className="flex justify-between items-start mb-3">
-                      <h3 className="text-lg font-semibold text-gray-800">
+                    <div className="flex justify-between items-start mb-2">
+                      <h3 className="text-lg font-semibold text-gray-800 break-words pr-2">
                         {location.nomeFantasia}
                       </h3>
-                      <div className="flex items-center gap-2">
-                        {location.rating && (
-                          <div className="flex items-center gap-1">
-                            <span className="text-yellow-500">★</span>
-                            <span className="text-sm text-gray-600">
-                              {location.rating}
-                            </span>
-                          </div>
-                        )}
-                        {selectedLocation?.id ===
-                          location.estabelecimentoId && (
-                          <div className="w-2 h-2 bg-[#017DB9] rounded-full animate-pulse"></div>
-                        )}
-                      </div>
+                      {location.rating && (
+                        <div className="flex items-center gap-1 flex-shrink-0">
+                          <span className="text-yellow-500">★</span>
+                          <span className="text-sm text-gray-600">
+                            {location.rating}
+                          </span>
+                        </div>
+                      )}
                     </div>
 
-                    <p className="text-gray-600 mb-4">
+                    <p className="text-gray-600 mb-4 text-sm break-words">
                       {location.descricaoDiferencial}
                     </p>
 
-                    <div className="space-y-2 text-sm text-gray-500">
-                      <div className="flex items-center gap-2">
-                        <MapPin className="w-4 h-4" />
-                        {location.endereco}
+                    <div className="space-y-2 text-sm text-gray-500 mt-auto">
+                      <div className="flex items-start gap-2">
+                        <MapPin className="w-4 h-4 mt-1 flex-shrink-0" />
+                        <span className="break-words">{location.endereco}</span>
                       </div>
                       {location.horarioFuncionamento && (
-                        <div className="flex items-center gap-2">
-                          <Clock className="w-4 h-4" />
-                          {location.horarioFuncionamento}
+                        <div className="flex items-start gap-2">
+                          <Clock className="w-4 h-4 mt-1 flex-shrink-0" />
+                          <span className="break-words">
+                            {location.horarioFuncionamento}
+                          </span>
                         </div>
                       )}
                       {location.contatoEstabelecimento && (
-                        <div className="flex items-center gap-2">
-                          <Phone className="w-4 h-4" />
-                          {location.contatoEstabelecimento}
+                        <div className="flex items-start gap-2">
+                          <Phone className="w-4 h-4 mt-1 flex-shrink-0" />
+                          <span className="break-words">
+                            {location.contatoEstabelecimento}
+                          </span>
                         </div>
                       )}
                       {location.website && (
-                        <div className="flex items-center gap-2">
-                          <Globe className="w-4 h-4" />
+                        <div className="flex items-start gap-2">
+                          <Globe className="w-4 h-4 mt-1 flex-shrink-0" />
                           <a
                             href={location.website}
                             target="_blank"
                             rel="noopener noreferrer"
-                            className="text-blue-600 hover:text-blue-800"
+                            className="text-blue-600 hover:text-blue-800 break-all"
                             onClick={(e) => e.stopPropagation()}
                           >
                             Visitar site
@@ -505,6 +469,7 @@ export default function CategoryPage({ params }: PageProps) {
   );
 }
 
+// Dummy useMap function if not implemented elsewhere
 function useMap() {
-  throw new Error("Function not implemented.");
+  return null;
 }

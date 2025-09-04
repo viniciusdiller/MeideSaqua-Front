@@ -41,7 +41,6 @@ const Popup = dynamic(() => import("react-leaflet").then((mod) => mod.Popup), {
   ssr: false,
 });
 
-// Componente para renderizar as estrelas de avaliação
 const StarRating = ({ rating }: { rating: number }) => {
   const totalStars = 5;
   const fullStars = Math.floor(rating);
@@ -74,7 +73,7 @@ export default function MeiDetailPage({ params }: { params: { slug: string }; })
 
   useEffect(() => {
     const fetchMeiData = async () => {
-      // O 'id' vem do slug da URL
+
       const meiId = params.slug;
       if (!meiId) return;
 
@@ -85,10 +84,10 @@ export default function MeiDetailPage({ params }: { params: { slug: string }; })
         
         setMeiDetails(detailsData);
         setReviews(reviewsData);
-        setRating(detailsData.media || 0); // Ajuste: usa 'media' do detailsData ou 0
+        setRating(detailsData.media || 0); 
       } catch (error) {
         console.error("Falha ao buscar dados do MEI:", error);
-        setMeiDetails(null); // Define como nulo em caso de erro
+        setMeiDetails(null);
       } finally {
         setIsLoading(false);
       }
@@ -115,7 +114,6 @@ export default function MeiDetailPage({ params }: { params: { slug: string }; })
     );
   }
 
-  // Encontra o 'id' da categoria para o link de "Voltar"
   const categoryInfo = categories.find(cat => cat.title === meiDetails.categoria);
   const categorySlug = categoryInfo ? categoryInfo.id : '';
 

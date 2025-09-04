@@ -74,9 +74,7 @@ export default function HomePage() {
   const [searchTerm, setSearchTerm] = useState("");
   const [showScrollTop, setShowScrollTop] = useState(false);
 
-  // Animação progressiva dos cards
   useEffect(() => {
-    // Adicionei +1 para garantir que o card estático também seja revelado
     const totalItems = categories.length + 1;
     const timer = setInterval(() => {
       setVisibleCards((prev) => {
@@ -87,39 +85,39 @@ export default function HomePage() {
         return prev;
       });
     }, 150);
-
     return () => clearInterval(timer);
   }, []);
 
-  // Verificar se chegou ao fim da página
   useEffect(() => {
     const handleScroll = () => {
       const scrollPosition = window.innerHeight + window.scrollY;
       const bottomPosition = document.body.offsetHeight;
-
       if (scrollPosition >= bottomPosition - 100) {
         setShowScrollTop(true);
       } else {
         setShowScrollTop(false);
       }
     };
-
     window.addEventListener("scroll", handleScroll);
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
-  // 1. Criamos a variável com as categorias filtradas ANTES do return.
+  // 1. O filtro de categorias continua o mesmo, sem o "Espaço MEI".
   const filteredCategories = categories.filter((category) =>
     category.title.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
+  // --- ALTERAÇÃO PRINCIPAL ---
+  // 2. Criamos uma variável para controlar a visibilidade do card "Espaço MEI".
+  // Ele será visível se a busca estiver vazia OU se o termo de busca for encontrado em "Espaço MEI".
+  const showEspacoMei =
+    searchTerm.trim() === "" ||
+    "espaço mei".toLowerCase().includes(searchTerm.toLowerCase());
+
   return (
     <>
       <div className="min-h-screen bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-gray-100 to-white pt-8">
-        {/* Header */}
-
-        {/* imagem como banner com efeito fade na parte inferior */}
-
+        {/* Header e Hero Section (sem alterações) */}
         <Image
           src="/logo2sq.png"
           alt="Logo Prefeitura de Saquarema"
@@ -127,10 +125,9 @@ export default function HomePage() {
           height={898}
           className="hidden md:hidden mx-auto h-20 w-auto mb-5"
         />
-
         <Link href="/" target="about:blank">
           <Image
-            src="/LogoMeiDeSaqua.png"
+            src="/LogoMeideSaqua.png"
             alt="Logo MeideSaqua"
             width={2660}
             height={898}
@@ -138,8 +135,6 @@ export default function HomePage() {
           />
         </Link>
         <ImageCarousel />
-
-        {/* Hero Section */}
         <section className="container mx-auto px-4 py-8 md:py-8 relative z-10 -mt-[1px] md:-mt-[1px]">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
@@ -186,100 +181,95 @@ export default function HomePage() {
 
           {/* Categories Grid */}
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5 max-w-7xl mx-auto">
-            {/* O .map() agora usa a variável 'filteredCategories' */}
-            {filteredCategories.map((category, index) => {
-              const backgroundimg = category.backgroundimg;
-              return (
-                <motion.div
-                  key={category.id}
-                  initial={{ opacity: 0, y: 50, scale: 0.9 }}
-                  animate={
-                    index < visibleCards
-                      ? { opacity: 1, y: 0, scale: 1 }
-                      : { opacity: 0, y: 50, scale: 0.9 }
-                  }
-                  transition={{
-                    duration: 0.5,
-                    delay: index * 0.1,
-                    type: "spring",
-                    stiffness: 100,
-                  }}
-                >
-                  <Link href={`/categoria/${category.id}`}>
-                    <div className="group relative overflow-hidden rounded-2xl bg-white shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1 hover:scale-[1.02] ">
-                      <div className="relative w-full rounded-md overflow-hidden h-40  flex justify-center items-center">
-                        {backgroundimg && (
-                          <Image
-                            src={backgroundimg}
-                            alt={category.title}
-                            fill
-                            className="object-cover"
-                          />
-                        )}
-
-                        {/* Overlay */}
-                        <div
-                          className={`absolute inset-0 bg-black 
-                                         backdrop-blur-md 
-                                         opacity-30 
-                                         group-hover:opacity-60 transition-opacity duration-300 `}
+            {/* Mapeamento das categorias filtradas (como no original) */}
+            {filteredCategories.map((category, index) => (
+              <motion.div
+                key={category.id}
+                initial={{ opacity: 0, y: 50, scale: 0.9 }}
+                animate={
+                  index < visibleCards
+                    ? { opacity: 1, y: 0, scale: 1 }
+                    : { opacity: 0, y: 50, scale: 0.9 }
+                }
+                transition={{
+                  duration: 0.5,
+                  delay: index * 0.1,
+                  type: "spring",
+                  stiffness: 100,
+                }}
+              >
+                <Link href={`/categoria/${category.id}`}>
+                  <div className="group relative overflow-hidden rounded-2xl bg-white shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1 hover:scale-[1.02] ">
+                    <div className="relative w-full rounded-md overflow-hidden h-40 flex justify-center items-center">
+                      {category.backgroundimg && (
+                        <Image
+                          src={category.backgroundimg}
+                          alt={category.title}
+                          fill
+                          className="object-cover"
                         />
-
-                        <div className="relative p-6">
-                          <h3 className=" font-poppins text-2xl font-bold text-white mb-auto group-hover: text-shadow-lg">
-                            {category.title}
-                          </h3>
-                        </div>
+                      )}
+                      <div
+                        className={`absolute inset-0 bg-black backdrop-blur-md opacity-30 group-hover:opacity-60 transition-opacity duration-300 `}
+                      />
+                      <div className="relative p-6">
+                        <h3 className=" font-poppins text-2xl font-bold text-white mb-auto group-hover: text-shadow-lg">
+                          {category.title}
+                        </h3>
                       </div>
-
-                      <div className="absolute bottom-0 left-0 right-0 h-1 bg-gradient-to-r from-transparent via-purple-500 to-transparent group-hover:via-orange-500 transition-all duration-300" />
                     </div>
-                  </Link>
-                </motion.div>
-              );
-            })}
-
-            {/* 2. CARD "ESPAÇO MEI" MOVIDO PARA FORA DO .map() E COM ANIMAÇÃO DINÂMICA */}
-            <motion.div
-              key="espaco-mei"
-              initial={{ opacity: 0, y: 50, scale: 0.9 }}
-              animate={
-                filteredCategories.length < visibleCards
-                  ? { opacity: 1, y: 0, scale: 1 }
-                  : { opacity: 0, y: 50, scale: 0.9 }
-              }
-              transition={{
-                duration: 0.5,
-                delay: filteredCategories.length * 0.1,
-                type: "spring",
-                stiffness: 100,
-              }}
-            >
-              <Link href="/espaco-mei">
-                <div className="group relative overflow-hidden rounded-2xl bg-white shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1 hover:scale-[1.02]">
-                  <div className="relative w-full rounded-md overflow-hidden h-40 flex justify-center items-center">
-                    <Image
-                      src="/gatooculos.jpg"
-                      alt="Espaço Mei"
-                      fill
-                      className="object-cover"
-                    />
-                    <div
-                      className={`absolute inset-0 bg-black backdrop-blur-md opacity-30 group-hover:opacity-60 transition-opacity duration-300`}
-                    />
-                    <div className="relative p-6">
-                      <h3 className="font-poppins text-2xl font-bold text-white mb-auto group-hover:text-shadow-lg">
-                        Espaço MEI
-                      </h3>
-                    </div>
+                    <div className="absolute bottom-0 left-0 right-0 h-1 bg-gradient-to-r from-transparent via-purple-500 to-transparent group-hover:via-orange-500 transition-all duration-300" />
                   </div>
-                  <div className="absolute bottom-0 left-0 right-0 h-1 bg-gradient-to-r from-transparent via-purple-500 to-transparent group-hover:via-orange-500 transition-all duration-300" />
-                </div>
-              </Link>
-            </motion.div>
+                </Link>
+              </motion.div>
+            ))}
+
+            {/* --- ALTERAÇÃO PRINCIPAL --- */}
+            {/* 3. Renderização condicional do card "Espaço MEI" */}
+            {showEspacoMei && (
+              <motion.div
+                key="espaco-mei"
+                initial={{ opacity: 0, y: 50, scale: 0.9 }}
+                animate={
+                  // A animação depende do número de categorias filtradas
+                  filteredCategories.length < visibleCards
+                    ? { opacity: 1, y: 0, scale: 1 }
+                    : { opacity: 0, y: 50, scale: 0.9 }
+                }
+                transition={{
+                  duration: 0.5,
+                  delay: filteredCategories.length * 0.1,
+                  type: "spring",
+                  stiffness: 100,
+                }}
+              >
+                <Link href="/espaco-mei">
+                  <div className="group relative overflow-hidden rounded-2xl bg-white shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1 hover:scale-[1.02]">
+                    <div className="relative w-full rounded-md overflow-hidden h-40 flex justify-center items-center">
+                      <Image
+                        src="/gatooculos.jpg"
+                        alt="Espaço Mei"
+                        fill
+                        className="object-cover"
+                      />
+                      <div
+                        className={`absolute inset-0 bg-black backdrop-blur-md opacity-30 group-hover:opacity-60 transition-opacity duration-300`}
+                      />
+                      <div className="relative p-6">
+                        <h3 className="font-poppins text-2xl font-bold text-white mb-auto group-hover:text-shadow-lg">
+                          Espaço MEI
+                        </h3>
+                      </div>
+                    </div>
+                    <div className="absolute bottom-0 left-0 right-0 h-1 bg-gradient-to-r from-transparent via-purple-500 to-transparent group-hover:via-orange-500 transition-all duration-300" />
+                  </div>
+                </Link>
+              </motion.div>
+            )}
           </div>
         </section>
-        {/* Botão "Voltar ao topo" */}
+
+        {/* O restante do código (botão e footer) permanece igual */}
         {showScrollTop && (
           <motion.button
             type="button"
@@ -303,8 +293,6 @@ export default function HomePage() {
             <ArrowUp size={20} />
           </motion.button>
         )}
-
-        {/* Footer */}
         <footer className="bg-gray-50 border-t border-gray-200 mt-20">
           <div className="container mx-auto px-4 py-8">
             <div className="text-center">
