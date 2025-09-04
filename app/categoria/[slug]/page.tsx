@@ -199,9 +199,9 @@ export default function CategoryPage({ params }: PageProps) {
 
   const filteredLocations = locations.filter(
     (location) =>
-      (location.nomeFantasia &&
-        typeof location.nomeFantasia === "string" &&
-        location.nomeFantasia.toLowerCase().includes(searchTerm.toLowerCase()))
+      location.nomeFantasia &&
+      typeof location.nomeFantasia === "string" &&
+      location.nomeFantasia.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
   if (!category) {
@@ -387,7 +387,10 @@ export default function CategoryPage({ params }: PageProps) {
 
             <div className=" max-h-[50vh] overflow-y-auto px-4 lg:grid grid-cols-2 gap-2">
               {filteredLocations.map((location: any, index: number) => (
-                <Link href={`${location.estabelecimentoId}/MEI/`} key={location.estabelecimentoId}>
+                <Link
+                  href={`${location.nomeFantasia}/MEI/`}
+                  key={location.estabelecimentoId}
+                >
                   <motion.div
                     key={location.estabelecimentoId}
                     initial={{ opacity: 0, y: 20 }}
@@ -419,13 +422,16 @@ export default function CategoryPage({ params }: PageProps) {
                             </span>
                           </div>
                         )}
-                        {selectedLocation?.id === location.estabelecimentoId && (
+                        {selectedLocation?.id ===
+                          location.estabelecimentoId && (
                           <div className="w-2 h-2 bg-[#017DB9] rounded-full animate-pulse"></div>
                         )}
                       </div>
                     </div>
 
-                    <p className="text-gray-600 mb-4">{location.descricao}</p>
+                    <p className="text-gray-600 mb-4">
+                      {location.descricaoDiferencial}
+                    </p>
 
                     <div className="space-y-2 text-sm text-gray-500">
                       <div className="flex items-center gap-2">
@@ -484,7 +490,10 @@ export default function CategoryPage({ params }: PageProps) {
               <ModernCarousel
                 slides={[
                   { imageUrl: "/gatinho.jpg", label: "Ver Gatinho mau" },
-                  { imageUrl: "/Alimentação.jpeg", label: "Comer até não aguentar" },
+                  {
+                    imageUrl: "/Alimentação.jpeg",
+                    label: "Comer até não aguentar",
+                  },
                   { imageUrl: "/Moda.jpeg", label: "Ver roupas" },
                 ]}
               />
