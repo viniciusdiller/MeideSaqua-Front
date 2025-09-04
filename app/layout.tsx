@@ -1,9 +1,10 @@
 import type React from "react";
 import type { Metadata } from "next";
-import { Poppins } from "next/font/google"; 
+import { Poppins } from "next/font/google";
 import "./globals.css";
 import { Navbar } from "./navbar";
-import { AuthProvider } from "@/context/AuthContext"; 
+import { AuthProvider } from "@/context/AuthContext";
+import { Toaster } from "@/components/ui/sonner"; 
 
 const poppins = Poppins({
   subsets: ["latin"],
@@ -42,10 +43,10 @@ export default function RootLayout({
   return (
     <html lang="pt-BR">
       <body className={`${poppins.variable} bg-white`}>
-        {/* conteúdo principal com o AuthProvider */}
         <AuthProvider>
-          <Navbar /> 
+          <Navbar />
           <main>{children}</main>
+          <Toaster richColors />
         </AuthProvider>
       </body>
     </html>
