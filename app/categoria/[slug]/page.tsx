@@ -1,6 +1,5 @@
-//CATEGORIA
 "use client";
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import Link from "next/link";
 import { ArrowLeft, Clock, MapPin, Phone, Globe, Search } from "lucide-react";
@@ -9,8 +8,8 @@ import dynamic from "next/dynamic";
 import { categories } from "../../page";
 import L from "leaflet";
 import ModernCarousel from "@/components/ModernCarousel";
-import { useUserLocation } from "../../../components/userlocation";
 import { getAllEstablishments } from "@/lib/api";
+import { toast } from "sonner";
 
 const userIcon = new L.Icon({
   iconUrl: "/person-icon.png",
@@ -67,7 +66,7 @@ function getDistanceFromLatLonInKm(
   lat2: number,
   lon2: number
 ) {
-  const R = 6371; // km
+  const R = 6371;
   const dLat = ((lat2 - lat1) * Math.PI) / 180;
   const dLon = ((lon2 - lon1) * Math.PI) / 180;
   const a =
@@ -84,7 +83,6 @@ function getDistanceFromLatLonInKm(
 export default function CategoryPage({ params }: PageProps) {
   const [locations, setLocations] = useState<any[]>([]);
   const [selectedLocation, setSelectedLocation] = useState<any>(null);
-  const [mapKey, setMapKey] = useState(0);
   const [isLoading, setIsLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
   const [userLocation, setUserLocation] = useState<{
@@ -92,13 +90,6 @@ export default function CategoryPage({ params }: PageProps) {
     lng: number;
   } | null>(null);
   const [nearestLocations, setNearestLocations] = useState<any[]>([]);
-  const [geoLoading, setGeoLoading] = useState(false);
-  const [geoError, setGeoError] = useState<string | null>(null);
-
-  useEffect(() => {
-    const timer = setTimeout(() => setMapKey((prev) => prev + 1), 500);
-    return () => clearTimeout(timer);
-  }, []);
 
   useEffect(() => {
     const fetchLocations = async () => {
@@ -125,20 +116,22 @@ export default function CategoryPage({ params }: PageProps) {
     fetchLocations();
   }, [params.slug]);
 
-  useEffect(() => {
-    if (!locations || locations.length === 0) {
-      setNearestLocations([]);
-      return;
-    }
-    if (!("geolocation" in navigator)) {
-      setGeoError("Geolocalização não é suportada pelo seu navegador.");
-      setNearestLocations([]);
-      return;
-    }
-    setGeoLoading(true);
-    setGeoError(null);
-    navigator.geolocation.getCurrentPosition(
-      (position) => {
+  const handleLocationRequest = () => {
+    const promise = () =>
+      new Promise((resolve, reject) => {
+        if (!("geolocation" in navigator)) {
+          reject(new Error("Geolocalização não é suportada pelo seu navegador."));
+          return;
+        }
+        navigator.geolocation.getCurrentPosition(resolve, reject, {
+          enableHighAccuracy: true,
+          timeout: 10000,
+        });
+      });
+
+    toast.promise(promise, {
+      loading: "A obter a sua localização...",
+      success: (position: any) => {
         const { latitude, longitude } = position.coords;
         setUserLocation({ lat: latitude, lng: longitude });
         const locationsWithDistance = locations
@@ -157,15 +150,27 @@ export default function CategoryPage({ params }: PageProps) {
           .filter((loc) => loc.distance !== Infinity)
           .sort((a, b) => a.distance - b.distance);
         setNearestLocations(locationsWithDistance.slice(0, 3));
-        setGeoLoading(false);
+        return "Localização encontrada!";
       },
-      (error) => {
-        setGeoError("Não foi possível obter sua localização.");
-        setNearestLocations([]);
-        setGeoLoading(false);
+      error: (err) => {
+        return "Para visualizar os locais mais próximos, habilite a localização no seu dispositivo";
       },
-      { enableHighAccuracy: true, timeout: 7000 }
-    );
+    });
+  };
+
+  useEffect(() => {
+    if (locations.length > 0) {
+      const timer = setTimeout(() => {
+        toast("Quer ver os locais mais próximos de si?", {
+          position: "top-center",
+          action: {
+            label: "Ativar Localização",
+            onClick: handleLocationRequest,
+          },
+        });
+      }, 1500);
+      return () => clearTimeout(timer);
+    }
   }, [locations]);
 
   const category = categories.find((cat) => cat.id === params.slug);
@@ -197,7 +202,7 @@ export default function CategoryPage({ params }: PageProps) {
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <div className="text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
-          <p className="text-gray-600">Carregando locais...</p>
+          <p className="text-gray-600">A carregar locais...</p>
         </div>
       </div>
     );
@@ -236,7 +241,6 @@ export default function CategoryPage({ params }: PageProps) {
                 <h1 className="text-xl md:text-2xl font-bold text-gray-800 capitalize">
                   {category.title}
                 </h1>
-                <p className="text-gray-600 text-sm"></p>
               </div>
             </div>
           </div>
@@ -244,20 +248,7 @@ export default function CategoryPage({ params }: PageProps) {
       </header>
 
       <div className="container mx-auto px-4 py-8">
-        {/* Seção "Locais Próximos" (sem alterações) */}
-        {geoLoading && (
-          <p className="text-center text-gray-600 mb-6">
-            Buscando sua localização...
-          </p>
-        )}
-        {geoError && (
-          <div className="text-center text-red-600 mb-6">
-            {geoError} <br />
-            Para usar a função de locais mais próximos, por favor habilite a
-            localização no seu navegador.
-          </div>
-        )}
-        {!geoLoading && !geoError && nearestLocations.length > 0 && (
+        {nearestLocations.length > 0 && (
           <section className="mb-14 px-4">
             <motion.h2
               initial={{ opacity: 0, y: 10 }}
@@ -265,7 +256,7 @@ export default function CategoryPage({ params }: PageProps) {
               transition={{ duration: 0.5 }}
               className="text-2xl md:text-3xl font-semibold tracking-tight text-[#017DB9] mb-6 border-l-4 border-[#017DB9] pl-4"
             >
-              Explore os locais mais próximos de você
+              Explore os locais mais próximos de si
             </motion.h2>
             <motion.div
               initial="hidden"
@@ -274,14 +265,12 @@ export default function CategoryPage({ params }: PageProps) {
                 hidden: { opacity: 0 },
                 visible: {
                   opacity: 1,
-                  transition: {
-                    staggerChildren: 0.15,
-                  },
+                  transition: { staggerChildren: 0.15 },
                 },
               }}
-              className="flex flex-col md:flex-row gap-6 overflow-y-auto md:overflow-x-auto md:pb-3 max-h-[80vh]"
+              className="flex flex-col md:flex-row gap-6 overflow-y-auto md:overflow-x-auto md:pb-3"
             >
-              {nearestLocations.map((loc, i) => (
+              {nearestLocations.map((loc) => (
                 <motion.div
                   key={loc.id}
                   variants={{
@@ -290,13 +279,6 @@ export default function CategoryPage({ params }: PageProps) {
                   }}
                   className="min-w-[250px] bg-white text-gray-800 rounded-2xl shadow-md hover:shadow-xl border border-[#017DB9]/20 p-4 cursor-pointer flex-shrink-0 hover:scale-[1.03] transition-all duration-300"
                 >
-                  {loc.imageUrl && (
-                    <img
-                      src={loc.imageUrl}
-                      alt={loc.nomeFantasia}
-                      className="w-full h-36 object-cover rounded-xl mb-4 border border-[#017DB9]/30"
-                    />
-                  )}
                   <h3 className="text-lg font-semibold text-[#017DB9] mb-1">
                     {loc.nomeFantasia}
                   </h3>
@@ -305,18 +287,6 @@ export default function CategoryPage({ params }: PageProps) {
                     <p className="text-sm font-medium text-[#017DB9]">
                       {loc.distance.toFixed(2)} km
                     </p>
-                    {loc.rating && (
-                      <div className="flex items-center gap-1 text-yellow-500 text-sm font-semibold">
-                        <svg
-                          xmlns="http://www.w3.org/2000/svg"
-                          className="w-4 h-4 fill-yellow-500"
-                          viewBox="0 0 24 24"
-                        >
-                          <path d="M12 .587l3.668 7.571L24 9.748l-6 5.853 1.417 8.269L12 18.896 4.583 23.87 6 15.6 0 9.748l8.332-1.59z" />
-                        </svg>
-                        <span>{loc.rating}</span>
-                      </div>
-                    )}
                   </div>
                 </motion.div>
               ))}
@@ -345,31 +315,23 @@ export default function CategoryPage({ params }: PageProps) {
               <input
                 type="text"
                 placeholder="Pesquisar por nome..."
-                className="
-                  w-full pl-12 pr-4 py-3
-                  rounded-2xl border border-gray-200 bg-white shadow-sm
-                  focus:outline-none focus:ring-2 focus:ring-purple-600/80 focus:border-transparent
-                  transition-all duration-300 placeholder-gray-400 text-sm
-                  hover:shadow-md
-                "
+                className="w-full pl-12 pr-4 py-3 rounded-2xl border border-gray-200 bg-white shadow-sm focus:outline-none focus:ring-2 focus:ring-purple-600/80 focus:border-transparent transition-all duration-300 placeholder-gray-400 text-sm hover:shadow-md"
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
               />
             </div>
-
-            {/* --- ÁREA DAS ALTERAÇÕES --- */}
             <div className="max-h-[50vh] overflow-y-auto px-2 space-y-4 lg:grid lg:grid-cols-2 lg:gap-4 lg:space-y-0">
               {filteredLocations.map((location: any, index: number) => (
                 <Link
                   href={`${location.estabelecimentoId}/MEI/`}
                   key={location.estabelecimentoId}
-                  className="block" // Garante que o Link ocupe o espaço do card
+                  className="block"
                 >
                   <motion.div
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ delay: index * 0.05 }}
-                    className={`bg-white rounded-xl shadow-md p-4 cursor-pointer mb-4 transition-all duration-300 hover:shadow-xl hover:scale-[1.02] flex flex-col h-full ${
+                    className={`bg-white rounded-xl shadow-md p-4 cursor-pointer transition-all duration-300 hover:shadow-xl hover:scale-[1.02] flex flex-col h-full ${
                       selectedLocation?.id === location.estabelecimentoId
                         ? "ring-2 ring-offset-2 ring-[#017DB9] shadow-lg"
                         : ""
@@ -388,11 +350,9 @@ export default function CategoryPage({ params }: PageProps) {
                         </div>
                       )}
                     </div>
-
                     <p className="text-gray-600 mb-4 text-sm break-words">
                       {location.descricaoDiferencial}
                     </p>
-
                     <div className="space-y-2 text-sm text-gray-500 mt-auto">
                       <div className="flex items-start gap-2">
                         <MapPin className="w-4 h-4 mt-1 flex-shrink-0" />
@@ -434,7 +394,6 @@ export default function CategoryPage({ params }: PageProps) {
               ))}
             </div>
           </div>
-
           <div className="lg:sticky lg:top-0 h-fit" id="map-container">
             <motion.div
               initial={{ opacity: 0, y: 10 }}
@@ -449,7 +408,6 @@ export default function CategoryPage({ params }: PageProps) {
                 Clique em um ponto para saber mais
               </p>
             </motion.div>
-
             <div className="w-full h-[300px] md:h-[500px] rounded-2xl shadow-lg overflow-hidden border border-purple-600">
               <ModernCarousel
                 slides={[
@@ -469,7 +427,6 @@ export default function CategoryPage({ params }: PageProps) {
   );
 }
 
-// Dummy useMap function if not implemented elsewhere
 function useMap() {
   return null;
 }
