@@ -12,7 +12,7 @@ import "leaflet/dist/leaflet.css";
 import { categories } from "@/app/page";
 import Image from "next/image";
 import { getEstablishmentById, getReviewsByEstablishment } from "@/lib/api";
-
+import AvaliacaoModalButton from "@/components/Pop-up Coments";
 
 // Configuração dos ícones do mapa
 const defaultIcon = new L.Icon({
@@ -62,7 +62,13 @@ const StarRating = ({ rating }: { rating: number }) => {
   );
 };
 
-export default function MeiDetailPage({ params }: { params: { slug: string }; }) {
+const REVIEWS_TO_SHOW = 4;
+
+export default function MeiDetailPage({
+  params,
+}: {
+  params: { slug: string };
+}) {
   //  Estados para armazenar os dados da API
   const [meiDetails, setMeiDetails] = useState<any>(null);
   const [reviews, setReviews] = useState<any[]>([]);
@@ -70,10 +76,8 @@ export default function MeiDetailPage({ params }: { params: { slug: string }; })
   const [isLoading, setIsLoading] = useState(true);
   const [isClient, setIsClient] = useState(false);
 
-
   useEffect(() => {
     const fetchMeiData = async () => {
-
       const meiId = params.slug;
       if (!meiId) return;
 
@@ -81,10 +85,10 @@ export default function MeiDetailPage({ params }: { params: { slug: string }; })
         setIsLoading(true);
         const detailsData = await getEstablishmentById(meiId);
         const reviewsData = await getReviewsByEstablishment(meiId);
-        
+
         setMeiDetails(detailsData);
         setReviews(reviewsData);
-        setRating(detailsData.media || 0); 
+        setRating(detailsData.media || 0);
       } catch (error) {
         console.error("Falha ao buscar dados do MEI:", error);
         setMeiDetails(null);
@@ -114,8 +118,10 @@ export default function MeiDetailPage({ params }: { params: { slug: string }; })
     );
   }
 
-  const categoryInfo = categories.find(cat => cat.title === meiDetails.categoria);
-  const categorySlug = categoryInfo ? categoryInfo.id : '';
+  const categoryInfo = categories.find(
+    (cat) => cat.title === meiDetails.categoria
+  );
+  const categorySlug = categoryInfo ? categoryInfo.id : "";
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-purple-400 to-orange-400">
@@ -228,7 +234,10 @@ export default function MeiDetailPage({ params }: { params: { slug: string }; })
             <div className="w-full h-80 bg-gray-200 rounded-3xl overflow-hidden mb-4 border">
               {isClient && meiDetails.coordenadas ? (
                 <MapContainer
-                  center={[meiDetails.coordenadas.lat, meiDetails.coordenadas.lng]}
+                  center={[
+                    meiDetails.coordenadas.lat,
+                    meiDetails.coordenadas.lng,
+                  ]}
                   zoom={15}
                   style={{ height: "100%", width: "100%" }}
                   scrollWheelZoom={false}
@@ -238,7 +247,10 @@ export default function MeiDetailPage({ params }: { params: { slug: string }; })
                     attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
                   />
                   <Marker
-                    position={[meiDetails.coordenadas.lat, meiDetails.coordenadas.lng]}
+                    position={[
+                      meiDetails.coordenadas.lat,
+                      meiDetails.coordenadas.lng,
+                    ]}
                     icon={defaultIcon}
                   >
                     <Popup>{meiDetails.nomeFantasia}</Popup>
@@ -266,22 +278,56 @@ export default function MeiDetailPage({ params }: { params: { slug: string }; })
             <h3 className="text-2xl font-bold text-gray-900 mb-6">
               Avaliações
             </h3>
-            <div className="space-y-6">
+
+            <AvaliacaoModalButton estabelecimentoId={meiDetails.id} />
+
+            <div className="space-y-4">
               {reviews.length > 0 ? (
-                reviews.map((review) => (
-                  <div key={review.avaliacoesId} className="flex gap-4">
-                    <div className="w-12 h-12 bg-gray-200 rounded-full flex-shrink-0"></div>
-                    <div>
-                      <p className="font-semibold text-gray-800">{review.Usuario}</p>
-                      <div className="flex items-center gap-1 my-1">
-                        <StarRating rating={review.nota} />
+                <>
+                  {/* Mostra apenas os 5 primeiros comentários */}
+                  {reviews.slice(0, REVIEWS_TO_SHOW).map((review) => (
+                    <div
+                      key={review.avaliacoesId}
+                      className="flex gap-4 py-2 items-start border bt-1px rounded-3xl shadow-lg"
+                    >
+                      <div className="w-12 h-12 bg-gray-200 rounded-full flex-shrink-0 my-auto ml-4">
+                        <Image
+                          src="/avatars/default-avatar.png"
+                          alt={`Avatar de ${review.usuario.nomeCompleto}`}
+                          width={48}
+                          height={48}
+                          className="rounded-full w-full h-full object-cover"
+                        />
                       </div>
-                      <p className="text-gray-600">{review.comentario}</p>
+                      <div>
+                        <p className="font-semibold text-gray-800">
+                          {review.usuario.nomeCompleto}
+                        </p>
+                        <div className="flex items-center gap-1 my-1">
+                          <StarRating rating={review.nota} />
+                        </div>
+                        <p className="text-gray-600 break-words">
+                          {review.comentario}
+                        </p>
+                      </div>
                     </div>
-                  </div>
-                ))
+                  ))}
+
+                  {reviews.length > REVIEWS_TO_SHOW && (
+                    <div className="text-center pt-2">
+                      <Link
+                        href={`/categoria/${categorySlug}/MEI/${params.slug}/avaliacoes`}
+                        className="font-semibold text-purple-600 hover:text-purple-800 transition-colors hover:underline"
+                      >
+                        Ver todas as {reviews.length} avaliações
+                      </Link>
+                    </div>
+                  )}
+                </>
               ) : (
-                <p className="text-gray-500">Ainda não há avaliações para este local.</p>
+                <p className="text-gray-500">
+                  Ainda não há avaliações para este local.
+                </p>
               )}
             </div>
           </section>

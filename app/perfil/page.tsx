@@ -7,22 +7,19 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { AnimatePresence } from "framer-motion";
 import { Notification, NotificationType } from "@/components/ui/notification";
 import { updateUserAvatar } from "@/lib/api";
-import Image from "next/image"; 
+import Image from "next/image";
 
 const AVATAR_BASE_PATH = "/avatars/";
-const avatarOptions = [
-  "avatar-homem.png",
-  "avatar-mulher.png",
-];
+const avatarOptions = ["avatar-homem.png", "avatar-mulher.png"];
 
 export default function PerfilPage() {
   const { user, logout, isLoading, updateUser } = useAuth();
-  
- 
-  const [selectedAvatarFile, setSelectedAvatarFile] = useState<string | undefined>("");
-  
-  const [notifications, setNotifications] = useState<NotificationType[]>([]);
 
+  const [selectedAvatarFile, setSelectedAvatarFile] = useState<
+    string | undefined
+  >("");
+
+  const [notifications, setNotifications] = useState<NotificationType[]>([]);
 
   useEffect(() => {
     if (user) {
@@ -41,30 +38,44 @@ export default function PerfilPage() {
 
   const handleSaveAvatar = async () => {
     if (!user?.token || !selectedAvatarFile) {
-        addNotification("Erro de autenticação ou nenhum avatar selecionado.", "error");
-        return;
+      addNotification(
+        "Erro de autenticação ou nenhum avatar selecionado.",
+        "error"
+      );
+      return;
     }
-    
+
     try {
-      const updatedUserData = await updateUserAvatar(selectedAvatarFile, user.token);
+      const updatedUserData = await updateUserAvatar(
+        selectedAvatarFile,
+        user.token
+      );
       const newAvatar = updatedUserData.chosenAvatar;
 
       updateUser({ chosenAvatar: newAvatar });
-      
-      addNotification("Avatar atualizado com sucesso!", "success");
 
+      addNotification("Avatar atualizado com sucesso!", "success");
     } catch (error) {
-      addNotification("Não foi possível atualizar o avatar. Tente novamente.", "error");
+      addNotification(
+        "Não foi possível atualizar o avatar. Tente novamente.",
+        "error"
+      );
       console.error(error);
     }
   };
 
   if (isLoading) {
-    return <div className="flex items-center justify-center h-screen"><p>Carregando perfil...</p></div>;
+    return (
+      <div className="flex items-center justify-center h-screen">
+        <p>Carregando perfil...</p>
+      </div>
+    );
   }
 
   if (!user) {
-    if (typeof window !== 'undefined') { window.location.href = '/login'; }
+    if (typeof window !== "undefined") {
+      window.location.href = "/login";
+    }
     return null;
   }
 
@@ -87,9 +98,9 @@ export default function PerfilPage() {
                 <CardHeader className="text-center flex flex-col items-center">
                   {/* caminho completo da imagem aqui */}
                   {selectedAvatarFile && (
-                    <Image 
-                      src={`${AVATAR_BASE_PATH}${selectedAvatarFile}`} 
-                      alt="Avatar" 
+                    <Image
+                      src="/avatars/default-avatar.png"
+                      alt="Avatar"
                       width={96}
                       height={96}
                       className="w-24 h-24 rounded-full mx-auto mb-4 border-2 border-purple-500 object-cover"
@@ -98,22 +109,34 @@ export default function PerfilPage() {
                   <CardTitle>{user.nomeCompleto}</CardTitle>
                 </CardHeader>
                 <CardContent className="flex flex-col gap-4">
-                  <Button onClick={logout} variant="destructive" className="w-full">Sair</Button>
+                  <Button
+                    onClick={logout}
+                    variant="destructive"
+                    className="w-full"
+                  >
+                    Sair
+                  </Button>
                 </CardContent>
               </Card>
             </div>
             <div className="md:col-span-2 space-y-8">
               <Card>
-                <CardHeader><CardTitle>Escolha seu Avatar</CardTitle></CardHeader>
+                <CardHeader>
+                  <CardTitle>Escolha seu Avatar</CardTitle>
+                </CardHeader>
                 <CardContent className="flex flex-wrap gap-4">
-                  {avatarOptions.map(avatarFile => (
-                    <button 
-                      key={avatarFile} 
-                      onClick={() => setSelectedAvatarFile(avatarFile)} 
-                      className={`w-16 h-16 rounded-full overflow-hidden border-2 hover:border-purple-600 transition-transform hover:scale-110 ${selectedAvatarFile === avatarFile ? 'border-purple-600' : 'border-gray-200'}`}
+                  {avatarOptions.map((avatarFile) => (
+                    <button
+                      key={avatarFile}
+                      onClick={() => setSelectedAvatarFile(avatarFile)}
+                      className={`w-16 h-16 rounded-full overflow-hidden border-2 hover:border-purple-600 transition-transform hover:scale-110 ${
+                        selectedAvatarFile === avatarFile
+                          ? "border-purple-600"
+                          : "border-gray-200"
+                      }`}
                     >
-                      <Image 
-                        src={`${AVATAR_BASE_PATH}${avatarFile}`} 
+                      <Image
+                        src={`${AVATAR_BASE_PATH}${avatarFile}`}
                         alt={`Opção de avatar ${avatarFile}`}
                         width={64}
                         height={64}
@@ -123,7 +146,9 @@ export default function PerfilPage() {
                   ))}
                 </CardContent>
               </Card>
-              <Button onClick={handleSaveAvatar} className="w-full">Salvar Avatar</Button>
+              <Button onClick={handleSaveAvatar} className="w-full">
+                Salvar Avatar
+              </Button>
             </div>
           </div>
         </div>
