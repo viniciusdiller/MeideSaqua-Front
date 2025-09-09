@@ -180,10 +180,13 @@ export default function MeiDetailPage({
                       <Instagram size={26} strokeWidth={2} />
                     </a>
                     <span className="ml-2.5 milecem:ml-5 desktop:ml-10">
-                      Website:
+                      Whatsapp:
                     </span>
                     <a
-                      href={meiDetails.website}
+                      href={`https://wa.me/${meiDetails.contatoEstabelecimento.replace(
+                        /\D/g,
+                        ""
+                      )}`}
                       target="_blank"
                       rel="noopener noreferrer"
                       className="text-gray-600 hover:text-blue-600 transition-colors ml-1"
