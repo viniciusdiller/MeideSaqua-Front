@@ -297,8 +297,8 @@ export default function CategoryPage({ params }: PageProps) {
           </section>
         )}
 
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-          <div className="flex flex-col">
+        <div className="grid grid-cols-1 milecem:grid-cols-5 gap-8">
+          <div className="flex flex-col milecem:col-span-4">
             <div className="flex items-center justify-between mb-4">
               <motion.h2
                 initial={{ opacity: 0, y: 10 }}
@@ -322,7 +322,7 @@ export default function CategoryPage({ params }: PageProps) {
                 onChange={(e) => setSearchTerm(e.target.value)}
               />
             </div>
-            <div className="max-h-[50vh] overflow-y-auto px-2 space-y-4 lg:grid lg:grid-cols-2 lg:gap-4 lg:space-y-0">
+            <div className="max-h-[50vh] overflow-y-auto px-2 space-y-4 pb-1 milecem:grid milecem:grid-cols-2 milecem:gap-4 milecem:space-y-0">
               {filteredLocations.map((location: any, index: number) => (
                 <Link
                   href={`${location.estabelecimentoId}/MEI/`}
@@ -333,7 +333,8 @@ export default function CategoryPage({ params }: PageProps) {
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ delay: index * 0.05 }}
-                    className={`bg-white rounded-xl shadow-md p-4 cursor-pointer transition-all duration-300 hover:shadow-xl hover:scale-[1.02] flex flex-col h-full ${
+                    className={`bg-white rounded-xl shadow-md p-4 cursor-pointer transition-all duration-300 hover:shadow-xl hover:scale-[1.02] 
+                      flex flex-col h-full  ${
                       selectedLocation?.id === location.estabelecimentoId
                         ? "ring-2 ring-offset-2 ring-[#017DB9] shadow-lg"
                         : ""
@@ -396,7 +397,7 @@ export default function CategoryPage({ params }: PageProps) {
               ))}
             </div>
           </div>
-          <div className="lg:sticky lg:top-0 h-fit" id="map-container">
+          <div className="lg:sticky lg:top-0 milecem:pl-6 h-fit" id="map-container">
             <motion.div
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
@@ -404,10 +405,10 @@ export default function CategoryPage({ params }: PageProps) {
               className="mb-4"
             >
               <h2 className="text-3xl font-bold text-gray-800 flex items-center gap-2">
-                <MapPin className="w-6 h-6 text-blue-600" /> {category.title}
+                <MapPin className="w-6 h-6 text-blue-600" /> Conheça também
               </h2>
               <p className="text-gray-500 text-sm mt-1">
-                Clique em um ponto para saber mais
+                clique no botão para explorar outra categoria
               </p>
             </motion.div>
             <div className="w-full h-[300px] md:h-[500px] rounded-2xl shadow-lg overflow-hidden border border-blue-600">
