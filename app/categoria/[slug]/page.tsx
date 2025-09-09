@@ -120,7 +120,9 @@ export default function CategoryPage({ params }: PageProps) {
     const promise = () =>
       new Promise((resolve, reject) => {
         if (!("geolocation" in navigator)) {
-          reject(new Error("Geolocalização não é suportada pelo seu navegador."));
+          reject(
+            new Error("Geolocalização não é suportada pelo seu navegador.")
+          );
           return;
         }
         navigator.geolocation.getCurrentPosition(resolve, reject, {
@@ -232,7 +234,7 @@ export default function CategoryPage({ params }: PageProps) {
               href="/"
               className="flex items-center gap-2 text-gray-600 hover:text-gray-800 transition-colors"
             >
-              <ArrowLeft className="w-5 h-5" />
+              <ArrowLeft className="w-5 h-5 hover:text-blue-600" />
               Voltar
             </Link>
             <div className="flex items-center gap-3">
@@ -315,7 +317,7 @@ export default function CategoryPage({ params }: PageProps) {
               <input
                 type="text"
                 placeholder="Pesquisar por nome..."
-                className="w-full pl-12 pr-4 py-3 rounded-2xl border border-gray-200 bg-white shadow-sm focus:outline-none focus:ring-2 focus:ring-purple-600/80 focus:border-transparent transition-all duration-300 placeholder-gray-400 text-sm hover:shadow-md"
+                className="w-full pl-12 pr-4 py-3 rounded-2xl border border-gray-200 bg-white shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-600/80 focus:border-transparent transition-all duration-300 placeholder-gray-400 text-sm hover:shadow-md"
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
               />
@@ -408,7 +410,7 @@ export default function CategoryPage({ params }: PageProps) {
                 Clique em um ponto para saber mais
               </p>
             </motion.div>
-            <div className="w-full h-[300px] md:h-[500px] rounded-2xl shadow-lg overflow-hidden border border-purple-600">
+            <div className="w-full h-[300px] md:h-[500px] rounded-2xl shadow-lg overflow-hidden border border-blue-600">
               <ModernCarousel
                 slides={[
                   { imageUrl: "/gatinho.jpg", label: "Ver Gatinho mau" },

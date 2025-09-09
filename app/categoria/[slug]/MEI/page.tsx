@@ -113,7 +113,9 @@ export default function MeiDetailPage({
     return (
       <div className="min-h-screen flex items-center justify-center bg-gray-100">
         <p>Estabelecimento não encontrado.</p>
-        <Link href="/">Voltar</Link>
+        <Link href="/" className="hidden md:block">
+          Voltar
+        </Link>
       </div>
     );
   }
@@ -131,8 +133,8 @@ export default function MeiDetailPage({
             href={`/categoria/${categorySlug}`}
             className="flex items-center gap-2 text-gray-600 hover:text-purple-600 transition-colors"
           >
-            <ArrowLeft className="w-5 h-5" />
-            Voltar
+            <ArrowLeft className="w-5 h-5 mr-3 md:mr-0" />
+            <p className="hidden md:block">Voltar</p>
           </Link>
           <h1 className="flex-1 text-center text-lg font-semibold text-gray-800 truncate pr-12">
             {meiDetails.nomeFantasia}
@@ -229,7 +231,7 @@ export default function MeiDetailPage({
 
           <section className="bg-white p-6 rounded-3xl shadow-md md:mx-auto md:max-w-[85%]">
             <h3 className="text-2xl font-bold text-gray-900 mb-4">
-              Localização e Contato
+              Área de Atuação
             </h3>
             <div className="w-full h-80 bg-gray-200 rounded-3xl overflow-hidden mb-4 border">
               {isClient && meiDetails.coordenadas ? (
@@ -279,7 +281,9 @@ export default function MeiDetailPage({
               Avaliações
             </h3>
 
-            <AvaliacaoModalButton estabelecimentoId={meiDetails.id} />
+            <AvaliacaoModalButton
+              estabelecimentoId={meiDetails.estabelecimentoId}
+            />
 
             <div className="space-y-4">
               {reviews.length > 0 ? (

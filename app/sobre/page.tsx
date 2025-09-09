@@ -7,12 +7,12 @@ export default function SobrePage() {
       <div className="max-w-5xl mx-auto bg-white rounded-3xl shadow-lg p-10 sm:p-16">
         <h1
           className=" text-4xl font-extrabold mb-10 inline-block pb-2
-  bg-gradient-to-r from-purple-600 to-orange-500
+  bg-gradient-to-r from-[#017DB9] to-[#22c362]
   bg-no-repeat
   [background-position:0_100%]
   [background-size:100%_4px]"
         >
-          <span className=" bg-gradient-to-r from-purple-600 to-orange-500 bg-clip-text text-transparent">
+          <span className=" bg-gradient-to-r from-[#017DB9] to-[#22c362] bg-clip-text text-transparent">
             MEIdeSaquá
           </span>
         </h1>
@@ -20,7 +20,7 @@ export default function SobrePage() {
         <section className="mb-8">
           <p className="text-gray-700 leading-relaxed text-lg">
             O{" "}
-            <span className=" bg-gradient-to-r from-purple-600 to-orange-500 bg-clip-text text-transparent">
+            <span className=" bg-gradient-to-r from-[#017DB9] to-[#22c362] bg-clip-text text-transparent">
               MEIdeSaquá
             </span>{" "}
             é a vitrine digital dos Microempreendedores Individuais de
@@ -40,7 +40,7 @@ export default function SobrePage() {
             empreendedorismo como motor de desenvolvimento econômico e social.
             Por isso, apoia e cuida dos MEI’s, oferecendo suporte, capacitação e
             oportunidades de crescimento. O{" "}
-            <span className=" bg-gradient-to-r from-purple-600 to-orange-500 bg-clip-text text-transparent">
+            <span className=" bg-gradient-to-r from-[#017DB9] to-[#22c362] bg-clip-text text-transparent">
               MEIdeSaquá
             </span>{" "}
             é parte desse compromisso: um projeto que une inovação digital,
@@ -50,7 +50,7 @@ export default function SobrePage() {
 
         <section className="mb-8">
           <h2 className="text-2xl font-semibold text-[#007a73] mb-3">
-            <span className=" bg-gradient-to-r from-purple-600 to-orange-500 bg-clip-text text-transparent">
+            <span className=" bg-gradient-to-r from-[#017DB9] to-[#22c362] bg-clip-text text-transparent">
               Quais são os principais recursos do MEIdeSaquá?
             </span>
           </h2>
@@ -73,7 +73,7 @@ export default function SobrePage() {
 
         <section className="mb-8">
           <h2 className="text-2xl font-semibold text-[#007a73] mb-3">
-            <span className=" bg-gradient-to-r from-purple-600 to-orange-500 bg-clip-text text-transparent">
+            <span className=" bg-gradient-to-r from-[#017DB9] to-[#22c362] bg-clip-text text-transparent">
               Sou um Microempreendedor Individual (MEI) cadastrado em Saquarema,
               como fazer parte da plataforma MEIdeSaquá?
             </span>
@@ -82,7 +82,7 @@ export default function SobrePage() {
             Se você possui o seu registro como MEI cadastrado e atualizado,
             basta acessar a página “
             <Link href="/cadastro-mei" legacyBehavior>
-              <a className="text-purple-600 hover:underline">Cadastro MEI</a>
+              <a className="text-blue-600 hover:underline">Cadastro MEI</a>
             </Link>
             ”, lá você terá acesso ao formulário para incluir suas informações
             que posteriormente serão validadas pela equipe e disponibilizadas
@@ -92,14 +92,14 @@ export default function SobrePage() {
 
         <section className="mb-8">
           <h2 className="text-2xl font-semibold text-[#007a73] mb-3">
-            <span className=" bg-gradient-to-r from-purple-600 to-orange-500 bg-clip-text text-transparent">
+            <span className=" bg-gradient-to-r from-[#017DB9] to-[#22c362] bg-clip-text text-transparent">
               Sou um Microempreendedor Individual (MEI) mas meu cadastro não é
               de Saquarema, posso fazer parte da plataforma?
             </span>
           </h2>
           <p className="text-gray-700 leading-relaxed text-lg">
             A plataforma{" "}
-            <span className=" bg-gradient-to-r from-purple-600 to-orange-500 bg-clip-text text-transparent">
+            <span className=" bg-gradient-to-r from-[#017DB9] to-[#22c362] bg-clip-text text-transparent">
               MEIdeSaquá
             </span>{" "}
             tem como objetivo principal fortalecer e fomentar o empreendedorismo
@@ -113,7 +113,7 @@ export default function SobrePage() {
 
         <section className="mb-8">
           <h2 className="text-2xl font-semibold text-[#007a73] mb-3">
-            <span className=" bg-gradient-to-r from-purple-600 to-orange-500 bg-clip-text text-transparent">
+            <span className=" bg-gradient-to-r from-[#017DB9] to-[#22c362] bg-clip-text text-transparent">
               Estou cadastrado no MEIdeSaquá e desejo atualizar minhas
               informações ou retirar minha divulgação, como faço?
             </span>
@@ -121,7 +121,7 @@ export default function SobrePage() {
           <p className="text-gray-700 leading-relaxed text-lg">
             Na aba de “
             <Link href="/cadastro-mei" legacyBehavior>
-              <a className="text-purple-600 hover:underline">Cadastro MEI</a>
+              <a className="text-blue-600 hover:underline">Cadastro MEI</a>
             </Link>
             ”, haverá também a opção de atualizar ou excluir cadastro, basta que
             preencha com suas informações necessárias que faremos as
@@ -131,7 +131,7 @@ export default function SobrePage() {
 
         <section className="mb-8">
           <h2 className="text-2xl font-semibold text-[#007a73] mb-3">
-            <span className=" bg-gradient-to-r from-purple-600 to-orange-500 bg-clip-text text-transparent">
+            <span className=" bg-gradient-to-r from-[#017DB9] to-[#22c362] bg-clip-text text-transparent">
               Gostaria de deixar uma avaliação sobre um produto ou serviço
               referente a um MEI aqui da plataforma, como faço?
             </span>
@@ -145,7 +145,7 @@ export default function SobrePage() {
 
         <section>
           <h2 className="text-2xl font-semibold text-[#007a73] mb-3">
-            <span className=" bg-gradient-to-r from-purple-600 to-orange-500 bg-clip-text text-transparent">
+            <span className=" bg-gradient-to-r from-[#017DB9] to-[#22c362] bg-clip-text text-transparent">
               Desejo me formalizar como MEI, atualizar meu cadastro ou obter
               mais informações sobre MEI’s, como faço?
             </span>
@@ -156,7 +156,7 @@ export default function SobrePage() {
               href="https://www.gov.br/empresas-e-negocios/pt-br/empreendedor"
               target="_blank"
               rel="noopener noreferrer"
-              className="text-purple-600 hover:underline"
+              className="text-blue-600 hover:underline"
             >
               https://www.gov.br/empresas-e-negocios/pt-br/empreendedor
             </a>{" "}
@@ -170,7 +170,7 @@ export default function SobrePage() {
                 href="https://wa.me/5522920052534"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="text-gray-700 hover:underline hover:text-purple-600"
+                className="text-gray-700 hover:underline hover:text-blue-600"
               >
                 22 92005-2534
               </a>
@@ -179,7 +179,7 @@ export default function SobrePage() {
               <strong>E-mail:</strong>{" "}
               <a
                 href="mailto:saladoempreendedor@saquarema.rj.gov.br"
-                className="text-gray-700 hover:underline hover:text-purple-600"
+                className="text-gray-700 hover:underline hover:text-blue-600"
               >
                 {/* Este span só será visível em telas PEQUENAS (extra-small) */}
                 <span className="sm:hidden">
@@ -200,7 +200,7 @@ export default function SobrePage() {
                 href="https://www.google.com/maps/search/?api=1&query=R.+Barão+de+Saquarema,+n°+243+-+Sala+5+-+Centro,+Saquarema+-+RJ,+28990-772"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="text-gray-700 hover:underline hover:text-purple-600"
+                className="text-gray-700 hover:underline hover:text-blue-600"
               >
                 R. Barão de Saquarema, n° 243 - Sala 5 - Centro, Saquarema - RJ,
                 28990-772
@@ -212,7 +212,7 @@ export default function SobrePage() {
                 href="https://www.google.com/maps/search/?api=1&query=Av.+Saquarema,+5483+-+Porto+da+Roça,+Saquarema+-+RJ,+28994-711"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="text-gray-700 hover:underline hover:text-purple-600"
+                className="text-gray-700 hover:underline hover:text-blue-600"
               >
                 Av. Saquarema, 5483 - Porto da Roça, Saquarema - RJ, 28994-711
                 (2° andar)

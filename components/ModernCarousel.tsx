@@ -3,7 +3,7 @@
 import React, { useState, useEffect, useRef } from "react";
 import Image from "next/image";
 import { ChevronLeft, ChevronRight, X } from "lucide-react";
-import { Button } from "@/components/ui/button"
+import { Button } from "@/components/ui/button";
 
 interface ModernCarouselProps {
   slides: {
@@ -13,7 +13,10 @@ interface ModernCarouselProps {
   interval?: number;
 }
 
-export default function ModernCarousel({ slides, interval = 5000 }: ModernCarouselProps) {
+export default function ModernCarousel({
+  slides,
+  interval = 5000,
+}: ModernCarouselProps) {
   const [current, setCurrent] = useState(0);
   const [isModalOpen, setModalOpen] = useState(false);
   const [modalImage, setModalImage] = useState("");
@@ -27,7 +30,9 @@ export default function ModernCarousel({ slides, interval = 5000 }: ModernCarous
   useEffect(() => {
     resetTimeout();
     timeoutRef.current = setTimeout(() => {
-      setCurrent((prevIndex) => (prevIndex === slides.length - 1 ? 0 : prevIndex + 1));
+      setCurrent((prevIndex) =>
+        prevIndex === slides.length - 1 ? 0 : prevIndex + 1
+      );
     }, interval);
 
     return () => resetTimeout();
@@ -44,11 +49,13 @@ export default function ModernCarousel({ slides, interval = 5000 }: ModernCarous
   };
 
   const goToSlide = (index: number) => setCurrent(index);
-  const prevSlide = () => setCurrent(current === 0 ? slides.length - 1 : current - 1);
-  const nextSlide = () => setCurrent(current === slides.length - 1 ? 0 : current + 1);
+  const prevSlide = () =>
+    setCurrent(current === 0 ? slides.length - 1 : current - 1);
+  const nextSlide = () =>
+    setCurrent(current === slides.length - 1 ? 0 : current + 1);
 
   return (
-    <div className="relative w-full h-full rounded-2xl overflow-hidden border border-purple-600">
+    <div className="relative w-full h-full rounded-2xl overflow-hidden border border-blue-600">
       {/* Slides */}
       <div
         className="flex transition-transform duration-700 ease-in-out h-full"
@@ -68,12 +75,11 @@ export default function ModernCarousel({ slides, interval = 5000 }: ModernCarous
             <div className="absolute bottom-6 left-6 z-10">
               <button
                 onClick={() => openModal(slide.imageUrl)}
-                className="rounded-2xl border-2 border-dashed border-purple-600 bg-[rgba(255,255,255,0.2)] px-4 py-2 font-bold uppercase 
+                className="rounded-2xl border-2 border-dashed border-blue-600 bg-[rgba(255,255,255,0.2)] px-4 py-2 font-bold uppercase 
            text-white transition-all duration-300 hover:translate-x-[-4px] hover:translate-y-[-4px] hover:rounded-md 
            hover:shadow-[4px_4px_16px_rgba(0,0,0,0.4)] active:translate-x-[0px] active:translate-y-[0px] active:rounded-2xl 
            active:shadow-none backdrop-blur-lg text-sm"
->
-              
+              >
                 {slide.label}
               </button>
             </div>
@@ -99,13 +105,13 @@ export default function ModernCarousel({ slides, interval = 5000 }: ModernCarous
         onClick={prevSlide}
         className="absolute left-2 top-1/2 transform -translate-y-1/2 bg-white/50 hover:bg-white p-2 rounded-full z-10"
       >
-        <ChevronLeft className="w-5 h-5 text-purple-700" />
+        <ChevronLeft className="w-5 h-5 text-blue-700" />
       </button>
       <button
         onClick={nextSlide}
         className="absolute right-2 top-1/2 transform -translate-y-1/2 bg-white/50 hover:bg-white p-2 rounded-full z-10"
       >
-        <ChevronRight className="w-5 h-5 text-purple-700" />
+        <ChevronRight className="w-5 h-5 text-blue-700" />
       </button>
 
       {/* Modal */}

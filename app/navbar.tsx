@@ -102,25 +102,25 @@ export function Navbar() {
           <nav className="flex items-center gap-6">
             <Link
               href="/"
-              className="text-gray-700 hover:text-purple-500 transition-colors"
+              className="text-gray-700 hover:text-blue-600 transition-colors"
             >
               Home
             </Link>
             <Link
               href="/sobre"
-              className="text-gray-700 hover:text-purple-500 transition-colors"
+              className="text-gray-700 hover:text-blue-600 transition-colors"
             >
               Sobre o Projeto
             </Link>
             <Link
               href="/cadastro-mei"
-              className="text-gray-700 hover:text-purple-500 transition-colors"
+              className="text-gray-700 hover:text-blue-600 transition-colors"
             >
               Cadastro MEI
             </Link>
             <Link
               href="/contato"
-              className="text-gray-700 hover:text-purple-500 transition-colors"
+              className="text-gray-700 hover:text-blue-600 transition-colors"
             >
               Fale Conosco
             </Link>
@@ -164,7 +164,7 @@ export function Navbar() {
             <div className="flex items-center gap-3">
               <Link
                 href="/perfil"
-                className="flex items-center gap-3 text-gray-700 hover:text-purple-500 transition-colors"
+                className="flex items-center gap-3 text-gray-700 hover:text-blue-600 transition-colors"
               >
                 <UserIcon size={22} />
 
@@ -199,28 +199,28 @@ export function Navbar() {
           <nav className="flex flex-col space-y-4 px-6">
             <Link
               href="/"
-              className="text-gray-700 hover:text-purple-500 transition-colors font-medium"
+              className="text-gray-700 hover:text-blue-600 transition-colors font-medium"
               onClick={() => setIsOpen(false)}
             >
               Home
             </Link>
             <Link
               href="/sobre"
-              className="text-gray-700 hover:text-purple-500 transition-colors font-medium"
+              className="text-gray-700 hover:text-blue-600 transition-colors font-medium"
               onClick={() => setIsOpen(false)}
             >
               Sobre o Projeto
             </Link>
             <Link
               href="/cadastro-mei"
-              className="text-gray-700 hover:text-purple-500 transition-colors font-medium"
+              className="text-gray-700 hover:text-blue-600 transition-colors font-medium"
               onClick={() => setIsOpen(false)}
             >
               Cadastro MEI
             </Link>
             <Link
               href="/contato"
-              className="text-gray-700 hover:text-purple-500 transition-colors font-medium"
+              className="text-gray-700 hover:text-blue-600 transition-colors font-medium"
               onClick={() => setIsOpen(false)}
             >
               Fale Conosco
@@ -234,7 +234,7 @@ export function Navbar() {
               <>
                 <Link
                   href="/perfil"
-                  className="flex items-center gap-3 text-gray-700 hover:text-purple-500 transition-colors font-medium"
+                  className="flex items-center gap-3 text-gray-700 hover:text-blue-600 transition-colors font-medium"
                   onClick={() => setIsOpen(false)}
                 >
                   {/* LÓGICA DO AVATAR AQUI */}
@@ -264,7 +264,7 @@ export function Navbar() {
             ) : (
               <Link
                 href="/login"
-                className="flex items-center gap-3 text-gray-700 hover:text-purple-500 transition-colors font-medium"
+                className="flex items-center gap-3 text-gray-700 hover:text-blue-600 transition-colors font-medium"
                 onClick={() => setIsOpen(false)}
               >
                 <LogIn size={20} /> Efetuar Login

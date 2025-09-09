@@ -125,15 +125,17 @@ export default function HomePage() {
           height={898}
           className="hidden md:hidden mx-auto h-20 w-auto mb-5"
         />
-        <Link href="/" target="about:blank">
-          <Image
-            src="/LogoMeideSaqua.png"
-            alt="Logo MeideSaqua"
-            width={2660}
-            height={898}
-            className="md:block mx-auto h-10 sm:h-12 w-auto mb-5 milecem:h-16"
-          />
-        </Link>
+        <div>
+          <Link href="/" target="about:blank">
+            <Image
+              src="/LogoMeideSaqua.png"
+              alt="Logo MeideSaqua"
+              width={2660}
+              height={898}
+              className="md:block mx-auto h-14 sm:h-20 w-auto mb-5 milecem:h-24"
+            />
+          </Link>
+        </div>
         <ImageCarousel />
         <section className="container mx-auto px-4 py-8 md:py-8 relative z-10 -mt-[1px] md:-mt-[1px]">
           <motion.div
@@ -144,7 +146,7 @@ export default function HomePage() {
           >
             <h2 className="text-4xl md:text-6xl font-bold text-gray-800 mb-6">
               Vitrine de{" "}
-              <span className="bg-gradient-to-r from-purple-600 to-orange-500 bg-clip-text text-transparent">
+              <span className="bg-gradient-to-r from-blue-900 to-blue-500 bg-clip-text text-transparent">
                 MEIs
               </span>{" "}
               de Saquarema
@@ -152,7 +154,7 @@ export default function HomePage() {
             <p className="text-xl font-bold text-gray-700 md:text-gray-600 max-w-2xl mx-auto">
               A vitrine digital de quem faz a economia local acontecer. Conheça
               os{" "}
-              <span className="bg-gradient-to-r from-purple-600 to-orange-500 bg-clip-text text-transparent">
+              <span className="bg-gradient-to-r from-[#017DB9] to-[#22c362] bg-clip-text text-transparent">
                 MEIdeSaquá!
               </span>{" "}
             </p>
@@ -168,7 +170,7 @@ export default function HomePage() {
                   className="
                 w-full pl-12 pr-4 py-3
                 rounded-2xl border border-gray-200 bg-white shadow-sm
-                focus:outline-none focus:ring-2 focus:ring-purple-600/70 focus:border-transparent
+                focus:outline-none focus:ring-2 focus:ring-blue-600/70 focus:border-transparent
                 transition-all duration-300 placeholder-gray-400 text-sm
                 hover:shadow-md
               "
@@ -218,7 +220,7 @@ export default function HomePage() {
                         </h3>
                       </div>
                     </div>
-                    <div className="absolute bottom-0 left-0 right-0 h-1 bg-gradient-to-r from-transparent via-purple-500 to-transparent group-hover:via-orange-500 transition-all duration-300" />
+                    <div className="absolute bottom-0 left-0 right-0 h-1 bg-gradient-to-r from-transparent via-blue-500 to-transparent group-hover:via-orange-500 transition-all duration-300" />
                   </div>
                 </Link>
               </motion.div>
@@ -257,11 +259,11 @@ export default function HomePage() {
                       />
                       <div className="relative p-6">
                         <h3 className="font-poppins text-2xl font-bold text-white mb-auto group-hover:text-shadow-lg">
-                          Espaço MEI
+                          Quero ser MEI
                         </h3>
                       </div>
                     </div>
-                    <div className="absolute bottom-0 left-0 right-0 h-1 bg-gradient-to-r from-transparent via-purple-500 to-transparent group-hover:via-orange-500 transition-all duration-300" />
+                    <div className="absolute bottom-0 left-0 right-0 h-1 bg-gradient-to-r from-transparent via-blue-500 to-transparent group-hover:via-orange-500 transition-all duration-300" />
                   </div>
                 </Link>
               </motion.div>
@@ -279,7 +281,7 @@ export default function HomePage() {
             onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}
             className="
             fixed bottom-6 left-6 z-50 
-            bg-purple-600 hover:bg-orange-500
+            bg-blue-600 hover:bg-orange-500
             text-white font-semibold font-sans 
             px-5 py-3 rounded-full 
             shadow-lg shadow-blue-600/50 

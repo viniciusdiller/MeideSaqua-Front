@@ -12,12 +12,12 @@ export default function SobrePage() {
             <div className="md:w-2/3">
               <h1
                 className=" text-4xl font-extrabold mb-6 inline-block pb-2
-                    bg-gradient-to-r from-purple-600 to-orange-500
+                    bg-gradient-to-r from-[#017DB9] to-[#22c362]
                     bg-no-repeat
                     [background-position:0_100%]
                     [background-size:100%_4px]"
               >
-                <span className=" bg-gradient-to-r from-purple-600 to-orange-500 bg-clip-text text-transparent">
+                <span className=" bg-gradient-to-r from-[#017DB9] to-[#22c362] bg-clip-text text-transparent">
                   ESPAÇO MEI
                 </span>
               </h1>
@@ -66,7 +66,7 @@ export default function SobrePage() {
         {/* --- CURSOS --- */}
         <section className="mt-12 border-t pt-6">
           <h2 className="text-3xl font-bold text-center mb-10">
-            <span className="bg-gradient-to-r from-purple-600 to-orange-500 bg-clip-text text-transparent">
+            <span className="bg-gradient-to-r from-[#017DB9] to-[#22c362] bg-clip-text text-transparent">
               Cursos e Capacitações disponíveis:
             </span>
           </h2>
@@ -87,7 +87,7 @@ export default function SobrePage() {
                   className="w-full h-auto object-cover transform group-hover:scale-105 transition-transform duration-300"
                 />
               </div>
-              <p className="mt-3 text-md font-semibold text-gray-800 group-hover:text-purple-600 transition-colors duration-300">
+              <p className="mt-3 text-md font-semibold text-gray-800 group-hover:text-blue-600 transition-colors duration-300">
                 Como agir de maneira empreendedora
               </p>
             </Link>
@@ -107,7 +107,7 @@ export default function SobrePage() {
                   className="w-full h-auto object-cover transform group-hover:scale-105 transition-transform duration-300"
                 />
               </div>
-              <p className="mt-3 text-md font-semibold text-gray-800 group-hover:text-purple-600 transition-colors duration-300">
+              <p className="mt-3 text-md font-semibold text-gray-800 group-hover:text-blue-600 transition-colors duration-300">
                 Empreender na prática
               </p>
             </Link>
@@ -127,7 +127,7 @@ export default function SobrePage() {
                   className="w-full h-auto object-cover transform group-hover:scale-105 transition-transform duration-300"
                 />
               </div>
-              <p className="mt-3 text-md font-semibold text-gray-800 group-hover:text-purple-600 transition-colors duration-300">
+              <p className="mt-3 text-md font-semibold text-gray-800 group-hover:text-blue-600 transition-colors duration-300">
                 Como formalizar seu negócio como microempreendedor individual
               </p>
             </Link>
@@ -147,7 +147,7 @@ export default function SobrePage() {
                   className="w-full h-auto object-cover transform group-hover:scale-105 transition-transform duration-300"
                 />
               </div>
-              <p className="mt-3 text-md font-semibold text-gray-800 group-hover:text-purple-600 transition-colors duration-300">
+              <p className="mt-3 text-md font-semibold text-gray-800 group-hover:text-blue-600 transition-colors duration-300">
                 Empreendedorismo como opção de carreira
               </p>
             </Link>
@@ -167,7 +167,7 @@ export default function SobrePage() {
                   className="w-full h-auto object-cover transform group-hover:scale-105 transition-transform duration-300"
                 />
               </div>
-              <p className="mt-3 text-md font-semibold text-gray-800 group-hover:text-purple-600 transition-colors duration-300">
+              <p className="mt-3 text-md font-semibold text-gray-800 group-hover:text-blue-600 transition-colors duration-300">
                 Aprender a empreender
               </p>
             </Link>
@@ -187,7 +187,7 @@ export default function SobrePage() {
                   className="w-full h-auto object-cover transform group-hover:scale-105 transition-transform duration-300"
                 />
               </div>
-              <p className="mt-3 text-md font-semibold text-gray-800 group-hover:text-purple-600 transition-colors duration-300">
+              <p className="mt-3 text-md font-semibold text-gray-800 group-hover:text-blue-600 transition-colors duration-300">
                 Como ser um(a) empreendedor(a) mais eficiente
               </p>
             </Link>
@@ -207,7 +207,7 @@ export default function SobrePage() {
                   className="w-full h-auto object-cover transform group-hover:scale-105 transition-transform duration-300"
                 />
               </div>
-              <p className="mt-3 text-md font-semibold text-gray-800 group-hover:text-purple-600 transition-colors duration-300">
+              <p className="mt-3 text-md font-semibold text-gray-800 group-hover:text-blue-600 transition-colors duration-300">
                 Curso pelo whatsApp: Meu Negócio Online
               </p>
             </Link>
@@ -227,7 +227,7 @@ export default function SobrePage() {
                   className="w-full h-auto object-cover transform group-hover:scale-105 transition-transform duration-300"
                 />
               </div>
-              <p className="mt-3 text-md font-semibold text-gray-800 group-hover:text-purple-600 transition-colors duration-300">
+              <p className="mt-3 text-md font-semibold text-gray-800 group-hover:text-blue-600 transition-colors duration-300">
                 Fluxo de caixa como ferramenta de gestão para o seu negócio
               </p>
             </Link>
@@ -239,7 +239,7 @@ export default function SobrePage() {
           <div className="space-y-8">
             <section>
               <h2 className="text-2xl font-semibold text-[#007a73] mb-3">
-                <span className=" bg-gradient-to-r from-purple-600 to-orange-500 bg-clip-text text-transparent">
+                <span className=" bg-gradient-to-r from-[#017DB9] to-[#22c362] bg-clip-text text-transparent">
                   Desejo me formalizar como MEI, atualizar meu cadastro ou obter
                   mais informações sobre MEI’s, como faço?
                 </span>
@@ -251,7 +251,7 @@ export default function SobrePage() {
                   href="https://www.gov.br/empresas-e-negocios/pt-br/empreendedor"
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="text-purple-600 hover:underline"
+                  className="text-blue-600 hover:underline"
                 >
                   https://www.gov.br/empresas-e-negocios/pt-br/empreendedor
                 </a>{" "}
@@ -265,7 +265,7 @@ export default function SobrePage() {
                     href="https://wa.me/5522920052534"
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="text-gray-700 hover:underline hover:text-purple-600"
+                    className="text-gray-700 hover:underline hover:text-blue-600"
                   >
                     22 92005-2534
                   </a>
@@ -274,7 +274,7 @@ export default function SobrePage() {
                   <strong>E-mail:</strong>{" "}
                   <a
                     href="mailto:saladoempreendedor@saquarema.rj.gov.br"
-                    className="text-gray-700 hover:underline hover:text-purple-600"
+                    className="text-gray-700 hover:underline hover:text-blue-600"
                   >
                     <span className="sm:hidden">
                       saladoempreendedor
@@ -292,7 +292,7 @@ export default function SobrePage() {
                     href="https://www.google.com/maps/search/?api=1&query=R.+Barão+de+Saquarema,+n°+243+-+Sala+5+-+Centro,+Saquarema+-+RJ,+28990-772"
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="text-gray-700 hover:underline hover:text-purple-600"
+                    className="text-gray-700 hover:underline hover:text-blue-600"
                   >
                     R. Barão de Saquarema, n° 243 - Sala 5 - Centro, Saquarema -
                     RJ, 28990-772
@@ -304,7 +304,7 @@ export default function SobrePage() {
                     href="https://www.google.com/maps/search/?api=1&query=Av.+Saquarema,+5483+-+Porto+da+Roça,+Saquarema+-+RJ,+28994-711"
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="text-gray-700 hover:underline hover:text-purple-600"
+                    className="text-gray-700 hover:underline hover:text-blue-600"
                   >
                     Av. Saquarema, 5483 - Porto da Roça, Saquarema - RJ,
                     28994-711 (2° andar)
