@@ -9,6 +9,7 @@ import Head from "next/head";
 import ImageCarousel from "../components/ImageCarousel";
 import { Navbar } from "./navbar";
 import { Search } from "lucide-react";
+import ButtonWrapper from "../components/ui/button-home";
 
 export { categories };
 const categories = [
@@ -220,7 +221,7 @@ export default function HomePage() {
                         </h3>
                       </div>
                     </div>
-                    <div className="absolute bottom-0 left-0 right-0 h-1 bg-gradient-to-r from-transparent via-blue-500 to-transparent group-hover:via-orange-500 transition-all duration-300" />
+                    <div className="absolute bottom-0 left-0 right-0 h-1 bg-gradient-to-r from-transparent via-blue-500 to-transparent group-hover:via-green-500 transition-all duration-300" />
                   </div>
                 </Link>
               </motion.div>
@@ -263,7 +264,7 @@ export default function HomePage() {
                         </h3>
                       </div>
                     </div>
-                    <div className="absolute bottom-0 left-0 right-0 h-1 bg-gradient-to-r from-transparent via-blue-500 to-transparent group-hover:via-orange-500 transition-all duration-300" />
+                    <div className="absolute bottom-0 left-0 right-0 h-1 bg-gradient-to-r from-transparent via-blue-500 to-transparent group-hover:via-green-500 transition-all duration-300" />
                   </div>
                 </Link>
               </motion.div>
@@ -281,7 +282,7 @@ export default function HomePage() {
             onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}
             className="
             fixed bottom-6 left-6 z-50 
-            bg-blue-600 hover:bg-orange-500
+            bg-blue-600 hover:bg-green-500
             text-white font-semibold font-sans 
             px-5 py-3 rounded-full 
             shadow-lg shadow-blue-600/50 
@@ -295,6 +296,11 @@ export default function HomePage() {
             <ArrowUp size={20} />
           </motion.button>
         )}
+
+        <div className="text-center mt-1 text-gray-600 mb-3">
+          <h3>Gostaria que seu MEI aparecesse na vitrine?</h3>
+        </div>
+        <ButtonWrapper />
         <footer className="bg-gray-50 border-t border-gray-200 mt-20">
           <div className="container mx-auto px-4 py-8">
             <div className="text-center">
