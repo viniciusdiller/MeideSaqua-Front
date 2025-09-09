@@ -2,7 +2,16 @@
 import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import Link from "next/link";
-import { ArrowLeft, Clock, MapPin, Phone, Globe, Search } from "lucide-react";
+import {
+  ArrowLeft,
+  Clock,
+  MapPin,
+  Phone,
+  Globe,
+  Search,
+  Star,
+  Quote,
+} from "lucide-react";
 import Image from "next/image";
 import dynamic from "next/dynamic";
 import { categories } from "../../page";
@@ -90,6 +99,7 @@ export default function CategoryPage({ params }: PageProps) {
     lng: number;
   } | null>(null);
   const [nearestLocations, setNearestLocations] = useState<any[]>([]);
+  const [featuredMei, setFeaturedMei] = useState<any>(null);
 
   useEffect(() => {
     const fetchLocations = async () => {
@@ -106,6 +116,11 @@ export default function CategoryPage({ params }: PageProps) {
           (loc: any) => loc.categoria === categoryTitle
         );
         setLocations(filteredData);
+
+        if (filteredData.length > 0) {
+          const randomIndex = Math.floor(Math.random() * filteredData.length);
+          setFeaturedMei(filteredData[randomIndex]);
+        }
       } catch (error) {
         console.error("Erro ao buscar estabelecimentos da API:", error);
         setLocations([]);
@@ -227,29 +242,49 @@ export default function CategoryPage({ params }: PageProps) {
 
   return (
     <div className="min-h-screen bg-slate-50">
-      <header className="bg-white shadow-sm border-b">
-        <div className="container mx-auto px-3 py-4">
-          <div className="flex items-center gap-4">
-            <Link
-              href="/"
-              className="flex items-center gap-2 text-gray-600 hover:text-gray-800 transition-colors"
-            >
-              <ArrowLeft className="w-5 h-5 hover:text-blue-600" />
-              Voltar
-            </Link>
-            <div className="flex items-center gap-3">
-              <div className={`p-2 rounded-lg bg-gradient-to-br`}>ICON</div>
-              <div>
-                <h1 className="text-xl md:text-2xl font-bold text-gray-800 capitalize">
-                  {category.title}
-                </h1>
-              </div>
-            </div>
-          </div>
+      <header className="relative h-48 md:h-32 w-full flex items-center justify-center text-white overflow-hidden shadow-lg">
+        <Image
+          src={category.backgroundimg || "/placeholder.jpg"}
+          alt={`Background for ${category.title}`}
+          fill
+          className="object-cover z-0"
+          priority
+        />
+        <div className="absolute inset-0 bg-black/50 backdrop-blur-sm z-10"></div>
+
+        <div className="container mx-auto px-4 relative z-20 text-center">
+          <Link
+            href="/"
+            className="absolute -top-6 left-4 md:top-6 md:left-6 flex items-center gap-2 text-white/80 hover:text-white transition-colors bg-white/10 hover:bg-white/20 px-3 py-1.5 rounded-lg text-sm"
+          >
+            <ArrowLeft className="w-2 h-2 md:w-6 md:h-6" />
+            <span>Voltar</span>
+          </Link>
+
+          <motion.h1
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6 }}
+            className="text-4xl md:text-5xl font-bold capitalize"
+            style={{ textShadow: "2px 2px 8px rgba(0,0,0,0.6)" }}
+          >
+            {category.title}
+          </motion.h1>
+
+          <motion.p
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6, delay: 0.1 }}
+            className="text-white/90 mt-2 text-sm md:text-base max-w-2xl mx-auto"
+            style={{ textShadow: "1px 1px 4px rgba(0,0,0,0.7)" }}
+          >
+            Explore os melhores MEIs de Saquarema em{" "}
+            {category.title.toLowerCase()}.
+          </motion.p>
         </div>
       </header>
 
-      <div className="container mx-auto px-4 py-8">
+      <main className="container mx-auto px-4 py-8">
         {nearestLocations.length > 0 && (
           <section className="mb-14 px-4">
             <motion.h2
@@ -333,8 +368,7 @@ export default function CategoryPage({ params }: PageProps) {
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ delay: index * 0.05 }}
-                    className={`bg-white rounded-xl shadow-md p-4 cursor-pointer transition-all duration-300 hover:shadow-xl hover:scale-[1.02] 
-                      flex flex-col h-full  ${
+                    className={`bg-white rounded-xl shadow-md p-4 cursor-pointer transition-all duration-300 hover:shadow-xl hover:scale-[1.02] flex flex-col h-full ${
                       selectedLocation?.id === location.estabelecimentoId
                         ? "ring-2 ring-offset-2 ring-[#017DB9] shadow-lg"
                         : ""
@@ -425,7 +459,70 @@ export default function CategoryPage({ params }: PageProps) {
             </div>
           </div>
         </div>
-      </div>
+        {featuredMei && (
+          <section className="mt-20">
+            <div className="h-px w-full bg-gradient-to-r from-transparent via-gray-300 to-transparent mb-12" />
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true, amount: 0.3 }}
+              transition={{ duration: 0.6 }}
+              className="text-center mb-10"
+            >
+              <h2 className="text-3xl md:text-4xl font-bold text-gray-800 mb-4">
+                MEI em Destaque em{" "}
+                <span className="text-blue-600">{category.title}</span>
+              </h2>
+              <p className="text-gray-600 max-w-2xl mx-auto">
+                Descubra um dos talentos locais que fazem a diferença na nossa
+                cidade.
+              </p>
+            </motion.div>
+
+            <motion.div
+              initial={{ opacity: 0, scale: 0.95 }}
+              whileInView={{ opacity: 1, scale: 1 }}
+              viewport={{ once: true, amount: 0.3 }}
+              transition={{ duration: 0.7, delay: 0.2 }}
+              className="max-w-4xl mx-auto bg-white rounded-2xl shadow-lg overflow-hidden md:flex"
+            >
+              <div className="md:w-1/2 relative min-h-[250px] md:min-h-full">
+                <Image
+                  src={featuredMei.imageUrl || "/placeholder.jpg"}
+                  alt={`Imagem de ${featuredMei.nomeFantasia}`}
+                  fill
+                  className="object-cover"
+                />
+              </div>
+              <div className="p-8 md:w-1/2 flex flex-col justify-center">
+                <h3 className="text-2xl font-bold text-gray-900 mb-2">
+                  {featuredMei.nomeFantasia}
+                </h3>
+                <div className="flex items-center gap-2 text-sm text-gray-500 mb-4">
+                  <MapPin size={16} />
+                  <span>{featuredMei.endereco}</span>
+                </div>
+                <blockquote className="relative p-4 bg-gray-50 border-l-4 border-blue-500 mb-6">
+                  <Quote
+                    className="absolute top-2 left-2 w-8 h-8 text-blue-100"
+                    strokeWidth={1.5}
+                  />
+                  <p className="text-gray-700 italic z-10 relative">
+                    {featuredMei.descricaoDiferencial}
+                  </p>
+                </blockquote>
+                <Link
+                  href={`${featuredMei.estabelecimentoId}/MEI/`}
+                  className="mt-auto inline-block bg-blue-600 text-white font-bold text-center py-3 px-6 rounded-lg hover:bg-blue-700 transition-colors duration-300 shadow-md hover:shadow-lg transform hover:-translate-y-1"
+                >
+                  Conhecer Mais
+                </Link>
+              </div>
+            </motion.div>
+
+          </section>
+        )}
+      </main>
     </div>
   );
 }
@@ -433,3 +530,4 @@ export default function CategoryPage({ params }: PageProps) {
 function useMap() {
   return null;
 }
+

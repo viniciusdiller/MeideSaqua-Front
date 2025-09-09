@@ -72,16 +72,16 @@ export default function ModernCarousel({
               priority={idx === 0}
             />
             {/* Botão por slide */}
-            <div className="absolute bottom-6 left-6 z-10">
+            <div className="absolute bottom-9 left-1/2 transform -translate-x-1/2 w-auto text-center">
               <button
                 onClick={() => openModal(slide.imageUrl)}
-                className="rounded-2xl border-2 border-dashed border-blue-600 bg-[rgba(255,255,255,0.2)] px-4 py-2 font-bold uppercase 
-           text-white transition-all duration-300 hover:translate-x-[-4px] hover:translate-y-[-4px] hover:rounded-md 
-           hover:shadow-[4px_4px_16px_rgba(0,0,0,0.4)] active:translate-x-[0px] active:translate-y-[0px] active:rounded-2xl 
-           active:shadow-none backdrop-blur-lg text-sm"
-              >
+                className="rounded-2xl border-2 border-dashed border-blue-600 bg-[rgba(255,255,255,0.2)] px-4 py-2 font-bold uppercase
+                text-white transition-all duration-300 hover:translate-x-[-4px] hover:translate-y-[-4px] hover:rounded-md
+                hover:shadow-[4px_4px_16px_rgba(0,0,0,0.4)] active:translate-x-[0px] active:translate-y-[0px] active:rounded-2xl
+                active:shadow-none backdrop-blur-lg text-sm whitespace-nowrap"
+            >
                 {slide.label}
-              </button>
+            </button>
             </div>
           </div>
         ))}

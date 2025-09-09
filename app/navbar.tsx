@@ -179,7 +179,7 @@ export function Navbar() {
             </div>
           ) : (
             <Link href="/login">
-              <button className="bg-purple-600 text-white px-4 py-2 rounded-full text-sm font-semibold hover:bg-orange-500 transition-colors">
+              <button className="bg-blue-600 text-white px-4 py-2 rounded-full text-sm font-semibold hover:bg-orange-500 transition-colors">
                 Login
               </button>
             </Link>
