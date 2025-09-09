@@ -99,7 +99,7 @@ export default function CategoryPage({ params }: PageProps) {
     lng: number;
   } | null>(null);
   const [nearestLocations, setNearestLocations] = useState<any[]>([]);
-  const [featuredMei, setFeaturedMei] = useState<any>(null);
+  const [featuredMeis, setFeaturedMeis] = useState<any[]>([]);
 
   useEffect(() => {
     const fetchLocations = async () => {
@@ -118,9 +118,9 @@ export default function CategoryPage({ params }: PageProps) {
         setLocations(filteredData);
 
         if (filteredData.length > 0) {
-          const randomIndex = Math.floor(Math.random() * filteredData.length);
-          setFeaturedMei(filteredData[randomIndex]);
-        }
+        const shuffled = [...filteredData].sort(() => 0.5 - Math.random());
+        setFeaturedMeis(shuffled.slice(0, 2));
+      }
       } catch (error) {
         console.error("Erro ao buscar estabelecimentos da API:", error);
         setLocations([]);
@@ -459,7 +459,7 @@ export default function CategoryPage({ params }: PageProps) {
             </div>
           </div>
         </div>
-        {featuredMei && (
+       {featuredMeis.length > 0 && (
           <section className="mt-20">
             <div className="h-px w-full bg-gradient-to-r from-transparent via-gray-300 to-transparent mb-12" />
             <motion.div
@@ -474,52 +474,54 @@ export default function CategoryPage({ params }: PageProps) {
                 <span className="text-blue-600">{category.title}</span>
               </h2>
               <p className="text-gray-600 max-w-2xl mx-auto">
-                Descubra um dos talentos locais que fazem a diferença na nossa
-                cidade.
+                Descubra talentos locais que fazem a diferença na nossa cidade.
               </p>
             </motion.div>
-
-            <motion.div
-              initial={{ opacity: 0, scale: 0.95 }}
-              whileInView={{ opacity: 1, scale: 1 }}
-              viewport={{ once: true, amount: 0.3 }}
-              transition={{ duration: 0.7, delay: 0.2 }}
-              className="max-w-4xl mx-auto bg-white rounded-2xl shadow-lg overflow-hidden md:flex"
-            >
-              <div className="md:w-1/2 relative min-h-[250px] md:min-h-full">
-                <Image
-                  src={featuredMei.imageUrl || "/placeholder.jpg"}
-                  alt={`Imagem de ${featuredMei.nomeFantasia}`}
-                  fill
-                  className="object-cover"
-                />
-              </div>
-              <div className="p-8 md:w-1/2 flex flex-col justify-center">
-                <h3 className="text-2xl font-bold text-gray-900 mb-2">
-                  {featuredMei.nomeFantasia}
-                </h3>
-                <div className="flex items-center gap-2 text-sm text-gray-500 mb-4">
-                  <MapPin size={16} />
-                  <span>{featuredMei.endereco}</span>
-                </div>
-                <blockquote className="relative p-4 bg-gray-50 border-l-4 border-blue-500 mb-6">
-                  <Quote
-                    className="absolute top-2 left-2 w-8 h-8 text-blue-100"
-                    strokeWidth={1.5}
-                  />
-                  <p className="text-gray-700 italic z-10 relative">
-                    {featuredMei.descricaoDiferencial}
-                  </p>
-                </blockquote>
-                <Link
-                  href={`${featuredMei.estabelecimentoId}/MEI/`}
-                  className="mt-auto inline-block bg-blue-600 text-white font-bold text-center py-3 px-6 rounded-lg hover:bg-blue-700 transition-colors duration-300 shadow-md hover:shadow-lg transform hover:-translate-y-1"
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 max-w-6xl mx-auto">
+              {featuredMeis.map((mei, index) => (
+                <motion.div
+                  key={mei.estabelecimentoId}
+                  initial={{ opacity: 0, scale: 0.95 }}
+                  whileInView={{ opacity: 1, scale: 1 }}
+                  viewport={{ once: true, amount: 0.3 }}
+                  transition={{ duration: 0.7, delay: index * 0.2 }}
+                  className="bg-white rounded-2xl shadow-lg overflow-hidden flex flex-col"
                 >
-                  Conhecer Mais
-                </Link>
-              </div>
-            </motion.div>
-
+                  <div className="relative w-full h-48">
+                    <Image
+                      src={mei.imageUrl || "/placeholder.jpg"}
+                      alt={`Imagem de ${mei.nomeFantasia}`}
+                      fill
+                      className="object-cover"
+                    />
+                  </div>
+                  <div className="p-6 flex flex-col flex-grow">
+                    <h3 className="text-xl font-bold text-gray-900 mb-2">
+                      {mei.nomeFantasia}
+                    </h3>
+                    <div className="flex items-center gap-2 text-sm text-gray-500 mb-4">
+                      <MapPin size={16} />
+                      <span>{mei.endereco}</span>
+                    </div>
+                    <blockquote className="relative p-3 bg-gray-50 border-l-4 border-blue-500 mb-5">
+                      <Quote
+                        className="absolute top-2 left-2 w-6 h-6 text-blue-100"
+                        strokeWidth={1.5}
+                      />
+                      <p className="text-gray-700 italic z-10 relative pl-2">
+                        {mei.descricaoDiferencial}
+                      </p>
+                    </blockquote>
+                    <Link
+                      href={`${mei.estabelecimentoId}/MEI/`}
+                      className="mt-auto w-full text-center bg-blue-600 text-white font-bold py-2.5 px-5 rounded-lg hover:bg-blue-700 transition-colors duration-300 shadow-md hover:shadow-lg transform hover:-translate-y-0.5"
+                    >
+                      Conhecer Mais
+                    </Link>
+                  </div>
+                </motion.div>
+              ))}
+            </div>
           </section>
         )}
       </main>
