@@ -2,29 +2,38 @@
 
 import { AnimatePresence, motion } from "framer-motion";
 import { Dispatch, SetStateAction, useState } from "react";
-import { Star } from "lucide-react"; // Usando o ícone de Estrela do Lucide
-import { submitReview } from "@/lib/api"; // Importa a função da API
-import { useAuth } from "@/context/AuthContext"; // Importa o hook de autenticação
-import { toast } from "sonner"; // Importa o sistema de notificações
+import { Star } from "lucide-react";
+import { submitReview } from "@/lib/api";
+import { useAuth } from "@/context/AuthContext";
+import { toast } from "sonner";
 
-// Este componente pode ser colocado na sua página de MEI
+
 const AvaliacaoModalButton = ({
   estabelecimentoId,
+  onReviewSubmit, // Opcional: callback para atualizar a página
 }: {
   estabelecimentoId: number;
+  onReviewSubmit?: () => void;
 }) => {
   const [isOpen, setIsOpen] = useState(false);
-  const { user } = useAuth(); // Pega o usuário para saber se está logado
+  const { user } = useAuth();
 
-  // O botão de avaliação só será exibido para usuários logados E se tivermos um ID válido
-  if (!user || !estabelecimentoId) {
-    return null;
-  }
+  const handleButtonClick = () => {
+    // Se não houver utilizador, mostra a notificação de erro
+    if (!user) {
+      toast.error(
+        "Para realizar um comentário, é necessário estar logado em uma conta."
+      );
+    } else {
+      // Se houver utilizador, abre o modal
+      setIsOpen(true);
+    }
+  };
 
   return (
-    <div className="my-4">
+    <div className="my-4 text-left mb-5">
       <button
-        onClick={() => setIsOpen(true)}
+        onClick={handleButtonClick}
         className="bg-gradient-to-br from-[#017DB9] to-[#22c362] text-white font-medium px-4 py-2 rounded-lg hover:opacity-90 transition-opacity shadow-md hover:shadow-lg"
       >
         Deixe aqui sua Avaliação
@@ -33,6 +42,7 @@ const AvaliacaoModalButton = ({
         isOpen={isOpen}
         setIsOpen={setIsOpen}
         estabelecimentoId={estabelecimentoId}
+        onReviewSubmit={onReviewSubmit}
       />
     </div>
   );
@@ -41,67 +51,53 @@ const AvaliacaoModalButton = ({
 const SpringModal = ({
   isOpen,
   setIsOpen,
-  estabelecimentoId, // Recebe o ID do estabelecimento como propriedade
+  estabelecimentoId,
+  onReviewSubmit,
 }: {
   isOpen: boolean;
   setIsOpen: Dispatch<SetStateAction<boolean>>;
   estabelecimentoId: number;
+  onReviewSubmit?: () => void;
 }) => {
-  const { user } = useAuth(); // Pega o usuário para obter o token
-  const [rating, setRating] = useState(0); // Estado para a nota
-  const [hoverRating, setHoverRating] = useState(0); // Estado para o efeito de hover nas estrelas
-  const [comment, setComment] = useState(""); // Estado para o comentário
-  const [isSubmitting, setIsSubmitting] = useState(false); // Estado para controlar o loading do botão
+  const [rating, setRating] = useState(0);
+  const [hoverRating, setHoverRating] = useState(0);
+  const [comment, setComment] = useState("");
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const { user } = useAuth();
 
   const handleAvaliarClick = async () => {
-    // Validação para garantir que o usuário está logado
-    if (!user || !user.token) {
-      toast.error("Você precisa estar logado para fazer uma avaliação.");
-      return;
-    }
-    // Validação para garantir que uma nota foi selecionada
     if (rating === 0) {
-      toast.error("Por favor, selecione uma nota de 1 a 5 estrelas.");
+      toast.warning("Por favor, selecione uma nota de 1 a 5 estrelas.");
       return;
     }
 
     setIsSubmitting(true);
 
-    // CORREÇÃO: O ID do estabelecimento precisa estar dentro de um objeto "estabelecimento"
     const reviewData = {
       nota: rating,
       comentario: comment,
       estabelecimento: {
         estabelecimentoId: estabelecimentoId,
       },
-      // O usuário será identificado pelo token no backend
     };
 
-    // DEBUG: Mostra o payload exato no console do navegador
-    console.log(
-      "Payload enviado para a API:",
-      JSON.stringify(reviewData, null, 2)
-    );
-
     try {
-      // Chama a função da API, passando os dados e o token
-      await submitReview(reviewData, user.token);
-
+      await submitReview(reviewData, user?.token ?? "");
       toast.success("Avaliação enviada com sucesso!");
 
       setIsOpen(false);
-      // Limpa os campos do formulário após o envio
       setRating(0);
       setComment("");
 
-      // Opcional: Recarrega a página após 1.5s para mostrar a nova avaliação
-      setTimeout(() => {
-        window.location.reload();
-      }, 1500);
-    } catch (error) {
+      // Se a função de callback for fornecida, execute-a
+      if (onReviewSubmit) {
+        onReviewSubmit();
+      }
+    } catch (error: any) {
       console.error("Erro ao enviar avaliação:", error);
       toast.error(
-        "Erro ao enviar sua avaliação. Verifique se você já avaliou este local."
+        error.message ||
+          "Erro ao enviar sua avaliação. Verifique se você já avaliou este local."
       );
     } finally {
       setIsSubmitting(false);
@@ -131,10 +127,9 @@ const SpringModal = ({
                 <Star />
               </div>
 
-              {/* Sistema de Estrelas Interativo */}
               <div
                 className="flex justify-center gap-2 mb-4"
-                onMouseLeave={() => setHoverRating(0)} // Limpa o hover quando o mouse sai da área
+                onMouseLeave={() => setHoverRating(0)}
               >
                 {[1, 2, 3, 4, 5].map((index) => (
                   <Star
@@ -181,3 +176,4 @@ const SpringModal = ({
 };
 
 export default AvaliacaoModalButton;
+
