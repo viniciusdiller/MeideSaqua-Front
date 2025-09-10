@@ -294,9 +294,13 @@ export default function HomePage() {
         <footer className="bg-gray-50 border-t border-gray-200 mt-20">
           <div className="container mx-auto px-4 py-8">
             <div className="text-center">
-              <h3 className="text-lg font-semibold text-gray-800 mb-2">
-                MEIdeSaquá
-              </h3>
+              <Image
+                src="/LogoExploraMonocromática.png"
+                alt="Logo MeideSaqua"
+                width={2660}
+                height={898}
+                className=" mx-auto h-10 sm:h-12 w-auto mb-5 md:block milecem:h-14"
+              />
               <p className="text-gray-600 mb-4">
                 {" "}
                 A vitrine digital que valoriza o empreendedor local e fortalece

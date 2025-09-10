@@ -149,6 +149,10 @@ export default function PerfilPage() {
               <Button onClick={handleSaveAvatar} className="w-full">
                 Salvar Avatar
               </Button>
+              <h1>Alterar senha</h1>
+              <h1>excluir conta</h1>
+              <h1>alterar nome de usuário</h1>
+              <h1>Alterar Nome Completo</h1>
             </div>
           </div>
         </div>
