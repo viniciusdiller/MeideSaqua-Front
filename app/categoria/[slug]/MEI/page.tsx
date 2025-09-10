@@ -2,7 +2,15 @@
 "use client";
 
 import Link from "next/link";
-import { ArrowLeft, Star, MapPin, Phone, Globe, Instagram } from "lucide-react";
+import {
+  ArrowLeft,
+  Star,
+  MapPin,
+  Phone,
+  MessageCircle,
+  Globe,
+  Instagram,
+} from "lucide-react";
 import React, { useState, useEffect } from "react";
 import dynamic from "next/dynamic";
 import L from "leaflet";
@@ -18,18 +26,6 @@ import {
   PaginationItem,
   PaginationLink,
 } from "@/components/ui/pagination";
-
-// Configuração dos ícones do mapa
-const defaultIcon = new L.Icon({
-  iconUrl: "/marker-icon-blue.png",
-  shadowUrl: "/marker-shadow.png",
-  iconSize: [25, 41],
-  iconAnchor: [12, 41],
-  popupAnchor: [1, -34],
-  shadowSize: [41, 41],
-});
-
-// Componentes do Mapa carregados dinamicamente
 
 const StarRating = ({ rating }: { rating: number }) => {
   const totalStars = 5;
@@ -205,9 +201,9 @@ export default function MeiDetailPage({
                       )}`}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="text-gray-600 hover:text-blue-600 transition-colors ml-1"
+                      className="text-gray-600 hover:text-[#22c362] transition-colors ml-1"
                     >
-                      <Globe size={26} strokeWidth={2} />
+                      <MessageCircle size={26} strokeWidth={2} />
                     </a>
                   </div>
                 </div>
@@ -320,7 +316,7 @@ export default function MeiDetailPage({
                   {/* ======================== FIM DA CORREÇÃO ========================= */}
 
                   {totalPages > 1 && (
-                    <div className="pt-4 flex justify-end">
+                    <div className="pt-4 flex justify-end rounded-lg">
                       <Pagination>
                         <PaginationContent>
                           {[...Array(totalPages)].map((_, i) => {

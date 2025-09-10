@@ -260,7 +260,7 @@ export default function HomePage() {
                       />
                       <div className="relative p-6">
                         <h3 className="font-poppins text-2xl font-bold text-white mb-auto group-hover:text-shadow-lg">
-                          Quero ser MEI
+                          Produtores Rurais e Atividades Agrícolas
                         </h3>
                       </div>
                     </div>

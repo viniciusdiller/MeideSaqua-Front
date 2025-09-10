@@ -116,13 +116,13 @@ export function Navbar() {
               href="/cadastro-mei"
               className="text-gray-700 hover:text-blue-600 transition-colors"
             >
-              Cadastro MEI
+              Cadastro MEIdeSaquá
             </Link>
             <Link
-              href="/contato"
+              href="/espaco-mei"
               className="text-gray-700 hover:text-blue-600 transition-colors"
             >
-              Fale Conosco
+              Espaço MEI
             </Link>
           </nav>
         </div>
@@ -216,14 +216,14 @@ export function Navbar() {
               className="text-gray-700 hover:text-blue-600 transition-colors font-medium"
               onClick={() => setIsOpen(false)}
             >
-              Cadastro MEI
+              Cadastro MEIdeSaquá
             </Link>
             <Link
-              href="/contato"
+              href="/espaco-mei"
               className="text-gray-700 hover:text-blue-600 transition-colors font-medium"
               onClick={() => setIsOpen(false)}
             >
-              Fale Conosco
+              Espaço MEI
             </Link>
             <hr className="border-gray-200" />
 
