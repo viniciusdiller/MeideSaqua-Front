@@ -278,10 +278,13 @@ export default function MeiDetailPage({
               {reviews.length > 0 ? (
                 <>
                   <div key={currentPage} className="space-y-4">
-                    {paginatedReviews.map((review, index) => (
-                      <div
-                        key={review.avaliacoesId}
-                        className={`
+                    {paginatedReviews
+                      .slice()
+                      .reverse()
+                      .map((review, index) => (
+                        <div
+                          key={review.avaliacoesId}
+                          className={`
                           flex gap-4 py-2 items-start border bt-1px rounded-3xl shadow-lg
                           transition-all duration-500 ease-out
                           ${
@@ -290,30 +293,30 @@ export default function MeiDetailPage({
                               : "opacity-0 translate-y-4"
                           }
                         `}
-                        style={{ transitionDelay: `${index * 50}ms` }}
-                      >
-                        <div className="w-12 h-12 bg-gray-200 rounded-full flex-shrink-0 my-auto ml-4">
-                          <Image
-                            src="/avatars/default-avatar.png"
-                            alt={`Avatar de ${review.usuario.nomeCompleto}`}
-                            width={48}
-                            height={48}
-                            className="rounded-full w-full h-full object-cover"
-                          />
-                        </div>
-                        <div>
-                          <p className="font-semibold text-gray-800">
-                            {review.usuario.nomeCompleto}
-                          </p>
-                          <div className="flex items-center gap-1 my-1">
-                            <StarRating rating={review.nota} />
+                          style={{ transitionDelay: `${index * 50}ms` }}
+                        >
+                          <div className="w-12 h-12 bg-gray-200 rounded-full flex-shrink-0 my-auto ml-4">
+                            <Image
+                              src="/avatars/default-avatar.png"
+                              alt={`Avatar de ${review.usuario.nomeCompleto}`}
+                              width={48}
+                              height={48}
+                              className="rounded-full w-full h-full object-cover"
+                            />
                           </div>
-                          <p className="text-gray-600 break-words">
-                            {review.comentario}
-                          </p>
+                          <div>
+                            <p className="font-semibold text-gray-800">
+                              {review.usuario.nomeCompleto}
+                            </p>
+                            <div className="flex items-center gap-1 my-1">
+                              <StarRating rating={review.nota} />
+                            </div>
+                            <p className="text-gray-600 break-words">
+                              {review.comentario}
+                            </p>
+                          </div>
                         </div>
-                      </div>
-                    ))}
+                      ))}
                   </div>
                   {/* */}
                   {/* ======================== FIM DA CORREÇÃO ========================= */}
