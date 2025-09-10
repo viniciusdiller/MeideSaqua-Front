@@ -10,6 +10,7 @@ import {
   LogIn,
   User as UserIcon,
   LogOut,
+  MessageCircleQuestion,
 } from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
 
@@ -286,6 +287,13 @@ export function Navbar() {
               className="flex items-center gap-3 text-gray-700 hover:text-blue-700 transition-colors"
             >
               <Globe size={20} /> Site da Prefeitura
+            </a>
+            <a
+              href="/contato"
+              rel="noopener noreferrer"
+              className="flex items-center gap-3 text-gray-700 hover:text-blue-700 transition-colors"
+            >
+              <MessageCircleQuestion size={20} /> Fale Conosco
             </a>
           </nav>
         </div>

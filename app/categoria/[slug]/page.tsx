@@ -2,66 +2,11 @@
 import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import Link from "next/link";
-import {
-  ArrowLeft,
-  Clock,
-  MapPin,
-  Phone,
-  Globe,
-  Search,
-  Star,
-  Quote,
-} from "lucide-react";
+import { ArrowLeft, Clock, MapPin, Phone, Globe, Search } from "lucide-react";
 import Image from "next/image";
-import dynamic from "next/dynamic";
 import { categories } from "../../page";
-import L from "leaflet";
 import ModernCarousel from "@/components/ModernCarousel";
 import { getAllEstablishments } from "@/lib/api";
-import { toast } from "sonner";
-
-const userIcon = new L.Icon({
-  iconUrl: "/person-icon.png",
-  iconSize: [32, 32],
-  iconAnchor: [16, 32],
-  popupAnchor: [0, -32],
-  shadowUrl: "",
-  shadowSize: [0, 0],
-});
-
-const defaultIcon = new L.Icon({
-  iconUrl: "/marker-icon-blue.png",
-  shadowUrl: "/marker-shadow.png",
-  iconSize: [25, 41],
-  iconAnchor: [12, 41],
-  popupAnchor: [1, -34],
-  shadowSize: [41, 41],
-});
-
-const selectedIcon = new L.Icon({
-  iconUrl: "/marker-icon-red.png",
-  shadowUrl: "/marker-shadow.png",
-  iconSize: [25, 41],
-  iconAnchor: [12, 41],
-  popupAnchor: [1, -34],
-  shadowSize: [41, 41],
-});
-
-const MapContainer = dynamic(
-  () => import("react-leaflet").then((mod) => mod.MapContainer),
-  { ssr: false }
-);
-const TileLayer = dynamic(
-  () => import("react-leaflet").then((mod) => mod.TileLayer),
-  { ssr: false }
-);
-const Marker = dynamic(
-  () => import("react-leaflet").then((mod) => mod.Marker),
-  { ssr: false }
-);
-const Popup = dynamic(() => import("react-leaflet").then((mod) => mod.Popup), {
-  ssr: false,
-});
 
 interface PageProps {
   params: {
@@ -69,37 +14,11 @@ interface PageProps {
   };
 }
 
-function getDistanceFromLatLonInKm(
-  lat1: number,
-  lon1: number,
-  lat2: number,
-  lon2: number
-) {
-  const R = 6371;
-  const dLat = ((lat2 - lat1) * Math.PI) / 180;
-  const dLon = ((lon2 - lon1) * Math.PI) / 180;
-  const a =
-    Math.sin(dLat / 2) * Math.sin(dLat / 2) +
-    Math.cos((lat1 * Math.PI) / 180) *
-      Math.cos((lat2 * Math.PI) / 180) *
-      Math.sin(dLon / 2) *
-      Math.sin(dLon / 2);
-  const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-  const d = R * c;
-  return d;
-}
-
 export default function CategoryPage({ params }: PageProps) {
   const [locations, setLocations] = useState<any[]>([]);
   const [selectedLocation, setSelectedLocation] = useState<any>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
-  const [userLocation, setUserLocation] = useState<{
-    lat: number;
-    lng: number;
-  } | null>(null);
-  const [nearestLocations, setNearestLocations] = useState<any[]>([]);
-  const [featuredMeis, setFeaturedMeis] = useState<any[]>([]);
 
   useEffect(() => {
     const fetchLocations = async () => {
@@ -116,11 +35,6 @@ export default function CategoryPage({ params }: PageProps) {
           (loc: any) => loc.categoria === categoryTitle
         );
         setLocations(filteredData);
-
-        if (filteredData.length > 0) {
-        const shuffled = [...filteredData].sort(() => 0.5 - Math.random());
-        setFeaturedMeis(shuffled.slice(0, 2));
-      }
       } catch (error) {
         console.error("Erro ao buscar estabelecimentos da API:", error);
         setLocations([]);
@@ -130,65 +44,6 @@ export default function CategoryPage({ params }: PageProps) {
     };
     fetchLocations();
   }, [params.slug]);
-
-  const handleLocationRequest = () => {
-    const promise = () =>
-      new Promise((resolve, reject) => {
-        if (!("geolocation" in navigator)) {
-          reject(
-            new Error("Geolocalização não é suportada pelo seu navegador.")
-          );
-          return;
-        }
-        navigator.geolocation.getCurrentPosition(resolve, reject, {
-          enableHighAccuracy: true,
-          timeout: 10000,
-        });
-      });
-
-    toast.promise(promise, {
-      loading: "A obter a sua localização...",
-      success: (position: any) => {
-        const { latitude, longitude } = position.coords;
-        setUserLocation({ lat: latitude, lng: longitude });
-        const locationsWithDistance = locations
-          .map((loc) => {
-            if (loc.coordinates && loc.coordinates.lat && loc.coordinates.lng) {
-              const dist = getDistanceFromLatLonInKm(
-                latitude,
-                longitude,
-                loc.coordinates.lat,
-                loc.coordinates.lng
-              );
-              return { ...loc, distance: dist };
-            }
-            return { ...loc, distance: Infinity };
-          })
-          .filter((loc) => loc.distance !== Infinity)
-          .sort((a, b) => a.distance - b.distance);
-        setNearestLocations(locationsWithDistance.slice(0, 3));
-        return "Localização encontrada!";
-      },
-      error: (err) => {
-        return "Para visualizar os locais mais próximos, habilite a localização no seu dispositivo";
-      },
-    });
-  };
-
-  useEffect(() => {
-    if (locations.length > 0) {
-      const timer = setTimeout(() => {
-        toast("Quer ver os locais mais próximos de si?", {
-          position: "top-center",
-          action: {
-            label: "Ativar Localização",
-            onClick: handleLocationRequest,
-          },
-        });
-      }, 1500);
-      return () => clearTimeout(timer);
-    }
-  }, [locations]);
 
   const category = categories.find((cat) => cat.id === params.slug);
 
@@ -285,53 +140,6 @@ export default function CategoryPage({ params }: PageProps) {
       </header>
 
       <main className="container mx-auto px-4 py-8">
-        {nearestLocations.length > 0 && (
-          <section className="mb-14 px-4">
-            <motion.h2
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.5 }}
-              className="text-2xl md:text-3xl font-semibold tracking-tight text-[#017DB9] mb-6 border-l-4 border-[#017DB9] pl-4"
-            >
-              Explore os locais mais próximos de si
-            </motion.h2>
-            <motion.div
-              initial="hidden"
-              animate="visible"
-              variants={{
-                hidden: { opacity: 0 },
-                visible: {
-                  opacity: 1,
-                  transition: { staggerChildren: 0.15 },
-                },
-              }}
-              className="flex flex-col md:flex-row gap-6 overflow-y-auto md:overflow-x-auto md:pb-3"
-            >
-              {nearestLocations.map((loc) => (
-                <motion.div
-                  key={loc.id}
-                  variants={{
-                    hidden: { opacity: 0, y: 20 },
-                    visible: { opacity: 1, y: 0 },
-                  }}
-                  className="min-w-[250px] bg-white text-gray-800 rounded-2xl shadow-md hover:shadow-xl border border-[#017DB9]/20 p-4 cursor-pointer flex-shrink-0 hover:scale-[1.03] transition-all duration-300"
-                >
-                  <h3 className="text-lg font-semibold text-[#017DB9] mb-1">
-                    {loc.nomeFantasia}
-                  </h3>
-                  <p className="text-sm text-gray-600">{loc.endereco}</p>
-                  <div className="flex justify-between items-center mt-3">
-                    <p className="text-sm font-medium text-[#017DB9]">
-                      {loc.distance.toFixed(2)} km
-                    </p>
-                  </div>
-                </motion.div>
-              ))}
-            </motion.div>
-            <div className="h-px w-full bg-gradient-to-r from-transparent via-gray-300 to-transparent my-5" />
-          </section>
-        )}
-
         <div className="grid grid-cols-1 milecem:grid-cols-5 gap-8">
           <div className="flex flex-col milecem:col-span-4">
             <div className="flex items-center justify-between mb-4">
@@ -431,7 +239,10 @@ export default function CategoryPage({ params }: PageProps) {
               ))}
             </div>
           </div>
-          <div className="lg:sticky lg:top-0 milecem:pl-6 h-fit" id="map-container">
+          <div
+            className="lg:sticky lg:top-0 milecem:pl-6 h-fit"
+            id="map-container"
+          >
             <motion.div
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
@@ -459,77 +270,7 @@ export default function CategoryPage({ params }: PageProps) {
             </div>
           </div>
         </div>
-       {featuredMeis.length > 0 && (
-          <section className="mt-20">
-            <div className="h-px w-full bg-gradient-to-r from-transparent via-gray-300 to-transparent mb-12" />
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true, amount: 0.3 }}
-              transition={{ duration: 0.6 }}
-              className="text-center mb-10"
-            >
-              <h2 className="text-3xl md:text-4xl font-bold text-gray-800 mb-4">
-                MEI em Destaque em{" "}
-                <span className="text-blue-600">{category.title}</span>
-              </h2>
-              <p className="text-gray-600 max-w-2xl mx-auto">
-                Descubra talentos locais que fazem a diferença na nossa cidade.
-              </p>
-            </motion.div>
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 max-w-6xl mx-auto">
-              {featuredMeis.map((mei, index) => (
-                <motion.div
-                  key={mei.estabelecimentoId}
-                  initial={{ opacity: 0, scale: 0.95 }}
-                  whileInView={{ opacity: 1, scale: 1 }}
-                  viewport={{ once: true, amount: 0.3 }}
-                  transition={{ duration: 0.7, delay: index * 0.2 }}
-                  className="bg-white rounded-2xl shadow-lg overflow-hidden flex flex-col"
-                >
-                  <div className="relative w-full h-48">
-                    <Image
-                      src={mei.imageUrl || "/placeholder.jpg"}
-                      alt={`Imagem de ${mei.nomeFantasia}`}
-                      fill
-                      className="object-cover"
-                    />
-                  </div>
-                  <div className="p-6 flex flex-col flex-grow">
-                    <h3 className="text-xl font-bold text-gray-900 mb-2">
-                      {mei.nomeFantasia}
-                    </h3>
-                    <div className="flex items-center gap-2 text-sm text-gray-500 mb-4">
-                      <MapPin size={16} />
-                      <span>{mei.endereco}</span>
-                    </div>
-                    <blockquote className="relative p-3 bg-gray-50 border-l-4 border-blue-500 mb-5">
-                      <Quote
-                        className="absolute top-2 left-2 w-6 h-6 text-blue-100"
-                        strokeWidth={1.5}
-                      />
-                      <p className="text-gray-700 italic z-10 relative pl-2">
-                        {mei.descricaoDiferencial}
-                      </p>
-                    </blockquote>
-                    <Link
-                      href={`${mei.estabelecimentoId}/MEI/`}
-                      className="mt-auto w-full text-center bg-blue-600 text-white font-bold py-2.5 px-5 rounded-lg hover:bg-blue-700 transition-colors duration-300 shadow-md hover:shadow-lg transform hover:-translate-y-0.5"
-                    >
-                      Conhecer Mais
-                    </Link>
-                  </div>
-                </motion.div>
-              ))}
-            </div>
-          </section>
-        )}
       </main>
     </div>
   );
 }
-
-function useMap() {
-  return null;
-}
-

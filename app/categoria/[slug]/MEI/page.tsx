@@ -7,13 +7,11 @@ import {
   Star,
   MapPin,
   Phone,
-  MessageCircle,
+  PhoneForwarded,
   Globe,
   Instagram,
 } from "lucide-react";
 import React, { useState, useEffect } from "react";
-import dynamic from "next/dynamic";
-import L from "leaflet";
 import { TiltImage } from "@/components/ui/TiltImage";
 import "leaflet/dist/leaflet.css";
 import { categories } from "@/app/page";
@@ -189,7 +187,7 @@ export default function MeiDetailPage({
                       rel="noopener noreferrer"
                       className="text-gray-600 hover:text-pink-600 transition-colors ml-1"
                     >
-                      <Instagram size={26} strokeWidth={2} />
+                      <Instagram size={22} strokeWidth={2} />
                     </a>
                     <span className="ml-2.5 milecem:ml-5 desktop:ml-10">
                       Whatsapp:
@@ -203,7 +201,7 @@ export default function MeiDetailPage({
                       rel="noopener noreferrer"
                       className="text-gray-600 hover:text-[#22c362] transition-colors ml-1"
                     >
-                      <MessageCircle size={26} strokeWidth={2} />
+                      <PhoneForwarded size={22} strokeWidth={2} />
                     </a>
                   </div>
                 </div>
@@ -228,17 +226,22 @@ export default function MeiDetailPage({
                   rel="noopener noreferrer"
                   className="text-gray-600 hover:text-pink-600 transition-colors ml-1"
                 >
-                  <Instagram size={26} strokeWidth={2} />
+                  <Instagram size={22} strokeWidth={2} />
                 </a>
 
-                <span className="ml-2.5 milecem:ml-5 desktop:ml-10">Site:</span>
+                <span className="ml-2.5 milecem:ml-5 desktop:ml-10">
+                  Whatsapp:
+                </span>
                 <a
-                  href={meiDetails.website}
+                  href={`https://wa.me/${meiDetails.contatoEstabelecimento.replace(
+                    /\D/g,
+                    ""
+                  )}`}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="text-gray-600 hover:text-pink-600 transition-colors ml-1"
+                  className="text-gray-600 hover:text-[#22c362] transition-colors ml-1"
                 >
-                  <Globe size={26} strokeWidth={2} />
+                  <PhoneForwarded size={22} strokeWidth={2} />
                 </a>
               </div>
             </div>

@@ -10,6 +10,7 @@ import ImageCarousel from "../components/ImageCarousel";
 import { Navbar } from "./navbar";
 import { Search } from "lucide-react";
 import ButtonWrapper from "../components/ui/button-home";
+import FaleConoscoButton from "@/components/FaleConoscoButton";
 
 export { categories };
 const categories = [
@@ -66,6 +67,11 @@ const categories = [
   {
     id: "turismo",
     title: "Turismo, Cultura e Lazer",
+    backgroundimg: "",
+  },
+  {
+    id: "rural",
+    title: "Produtores Rurais e Atividades Agrícolas",
     backgroundimg: "",
   },
 ];
@@ -301,6 +307,7 @@ export default function HomePage() {
           <h3>Gostaria que seu MEI aparecesse na vitrine?</h3>
         </div>
         <ButtonWrapper />
+        <FaleConoscoButton />
         <footer className="bg-gray-50 border-t border-gray-200 mt-20">
           <div className="container mx-auto px-4 py-8">
             <div className="text-center">
