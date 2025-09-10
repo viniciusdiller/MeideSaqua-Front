@@ -25,7 +25,7 @@ const AvaliacaoModalButton = ({
     <div className="my-4">
       <button
         onClick={() => setIsOpen(true)}
-        className="bg-gradient-to-r from-[#017DB9] to-[#22c362] text-white font-medium px-4 py-2 rounded-lg hover:opacity-90 transition-opacity shadow-md hover:shadow-lg"
+        className="bg-gradient-to-br from-[#017DB9] to-[#22c362] text-white font-medium px-4 py-2 rounded-lg hover:opacity-90 transition-opacity shadow-md hover:shadow-lg"
       >
         Deixe aqui sua Avaliação
       </button>
@@ -123,7 +123,7 @@ const SpringModal = ({
             animate={{ scale: 1, rotate: "0deg" }}
             exit={{ scale: 0, rotate: "0deg" }}
             onClick={(e) => e.stopPropagation()}
-            className="bg-gradient-to-r from-[#017DB9] to-[#22c362] text-white p-6 w-full max-w-lg shadow-xl cursor-default relative overflow-hidden rounded-2xl"
+            className="bg-gradient-to-br from-[#017DB9] to-[#22c362] text-white p-6 w-full max-w-lg shadow-xl cursor-default relative overflow-hidden rounded-2xl"
           >
             <Star className="text-white/10 rotate-12 text-[250px] absolute z-0 -top-24 -left-24" />
             <div className="relative z-10">

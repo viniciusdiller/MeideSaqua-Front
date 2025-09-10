@@ -4,7 +4,6 @@
 import Link from "next/link";
 import { ArrowLeft, Star, MapPin, Phone, Globe, Instagram } from "lucide-react";
 import React, { useState, useEffect } from "react";
-import { SwiperCarousel } from "../../../../components/CarouselMEI";
 import dynamic from "next/dynamic";
 import L from "leaflet";
 import { TiltImage } from "@/components/ui/TiltImage";
@@ -13,6 +12,12 @@ import { categories } from "@/app/page";
 import Image from "next/image";
 import { getEstablishmentById, getReviewsByEstablishment } from "@/lib/api";
 import AvaliacaoModalButton from "@/components/Pop-up Coments";
+import {
+  Pagination,
+  PaginationContent,
+  PaginationItem,
+  PaginationLink,
+} from "@/components/ui/pagination";
 
 // Configuração dos ícones do mapa
 const defaultIcon = new L.Icon({
@@ -25,21 +30,6 @@ const defaultIcon = new L.Icon({
 });
 
 // Componentes do Mapa carregados dinamicamente
-const MapContainer = dynamic(
-  () => import("react-leaflet").then((mod) => mod.MapContainer),
-  { ssr: false }
-);
-const TileLayer = dynamic(
-  () => import("react-leaflet").then((mod) => mod.TileLayer),
-  { ssr: false }
-);
-const Marker = dynamic(
-  () => import("react-leaflet").then((mod) => mod.Marker),
-  { ssr: false }
-);
-const Popup = dynamic(() => import("react-leaflet").then((mod) => mod.Popup), {
-  ssr: false,
-});
 
 const StarRating = ({ rating }: { rating: number }) => {
   const totalStars = 5;
@@ -62,7 +52,7 @@ const StarRating = ({ rating }: { rating: number }) => {
   );
 };
 
-const REVIEWS_TO_SHOW = 4;
+const REVIEWS_PER_PAGE = 4;
 
 export default function MeiDetailPage({
   params,
@@ -75,6 +65,8 @@ export default function MeiDetailPage({
   const [rating, setRating] = useState(0);
   const [isLoading, setIsLoading] = useState(true);
   const [isClient, setIsClient] = useState(false);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [animateReviews, setAnimateReviews] = useState(false);
 
   useEffect(() => {
     const fetchMeiData = async () => {
@@ -89,6 +81,9 @@ export default function MeiDetailPage({
         setMeiDetails(detailsData);
         setReviews(reviewsData);
         setRating(detailsData.media || 0);
+
+        // Ativar animação após carregar os dados
+        setAnimateReviews(true);
       } catch (error) {
         console.error("Falha ao buscar dados do MEI:", error);
         setMeiDetails(null);
@@ -100,6 +95,14 @@ export default function MeiDetailPage({
     fetchMeiData();
     setIsClient(true);
   }, [params.slug]);
+
+  useEffect(() => {
+    setAnimateReviews(false); // Reseta o estado para que a animação possa ser ativada novamente
+    const timer = setTimeout(() => {
+      setAnimateReviews(true); // Ativa a animação um pouco depois do estado ser resetado
+    }, 50); // Um pequeno delay para permitir que o React recalcule
+    return () => clearTimeout(timer); // Limpa o timer se o componente for desmontado ou a página mudar novamente
+  }, [currentPage]); // Depende da currentPage
 
   if (isLoading) {
     return (
@@ -125,13 +128,26 @@ export default function MeiDetailPage({
   );
   const categorySlug = categoryInfo ? categoryInfo.id : "";
 
+  // Lógica de Paginação
+  const totalPages = Math.ceil(reviews.length / REVIEWS_PER_PAGE);
+  const paginatedReviews = reviews.slice(
+    (currentPage - 1) * REVIEWS_PER_PAGE,
+    currentPage * REVIEWS_PER_PAGE
+  );
+
+  const handlePageChange = (page: number) => {
+    if (page >= 1 && page <= totalPages) {
+      setCurrentPage(page);
+    }
+  };
+
   return (
-    <div className="min-h-screen bg-gradient-to-br from-purple-400 to-orange-400">
+    <div className="min-h-screen bg-gradient-to-br from-[#017DB9] to-[#22c362]">
       <header className="sticky top-0 bg-white shadow-sm z-10">
         <div className="max-w-4xl mx-auto px-4 py-3 flex items-center">
           <Link
             href={`/categoria/${categorySlug}`}
-            className="flex items-center gap-2 text-gray-600 hover:text-purple-600 transition-colors"
+            className="flex items-center gap-2 text-gray-600 hover:text-[#017DB9] transition-colors"
           >
             <ArrowLeft className="w-5 h-5 mr-3 md:mr-0" />
             <p className="hidden md:block">Voltar</p>
@@ -236,37 +252,8 @@ export default function MeiDetailPage({
             <h3 className="text-2xl font-bold text-gray-900 mb-4">
               Área de Atuação
             </h3>
-            <div className="w-full h-80 bg-gray-200 rounded-3xl overflow-hidden mb-4 border">
-              {isClient && meiDetails.coordenadas ? (
-                <MapContainer
-                  center={[
-                    meiDetails.coordenadas.lat,
-                    meiDetails.coordenadas.lng,
-                  ]}
-                  zoom={15}
-                  style={{ height: "100%", width: "100%" }}
-                  scrollWheelZoom={false}
-                >
-                  <TileLayer
-                    url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-                    attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-                  />
-                  <Marker
-                    position={[
-                      meiDetails.coordenadas.lat,
-                      meiDetails.coordenadas.lng,
-                    ]}
-                    icon={defaultIcon}
-                  >
-                    <Popup>{meiDetails.nomeFantasia}</Popup>
-                  </Marker>
-                </MapContainer>
-              ) : (
-                <p className="flex items-center justify-center h-full text-gray-500">
-                  Carregando mapa...
-                </p>
-              )}
-            </div>
+            <div className="w-full h-80 bg-gray-200 rounded-3xl overflow-hidden mb-4 border"></div>
+
             <div className="space-y-3 text-gray-700">
               <div className="flex items-start gap-3">
                 <MapPin className="w-5 h-5 mt-1 text-gray-500 flex-shrink-0" />
@@ -291,43 +278,75 @@ export default function MeiDetailPage({
             <div className="space-y-4">
               {reviews.length > 0 ? (
                 <>
-                  {/* Mostra apenas os 5 primeiros comentários */}
-                  {reviews.slice(0, REVIEWS_TO_SHOW).map((review) => (
-                    <div
-                      key={review.avaliacoesId}
-                      className="flex gap-4 py-2 items-start border bt-1px rounded-3xl shadow-lg"
-                    >
-                      <div className="w-12 h-12 bg-gray-200 rounded-full flex-shrink-0 my-auto ml-4">
-                        <Image
-                          src="/avatars/default-avatar.png"
-                          alt={`Avatar de ${review.usuario.nomeCompleto}`}
-                          width={48}
-                          height={48}
-                          className="rounded-full w-full h-full object-cover"
-                        />
-                      </div>
-                      <div>
-                        <p className="font-semibold text-gray-800">
-                          {review.usuario.nomeCompleto}
-                        </p>
-                        <div className="flex items-center gap-1 my-1">
-                          <StarRating rating={review.nota} />
-                        </div>
-                        <p className="text-gray-600 break-words">
-                          {review.comentario}
-                        </p>
-                      </div>
-                    </div>
-                  ))}
-
-                  {reviews.length > REVIEWS_TO_SHOW && (
-                    <div className="text-center pt-2">
-                      <Link
-                        href={`/categoria/${categorySlug}/MEI/${params.slug}/avaliacoes`}
-                        className="font-semibold text-purple-600 hover:text-purple-800 transition-colors hover:underline"
+                  <div key={currentPage} className="space-y-4">
+                    {paginatedReviews.map((review, index) => (
+                      <div
+                        key={review.avaliacoesId}
+                        className={`
+                          flex gap-4 py-2 items-start border bt-1px rounded-3xl shadow-lg
+                          transition-all duration-500 ease-out
+                          ${
+                            animateReviews
+                              ? "opacity-100 translate-y-0"
+                              : "opacity-0 translate-y-4"
+                          }
+                        `}
+                        style={{ transitionDelay: `${index * 50}ms` }}
                       >
-                        Ver todas as {reviews.length} avaliações
-                      </Link>
+                        <div className="w-12 h-12 bg-gray-200 rounded-full flex-shrink-0 my-auto ml-4">
+                          <Image
+                            src="/avatars/default-avatar.png"
+                            alt={`Avatar de ${review.usuario.nomeCompleto}`}
+                            width={48}
+                            height={48}
+                            className="rounded-full w-full h-full object-cover"
+                          />
+                        </div>
+                        <div>
+                          <p className="font-semibold text-gray-800">
+                            {review.usuario.nomeCompleto}
+                          </p>
+                          <div className="flex items-center gap-1 my-1">
+                            <StarRating rating={review.nota} />
+                          </div>
+                          <p className="text-gray-600 break-words">
+                            {review.comentario}
+                          </p>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                  {/* */}
+                  {/* ======================== FIM DA CORREÇÃO ========================= */}
+
+                  {totalPages > 1 && (
+                    <div className="pt-4 flex justify-end">
+                      <Pagination>
+                        <PaginationContent>
+                          {[...Array(totalPages)].map((_, i) => {
+                            const pageNumber = i + 1;
+                            return (
+                              <PaginationItem key={i}>
+                                <PaginationLink
+                                  href="#"
+                                  onClick={(e) => {
+                                    e.preventDefault();
+                                    handlePageChange(pageNumber);
+                                  }}
+                                  isActive={currentPage === pageNumber}
+                                  className={
+                                    currentPage === pageNumber
+                                      ? "bg-[#017DB9] text-white hover:bg-gradient-to-br from-[#017DB9] to-[#22c362]"
+                                      : ""
+                                  }
+                                >
+                                  {pageNumber}
+                                </PaginationLink>
+                              </PaginationItem>
+                            );
+                          })}
+                        </PaginationContent>
+                      </Pagination>
                     </div>
                   )}
                 </>
