@@ -50,10 +50,11 @@ export const loginUser = (data: any) =>
   });
 
 // Funções de Perfil do Usuário
-/**
- * Atualiza o perfil do usuário (nome completo e email).
- * Requer token de autenticação.
- */
+export const confirmAccount = (token: string) =>
+  fetchApi(`/api/auth/confirm-account?token=${token}`, {
+    method: "GET",
+  });
+
 export const updateUserProfile = (
   data: { nomeCompleto?: string; email?: string },
   token: string
