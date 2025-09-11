@@ -157,6 +157,17 @@ export default function PerfilPage() {
                     <div className="grid gap-4 py-4">
                       <div>
                         <Label htmlFor="email" className="text-right">
+                          Alterar nome de usuário
+                        </Label>
+                        <Input
+                          id="usernamoe"
+                          placeholder="Deixe em branco para não alterar"
+                          onChange={(e) => setUsername(e.target.value)}
+                          className="mt-1 rounded-xl border-gray-300 placeholder-gray-300 transition-all hover:border-blue-500 focus:border-blue-500 focus:ring-2 focus:ring-blue-200"
+                        />
+                      </div>
+                      <div>
+                        <Label htmlFor="email" className="text-right">
                           Alterar E-mail
                         </Label>
                         <Input

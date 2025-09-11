@@ -90,6 +90,7 @@ export function Navbar() {
         <div className="hidden teste:flex items-center gap-10">
           <Link
             href="https://www.saquarema.rj.gov.br/"
+            target="_blank"
             aria-label="Página da Prefeitura de Saquarema"
           >
             <Image
