@@ -1,7 +1,7 @@
 "use client";
 
 import { useAuth } from "@/context/AuthContext";
-import { Button } from "@/components/ui/button";
+import { Button, buttonVariants } from "@/components/ui/button"; // Importe o buttonVariants
 import {
   Card,
   CardContent,
@@ -20,21 +20,47 @@ import {
   DialogTrigger,
   DialogClose,
 } from "@/components/ui/dialog";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import Image from "next/image";
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { toast } from "sonner";
+import {
+  updateUserProfile,
+  changeUserPassword,
+  deleteUserAccount,
+} from "@/lib/api";
+import { cn } from "@/lib/utils"; // Importe o cn
 
 export default function PerfilPage() {
-  const { user, logout, isLoading } = useAuth();
+  const { user, logout, isLoading, updateUser: updateUserContext } = useAuth();
 
   // Estados para os campos do formulário de edição
-  const [nomeCompleto, setNomeCompleto] = useState(user?.nomeCompleto || "");
-  const [email, setEmail] = useState(user?.email || "");
-  const [username, setUsername] = useState(user?.username || "");
-  const [password, setPassword] = useState("");
+  const [username, setUsername] = useState("");
+  const [email, setEmail] = useState("");
+  const [currentPassword, setCurrentPassword] = useState("");
+  const [newPassword, setNewPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [isDialogOpen, setIsDialogOpen] = useState(false);
+
+  // Popula os estados quando o usuário é carregado
+  useEffect(() => {
+    if (user) {
+      setUsername(user.username || "");
+      setEmail(user.email || "");
+    }
+  }, [user]);
 
   if (isLoading) {
     return (
@@ -51,22 +77,68 @@ export default function PerfilPage() {
     return null;
   }
 
-  // Função para lidar com o envio das alterações
-  const handleSaveChanges = () => {
-    // Adicione a lógica para salvar as alterações do usuário aqui
-    console.log("Salvando alterações:", {
-      nomeCompleto,
-      username,
-      password,
-    });
-    // Fecha o dialog após salvar
+  const handleSaveChanges = async () => {
+    if (!user?.token) {
+      toast.error("Erro de autenticação. Por favor, faça login novamente.");
+      return;
+    }
+
+    const profileData = {
+      username: username !== user.username ? username : undefined,
+      email: email !== user.email ? email : undefined,
+    };
+
+    if (profileData.username || profileData.email) {
+      try {
+        const updatedUser = await updateUserProfile(profileData, user.token);
+        updateUserContext(updatedUser);
+        toast.success("Perfil atualizado com sucesso!");
+      } catch (error: any) {
+        toast.error(`Erro ao atualizar perfil: ${error.message}`);
+        return;
+      }
+    }
+
+    if (newPassword) {
+      if (newPassword !== confirmPassword) {
+        toast.error("As novas senhas não coincidem.");
+        return;
+      }
+      if (!currentPassword) {
+        toast.error("Por favor, insira sua senha atual para alterar a senha.");
+        return;
+      }
+
+      try {
+        await changeUserPassword({ currentPassword, newPassword }, user.token);
+        toast.success("Senha alterada com sucesso!");
+      } catch (error: any) {
+        toast.error(`Erro ao alterar senha: ${error.message}`);
+        return;
+      }
+    }
+
+    setCurrentPassword("");
+    setNewPassword("");
+    setConfirmPassword("");
     setIsDialogOpen(false);
   };
 
-  // Função para lidar com a exclusão da conta
-  const handleDeleteAccount = () => {
-    // Adicione a lógica para a exclusão da conta aqui
-    console.log("Excluindo a conta...");
+  const handleDeleteAccount = async () => {
+    if (!user?.token) {
+      toast.error("Erro de autenticação. Por favor, faça login novamente.");
+      return;
+    }
+
+    try {
+      await deleteUserAccount(user.token);
+      toast.success("Conta excluída com sucesso. Você será desconectado.");
+      setTimeout(() => {
+        logout();
+      }, 2000);
+    } catch (error: any) {
+      toast.error(`Erro ao excluir a conta: ${error.message}`);
+    }
   };
 
   return (
@@ -98,7 +170,6 @@ export default function PerfilPage() {
             </Card>
           </div>
           <div className="md:col-span-2 space-y-8">
-            {/* Card de Configurações da Conta com Dados Read-Only */}
             <Card className="rounded-xl shadow-md">
               <CardHeader>
                 <CardTitle>Configurações da Conta</CardTitle>
@@ -153,66 +224,71 @@ export default function PerfilPage() {
                         quando terminar.
                       </DialogDescription>
                     </DialogHeader>
-                    {/* Formulário de Edição Dentro do Modal */}
                     <div className="grid gap-4 py-4">
                       <div>
-                        <Label htmlFor="email" className="text-right">
-                          Alterar nome de usuário
-                        </Label>
+                        <Label htmlFor="username">Nome de Usuário</Label>
                         <Input
-                          id="usernamoe"
-                          placeholder="Deixe em branco para não alterar"
+                          id="username"
+                          value={username}
                           onChange={(e) => setUsername(e.target.value)}
                           className="mt-1 rounded-xl border-gray-300 placeholder-gray-300 transition-all hover:border-blue-500 focus:border-blue-500 focus:ring-2 focus:ring-blue-200"
                         />
                       </div>
                       <div>
-                        <Label htmlFor="email" className="text-right">
-                          Alterar E-mail
-                        </Label>
+                        <Label htmlFor="email">E-mail</Label>
                         <Input
                           id="email"
-                          placeholder="Deixe em branco para não alterar"
+                          value={email}
                           onChange={(e) => setEmail(e.target.value)}
                           className="mt-1 rounded-xl border-gray-300 placeholder-gray-300 transition-all hover:border-blue-500 focus:border-blue-500 focus:ring-2 focus:ring-blue-200"
                         />
                       </div>
+                      <hr className="my-2" />
                       <div>
-                        <Label htmlFor="password" className="text-right">
-                          Nova Senha
-                        </Label>
+                        <Label htmlFor="currentPassword">Senha Atual</Label>
                         <Input
-                          id="password"
+                          id="currentPassword"
                           type="password"
-                          value={password}
-                          onChange={(e) => setPassword(e.target.value)}
-                          placeholder="Deixe em branco para não alterar"
+                          placeholder="Sua senha atual"
+                          value={currentPassword}
+                          onChange={(e) => setCurrentPassword(e.target.value)}
                           className="mt-1 rounded-xl border-gray-300 placeholder-gray-300 transition-all hover:border-blue-500 focus:border-blue-500 focus:ring-2 focus:ring-blue-200"
                         />
                       </div>
                       <div>
-                        <Label htmlFor="confirmPassword" className="text-right">
+                        <Label htmlFor="newPassword">Nova Senha</Label>
+                        <Input
+                          id="newPassword"
+                          type="password"
+                          placeholder="Deixe em branco para não alterar"
+                          value={newPassword}
+                          onChange={(e) => setNewPassword(e.target.value)}
+                          className="mt-1 rounded-xl border-gray-300 placeholder-gray-300 transition-all hover:border-blue-500 focus:border-blue-500 focus:ring-2 focus:ring-blue-200"
+                        />
+                      </div>
+                      <div>
+                        <Label htmlFor="confirmPassword">
                           Confirmar Nova Senha
                         </Label>
                         <Input
                           id="confirmPassword"
                           type="password"
                           value={confirmPassword}
+                          placeholder="Digite novamente sua nova senha"
                           onChange={(e) => setConfirmPassword(e.target.value)}
-                          className="mt-1 rounded-xl border-gray-300 transition-all hover:border-blue-500 focus:border-blue-500 focus:ring-2 focus:ring-blue-200"
+                          className="mt-1 rounded-xl border-gray-300 placeholder-gray-300 transition-all hover:border-blue-500 focus:border-blue-500 focus:ring-2 focus:ring-blue-200"
                         />
                       </div>
                     </div>
                     <DialogFooter>
-                      <DialogClose
-                        asChild
-                        className="rounded-xl border border-gray-300 bg-white hover:bg-gray-100 focus:ring-4 focus:ring-gray-200"
-                      >
-                        <Button variant="outline">Cancelar</Button>
+                      <DialogClose asChild>
+                        <Button variant="outline" className="rounded-full">
+                          Cancelar
+                        </Button>
                       </DialogClose>
                       <Button
                         onClick={handleSaveChanges}
-                        className="rounded-xl border-blue-600 bg-blue-600 text-white hover:bg-blue-700 focus:ring-4 focus:ring-blue-200"
+                        className="w-fit rounded-full bg-gray-800 text-white transition-all transform hover:scale-105 hover:bg-gray-700 active:scale-95"
                       >
                         Salvar Alterações
                       </Button>
@@ -222,7 +298,6 @@ export default function PerfilPage() {
               </CardFooter>
             </Card>
 
-            {/* Card de Zona de Perigo */}
             <Card className="border-red-500 rounded-xl shadow-md">
               <CardHeader>
                 <CardTitle className="text-red-600">Zona de Perigo</CardTitle>
@@ -231,13 +306,39 @@ export default function PerfilPage() {
                 </CardDescription>
               </CardHeader>
               <CardContent className="flex justify-center">
-                <Button
-                  variant="destructive"
-                  className="w-fit rounded-full transition-all transform hover:scale-105 hover:bg-red-500 active:scale-95 border-2 border-transparent hover:border-red-700"
-                  onClick={handleDeleteAccount}
-                >
-                  Excluir conta
-                </Button>
+                <AlertDialog>
+                  <AlertDialogTrigger asChild>
+                    <Button
+                      variant="destructive"
+                      className="w-fit rounded-full transition-all transform hover:scale-105 hover:bg-red-500 active:scale-95 border-2 border-transparent hover:border-red-700"
+                    >
+                      Excluir conta
+                    </Button>
+                  </AlertDialogTrigger>
+                  <AlertDialogContent>
+                    <AlertDialogHeader>
+                      <AlertDialogTitle>
+                        Você tem certeza absoluta?
+                      </AlertDialogTitle>
+                      <AlertDialogDescription>
+                        Esta ação não pode ser desfeita. Isso excluirá
+                        permanentemente sua conta e removerá seus dados de
+                        nossos servidores.
+                      </AlertDialogDescription>
+                    </AlertDialogHeader>
+                    <AlertDialogFooter>
+                      <AlertDialogCancel>Cancelar</AlertDialogCancel>
+                      <AlertDialogAction
+                        onClick={handleDeleteAccount}
+                        className={cn(
+                          buttonVariants({ variant: "destructive" })
+                        )}
+                      >
+                        Continuar
+                      </AlertDialogAction>
+                    </AlertDialogFooter>
+                  </AlertDialogContent>
+                </AlertDialog>
               </CardContent>
             </Card>
           </div>
