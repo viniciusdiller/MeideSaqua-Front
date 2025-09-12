@@ -4,7 +4,8 @@ import { Poppins } from "next/font/google";
 import "./globals.css";
 import { Navbar } from "./navbar";
 import { AuthProvider } from "@/context/AuthContext";
-import { Toaster } from "@/components/ui/sonner"; 
+import { Toaster } from "@/components/ui/sonner";
+import Footer from "@/components/footer"; 
 
 const poppins = Poppins({
   subsets: ["latin"],
@@ -42,13 +43,17 @@ export default function RootLayout({
 }) {
   return (
     <html lang="pt-BR">
-      <body className={`${poppins.variable} bg-white`}>
+      <body
+        className={`${poppins.variable} bg-white flex flex-col min-h-screen`}
+      >
         <AuthProvider>
           <Navbar />
-          <main>{children}</main>
+          <main className="flex-grow">{children}</main>
+          <Footer />
           <Toaster richColors />
         </AuthProvider>
       </body>
     </html>
   );
 }
+

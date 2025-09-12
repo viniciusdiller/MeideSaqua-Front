@@ -1,13 +1,10 @@
-// PAGE PRINCIPAL
 "use client";
 import Image from "next/image";
 import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import Link from "next/link";
 import { ArrowUp } from "lucide-react";
-
 import ImageCarousel from "../components/ImageCarousel";
-
 import { Search } from "lucide-react";
 import ButtonWrapper from "../components/ui/button-home";
 import FaleConoscoButton from "@/components/FaleConoscoButton";
@@ -133,24 +130,19 @@ export default function HomePage() {
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
-  // 1. O filtro de categorias continua o mesmo, sem o "Espaço MEI".
   const filteredCategories = categories.filter(
     (category) =>
       category.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
       category.tagsinv.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
-  // --- ALTERAÇÃO PRINCIPAL ---
-  // 2. Criamos uma variável para controlar a visibilidade do card "Espaço MEI".
-  // Ele será visível se a busca estiver vazia OU se o termo de busca for encontrado em "Espaço MEI".
   const showEspacoMei =
     searchTerm.trim() === "" ||
     "espaço mei".toLowerCase().includes(searchTerm.toLowerCase());
 
   return (
     <>
-      <div className="min-h-screen bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-gray-100 to-white pt-8">
-        {/* Header e Hero Section (sem alterações) */}
+      <div className="flex flex-col flex-grow bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-gray-100 to-white pt-8">
         <Image
           src="/logo2sq.png"
           alt="Logo Prefeitura de Saquarema"
@@ -170,7 +162,8 @@ export default function HomePage() {
           </Link>
         </div>
         <ImageCarousel />
-        <section className="container mx-auto px-4 py-8 md:py-8 relative z-10 -mt-[1px] md:-mt-[1px]">
+
+        <section className="flex-grow container mx-auto px-4 py-8 md:py-8 relative z-10 -mt-[1px] md:-mt-[1px]">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
@@ -214,9 +207,7 @@ export default function HomePage() {
             </div>
           </motion.div>
 
-          {/* Categories Grid */}
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5 max-w-7xl mx-auto">
-            {/* Mapeamento das categorias filtradas (como no original) */}
             {filteredCategories.map((category, index) => (
               <motion.div
                 key={category.id}
@@ -284,39 +275,17 @@ export default function HomePage() {
             <ArrowUp size={20} />
           </motion.button>
         )}
-
-        <div className="text-center mt-1 text-gray-600 mb-3">
-          <h3>Gostaria que seu MEI aparecesse na vitrine?</h3>
-        </div>
-        <ButtonWrapper />
-        <FaleConoscoButton />
-        <footer className="bg-gray-50 border-t border-gray-200 mt-20">
-          <div className="container mx-auto px-4 py-8">
-            <div className="text-center">
-              <Image
-                src="/LogoExploraMonocromática.png"
-                alt="Logo MeideSaqua"
-                width={2660}
-                height={898}
-                className=" mx-auto h-10 sm:h-12 w-auto mb-5 md:block milecem:h-14"
-              />
-              <p className="text-gray-600 mb-4">
-                {" "}
-                A vitrine digital que valoriza o empreendedor local e fortalece
-                a economia de Saquarema
-              </p>
-              <hr className="w-16 mx-auto border-gray-300 mb-4" />{" "}
-              <p className="text-gray-500 text-sm">
-                © Desenvolvido pela{" "}
-                <span className="font-medium text-gray-600">
-                  Secretaria Municipal de Governança e Sustentabilidade de
-                  Saquarema
-                </span>
-              </p>
-            </div>
+        
+        <div className="mt-auto pt-10 pb-24">
+          <div className="text-center text-gray-600 mb-3">
+            <h3>Gostaria que seu MEI aparecesse na vitrine?</h3>
           </div>
-        </footer>
+          <ButtonWrapper />
+          <FaleConoscoButton />
+        </div>
       </div>
     </>
   );
 }
+
+
