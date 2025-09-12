@@ -1,29 +1,110 @@
 import Image from "next/image";
+import Link from "next/link";
 import React from "react";
+import { Facebook, Instagram, Mail, MapPin, Phone } from "lucide-react";
 
 const Footer = () => {
   return (
-    <footer className="bg-gray-50 border-t border-gray-200 w-full">
-      <div className="container mx-auto px-4 py-8">
-        <div className="text-center">
-          <Image
-            src="/LogoExploraMonocromática.png"
-            alt="Logo MeideSaqua"
-            width={2660}
-            height={898}
-            className=" mx-auto h-10 sm:h-12 w-auto mb-5 md:block milecem:h-14"
-          />
-          <p className="text-gray-600 mb-4">
-            {" "}
-            A vitrine digital que valoriza o empreendedor local e fortalece a
-            economia de Saquarema
-          </p>
-          <hr className="w-16 mx-auto border-gray-300 mb-4" />{" "}
-          <p className="text-gray-500 text-sm">
-            © Desenvolvido pela{" "}
-            <span className="font-medium text-gray-600">
-              Secretaria Municipal de Governança e Sustentabilidade de Saquarema
-            </span>
+    <footer className="bg-gray-100 border-t border-gray-200 w-full">
+      <div className="container mx-auto px-6 py-12">
+        <div className="md:flex md:justify-between md:items-start text-center md:text-left">
+          <div className="mb-10 md:mb-0 md:w-1/3">
+            <Link href="/" className="inline-block">
+              <Image
+                src="/LogoExploraMonocromática.png"
+                alt="Logo MeideSaqua"
+                width={160}
+                height={57}
+                className="h-14 w-auto mb-4 mx-auto md:mx-0"
+              />
+            </Link>
+            <p className="text-gray-600 max-w-xs mx-auto md:mx-0">
+              A vitrine digital que valoriza o empreendedor local e fortalece a
+              economia de Saquarema.
+            </p>
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
+            <div>
+              <h3 className="font-bold uppercase text-gray-800 mb-4">
+                Links Úteis
+              </h3>
+              <ul className="space-y-2">
+                <li>
+                  <Link
+                    href="/sobre"
+                    className="text-gray-600 hover:text-blue-600 transition-colors"
+                  >
+                    Sobre o Projeto
+                  </Link>
+                </li>
+                <li>
+                  <Link
+                    href="/espaco-mei"
+                    className="text-gray-600 hover:text-blue-600 transition-colors"
+                  >
+                    Espaço MEI
+                  </Link>
+                </li>
+                <li>
+                  <Link
+                    href="/contato"
+                    className="text-gray-600 hover:text-blue-600 transition-colors"
+                  >
+                    Fale Conosco
+                  </Link>
+                </li>
+              </ul>
+            </div>
+
+            <div>
+              <h3 className="font-bold uppercase text-gray-800 mb-4">
+                Contato
+              </h3>
+              <ul className="space-y-3 text-gray-600">
+                <li className="flex items-center justify-center md:justify-start gap-3">
+                  <Mail size={16} />
+                  <span>meidesaqua@saquarema.rj.gov.br</span>
+                </li>
+                <li className="flex items-center justify-center md:justify-start gap-3">
+                  <Phone size={16} />
+                  <span>(22) 2651-2254</span>
+                </li>
+                <li className="flex items-center justify-center md:justify-start gap-3">
+                  <MapPin size={16} />
+                  <span>R. Gatinhos gatos gatônicos, 12</span>
+                </li>
+              </ul>
+            </div>
+
+            <div>
+              <h3 className="font-bold uppercase text-gray-800 mb-4">
+                Siga-nos
+              </h3>
+              <div className="flex justify-center md:justify-start gap-5">
+                <a
+                  href="https://www.facebook.com/PrefeituradeSaquarema/"
+                  aria-label="Facebook"
+                  className="text-gray-500 hover:text-blue-700 transition-colors"
+                >
+                  <Facebook size={24} />
+                </a>
+                <a
+                  href="https://www.instagram.com/prefeiturasaquarema/?hl=en"
+                  aria-label="Instagram"
+                  className="text-gray-500 hover:text-pink-600 transition-colors"
+                >
+                  <Instagram size={24} />
+                </a>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div className="border-t border-gray-200 mt-12 pt-8 text-center text-sm text-gray-500">
+          <p>
+            © {new Date().getFullYear()} Desenvolvido pela Secretaria Municipal
+            de Governança e Sustentabilidade de Saquarema
           </p>
         </div>
       </div>
@@ -32,3 +113,4 @@ const Footer = () => {
 };
 
 export default Footer;
+
