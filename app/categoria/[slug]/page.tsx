@@ -257,16 +257,7 @@ export default function CategoryPage({ params }: PageProps) {
               </p>
             </motion.div>
             <div className="w-full h-[300px] md:h-[500px] rounded-2xl shadow-lg overflow-hidden border border-blue-600">
-              <ModernCarousel
-                slides={[
-                  { imageUrl: "/gatinho.jpg", label: "Ver Gatinho mau" },
-                  {
-                    imageUrl: "/categorias/Alimentação.jpeg",
-                    label: "Comer até não aguentar",
-                  },
-                  { imageUrl: "/categorias/Moda.jpeg", label: "Ver roupas" },
-                ]}
-              />
+              <ModernCarousel currentCategoryId={category.id} />
             </div>
           </div>
         </div>

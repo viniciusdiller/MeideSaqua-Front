@@ -41,7 +41,7 @@ export const SwiperCarousel = () => {
 
   return (
     <div className="w-full relative">
-      <div className="swiper default-carousel swiper-container">
+      <div className="swiper default-carousel swiper-container rounded-3xl">
         <div className="swiper-wrapper">
           {/* Slide 1 */}
           <div className="swiper-slide">
@@ -63,12 +63,15 @@ export const SwiperCarousel = () => {
           <div className="swiper-slide">
             <div className="bg-indigo-50 rounded-2xl h-96 flex justify-center items-center">
               <Image
-                src="/gatinho.jpg"
+                src="/teste.jpg"
                 alt="Slide 3"
                 fill
-                style={{ objectFit: "cover" }}
+                className="object-cover" // Você pode adicionar object-top, object-center, etc. aqui
+                sizes="(max-width: 768px) 100vw, 50vw" // Exemplo: 100% em mobile, 50% em telas maiores
+                priority // Adicione se a imagem for a primeira a ser vista na página (LCP)
+                placeholder="blur" // Opcional: Efeito de blur enquanto carrega
+                blurDataURL="/path/to/tiny/placeholder.jpg" // Opcional: uma imagem minúscula para o blur
               />
-              <span className="text-3xl font-semibold text-indigo-600"></span>
             </div>
           </div>
         </div>
@@ -77,22 +80,42 @@ export const SwiperCarousel = () => {
         <div className="flex items-center gap-8 lg:justify-start justify-center">
           <button
             id="slider-button-left"
-            className="swiper-button-prev group !p-2 flex justify-center items-center border border-solid border-indigo-600 !w-12 !h-12 transition-all duration-500 rounded-full !top-2/4 !-translate-y-8 !left-5 hover:bg-indigo-600"
+            aria-label="Slide anterior" // Boa prática para acessibilidade
+            className="swiper-button-prev group 
+             relative // Garante que o ícone interno seja posicionado corretamente se for necessário
+             flex items-center justify-center 
+             w-8 h-8 md:w-10 md:h-10 // Botão menor em telas pequenas, um pouco maior em md
+             rounded-full // Continua redondo
+             bg-gray-400 // Cor de fundo cinza principal
+             hover:bg-white // Background branco no hover
+             transition-all duration-300 ease-in-out // Transição suave
+             focus:outline-none focus:ring-2 focus:ring-gray-300 // Foco acessível
+             !absolute // Mantém a posição absoluta para o Swiper
+             left-2 md:left-4 // Posição mais próxima da borda
+             z-10 // Garante que esteja acima do slide
+             "
+            // Para centralizar verticalmente, precisamos da mesma técnica de 'top: 50%' e 'translateY(-50%)'
+            // que aplicamos antes no componente pai do botão, ou diretamente no botão se ele for absoluto no container do Swiper.
+            // Se ele já estiver dentro de um div com 'absolute inset-y-0 flex items-center', então está ok.
+            // Se não, adicione o style inline como abaixo:
+            style={{ top: "50%", transform: "translateY(-50%)" }}
           >
             <svg
-              className="h-5 w-5 text-indigo-600 group-hover:text-white"
+              className="h-4 w-4 md:h-5 md:w-5 // Tamanho do ícone menor
+               text-gray-800 // Cor da seta cinza escuro
+               group-hover:text-gray-900 // Seta escurece um pouco no hover
+               transition-colors duration-300 // Transição suave para a cor da seta
+               "
               xmlns="http://www.w3.org/2000/svg"
-              width="16"
-              height="16"
-              viewBox="0 0 16 16"
               fill="none"
+              viewBox="0 0 24 24"
+              strokeWidth={1.5}
+              stroke="currentColor"
             >
               <path
-                d="M10.0002 11.9999L6 7.99971L10.0025 3.99719"
-                stroke="currentColor"
-                strokeWidth="1.6" // Convertido de stroke-width
-                strokeLinecap="round" // Convertido de stroke-linecap
-                strokeLinejoin="round" // Convertido de stroke-linejoin
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                d="M15.75 19.5L8.25 12m7.5 0l-7.5-7.5"
               />
             </svg>
           </button>

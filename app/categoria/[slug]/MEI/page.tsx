@@ -24,6 +24,7 @@ import {
   PaginationItem,
   PaginationLink,
 } from "@/components/ui/pagination";
+import SwiperCarousel from "@/components/CarouselMEI";
 
 const StarRating = ({ rating }: { rating: number }) => {
   const totalStars = 5;
@@ -251,7 +252,128 @@ export default function MeiDetailPage({
             <h3 className="text-2xl font-bold text-gray-900 mb-4">
               Área de Atuação
             </h3>
-            <div className="w-full h-80 bg-gray-200 rounded-3xl overflow-hidden mb-4 border"></div>
+            <div className="w-full h-fit bg-gray-200 rounded-3xl overflow-hidden mb-4 border flex flex-col milecem:flex-row">
+              <div className="milecem:w-[70%] py-5 px-5 milecem:px-10 text-gray-700 break-words">
+                {" "}
+                <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
+                  <div className="px-2 py-1 md:px-4 md:py-2 rounded-xl border border-gray-400 bg-gray-100 text-gray-600 select-none text-center justify-center cursor-default duration-200 ease-in-out hover:scale-105 hover:shadow-md hover:-translate-y-1">
+                    Restaurante Central
+                  </div>
+
+                  <div className="px-2 py-1 md:px-4 md:py-2 rounded-xl border border-gray-400 bg-gray-100 text-gray-600 select-none text-center justify-center cursor-default duration-200 ease-in-out hover:scale-105 hover:shadow-md hover:-translate-y-1 ">
+                    Padaria Doce Pão
+                  </div>
+                  <div
+                    className="px-2 py-1 md:px-4 md:py-2 rounded-xl border border-gray-400 bg-gray-100 text-gray-600 select-none text-center justify-center cursor-default duration-200 ease-in-out 
+               hover:scale-105 hover:shadow-md hover:-translate-y-1  "
+                  >
+                    Restaurante Central
+                  </div>
+
+                  <div
+                    className="px-2 py-1 md:px-4 md:py-2 rounded-xl border border-gray-400 bg-gray-100 text-gray-600 select-none text-center justify-center cursor-default duration-200 ease-in-out 
+               hover:scale-105 hover:shadow-md hover:-translate-y-1 "
+                  >
+                    Padaria Doce Pão
+                  </div>
+                  <div
+                    className="px-2 py-1 md:px-4 md:py-2 rounded-xl border border-gray-400 bg-gray-100 text-gray-600 cursor-default select-none text-center justify-center transition-all duration-200 ease-in-out 
+               hover:scale-105 hover:shadow-md hover:-translate-y-1"
+                  >
+                    Farmácia Vida
+                  </div>
+                  <div
+                    className="px-2 py-1 md:px-4 md:py-2 rounded-xl border border-gray-400 bg-gray-100 text-gray-600 cursor-default select-none text-center justify-center transition-all duration-200 ease-in-out 
+               hover:scale-105 hover:shadow-md hover:-translate-y-1"
+                  >
+                    Lanchonete Express
+                  </div>
+                  <div
+                    className="px-2 py-1 md:px-4 md:py-2 rounded-xl border border-gray-400 bg-gray-100 text-gray-600 cursor-default select-none text-center justify-center transition-all duration-200 ease-in-out 
+               hover:scale-105 hover:shadow-md hover:-translate-y-1"
+                  >
+                    Barra Nova
+                  </div>
+                  <div
+                    className="px-2 py-1 md:px-4 md:py-2 rounded-xl border border-gray-400 bg-gray-100 text-gray-600 cursor-default select-none text-center justify-center transition-all duration-200 ease-in-out 
+               hover:scale-105 hover:shadow-md hover:-translate-y-1"
+                  >
+                    Vilatur
+                  </div>
+                  <div
+                    className="px-2 py-1 md:px-4 md:py-2 rounded-xl border border-gray-400 bg-gray-100 text-gray-600 cursor-default select-none text-center justify-center transition-all duration-200 ease-in-out 
+               hover:scale-105 hover:shadow-md hover:-translate-y-1"
+                  >
+                    Porto da Roça II
+                  </div>
+                  <div
+                    className="px-2 py-1 md:px-4 md:py-2 rounded-xl border border-gray-400 bg-gray-100 text-gray-600 cursor-default select-none text-center justify-center transition-all duration-200 ease-in-out 
+               hover:scale-105 hover:shadow-md hover:-translate-y-1"
+                  >
+                    Itaúna
+                  </div>
+                  <div className="px-2 py-1 md:px-4 md:py-2 rounded-xl border border-gray-400 bg-gray-100 text-gray-600 select-none text-center justify-center cursor-default duration-200 ease-in-out hover:scale-105 hover:shadow-md hover:-translate-y-1">
+                    Restaurante Central
+                  </div>
+
+                  <div className="px-2 py-1 md:px-4 md:py-2 rounded-xl border border-gray-400 bg-gray-100 text-gray-600 select-none text-center justify-center cursor-default duration-200 ease-in-out hover:scale-105 hover:shadow-md hover:-translate-y-1 ">
+                    Padaria Doce Pão
+                  </div>
+                  <div
+                    className="px-2 py-1 md:px-4 md:py-2 rounded-xl border border-gray-400 bg-gray-100 text-gray-600 select-none text-center justify-center cursor-default duration-200 ease-in-out 
+               hover:scale-105 hover:shadow-md hover:-translate-y-1  "
+                  >
+                    Restaurante Central
+                  </div>
+
+                  <div
+                    className="px-2 py-1 md:px-4 md:py-2 rounded-xl border border-gray-400 bg-gray-100 text-gray-600 select-none text-center justify-center cursor-default duration-200 ease-in-out 
+               hover:scale-105 hover:shadow-md hover:-translate-y-1 "
+                  >
+                    Padaria Doce Pão
+                  </div>
+                  <div
+                    className="px-2 py-1 md:px-4 md:py-2 rounded-xl border border-gray-400 bg-gray-100 text-gray-600 cursor-default select-none text-center justify-center transition-all duration-200 ease-in-out 
+               hover:scale-105 hover:shadow-md hover:-translate-y-1"
+                  >
+                    Farmácia Vida
+                  </div>
+                  <div
+                    className="px-2 py-1 md:px-4 md:py-2 rounded-xl border border-gray-400 bg-gray-100 text-gray-600 cursor-default select-none text-center justify-center transition-all duration-200 ease-in-out 
+               hover:scale-105 hover:shadow-md hover:-translate-y-1"
+                  >
+                    Lanchonete Express
+                  </div>
+                  <div
+                    className="px-2 py-1 md:px-4 md:py-2 rounded-xl border border-gray-400 bg-gray-100 text-gray-600 cursor-default select-none text-center justify-center transition-all duration-200 ease-in-out 
+               hover:scale-105 hover:shadow-md hover:-translate-y-1"
+                  >
+                    Barra Nova
+                  </div>
+                  <div
+                    className="px-2 py-1 md:px-4 md:py-2 rounded-xl border border-gray-400 bg-gray-100 text-gray-600 cursor-default select-none text-center justify-center transition-all duration-200 ease-in-out 
+               hover:scale-105 hover:shadow-md hover:-translate-y-1"
+                  >
+                    Vilatur
+                  </div>
+                  <div
+                    className="px-2 py-1 md:px-4 md:py-2 rounded-xl border border-gray-400 bg-gray-100 text-gray-600 cursor-default select-none text-center justify-center transition-all duration-200 ease-in-out 
+               hover:scale-105 hover:shadow-md hover:-translate-y-1"
+                  >
+                    Porto da Roça II
+                  </div>
+                  <div
+                    className="px-2 py-1 md:px-4 md:py-2 rounded-xl border border-gray-400 bg-gray-100 text-gray-600 cursor-default select-none text-center justify-center transition-all duration-200 ease-in-out 
+               hover:scale-105 hover:shadow-md hover:-translate-y-1"
+                  >
+                    Itaúna
+                  </div>
+                </div>
+              </div>
+              <div className="milecem:w-[40%] h-full relative">
+                <SwiperCarousel />
+              </div>
+            </div>
 
             <div className="space-y-3 text-gray-700">
               <div className="flex items-start gap-3">

@@ -5,13 +5,12 @@ import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import Link from "next/link";
 import { ArrowUp } from "lucide-react";
-import Head from "next/head";
+
 import ImageCarousel from "../components/ImageCarousel";
-import { Navbar } from "./navbar";
+
 import { Search } from "lucide-react";
 import ButtonWrapper from "../components/ui/button-home";
 import FaleConoscoButton from "@/components/FaleConoscoButton";
-import { table } from "console";
 
 export { categories };
 const categories = [
