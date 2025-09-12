@@ -32,7 +32,6 @@ export const SwiperCarousel = () => {
     <div className="w-full relative">
       <div className="swiper default-carousel swiper-container rounded-3xl">
         <div className="swiper-wrapper">
-          {/* Slides */}
           <div className="swiper-slide">
             <div className="bg-indigo-50 rounded-2xl h-96 flex justify-center items-center">
               <span className="text-3xl font-semibold text-indigo-600">
@@ -60,10 +59,8 @@ export const SwiperCarousel = () => {
           </div>
         </div>
 
-        {/* Paginação */}
         <div className="swiper-pagination"></div>
 
-        {/* Botões de Navegação (Agora filhos diretos do container) */}
         {/* Botão Esquerdo */}
         <button
           id="slider-button-left"
@@ -100,7 +97,6 @@ export const SwiperCarousel = () => {
             strokeWidth={2}
             stroke="currentColor"
           >
-            {/* Path CORRIGIDO para a seta direita */}
             <path
               strokeLinecap="round"
               strokeLinejoin="round"

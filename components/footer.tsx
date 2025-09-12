@@ -22,7 +22,7 @@ const Footer = () => {
                 className="h-14 w-auto mx-auto md:mx-auto "
               />
             </Link>
-            <p className="text-gray-600 max-w-xs mx-auto md:mx-0">
+            <p className="text-gray-600 max-w-xs mx-auto ">
               A vitrine digital que valoriza o empreendedor local e fortalece a
               economia de Saquarema.
             </p>
@@ -71,11 +71,11 @@ const Footer = () => {
               </li>
               <li className="flex items-center justify-center gap-3">
                 <Phone size={16} />
-                <span>(22) 2651-2254</span>
+                <span>(22) 0000-0000</span>
               </li>
               <li className="flex items-center justify-center gap-3 break-words">
                 <MapPin size={16} />
-                <span>R. Gatinhos gatos gatônicos, 12</span>
+                <span>R. Cel. Madureira, 77 - Centro, Saquarema - RJ</span>
               </li>
             </ul>
           </div>

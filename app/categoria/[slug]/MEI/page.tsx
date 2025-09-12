@@ -92,12 +92,12 @@ export default function MeiDetailPage({
   }, [params.slug]);
 
   useEffect(() => {
-    setAnimateReviews(false); // Reseta o estado para que a animação possa ser ativada novamente
+    setAnimateReviews(false);
     const timer = setTimeout(() => {
-      setAnimateReviews(true); // Ativa a animação um pouco depois do estado ser resetado
-    }, 50); // Um pequeno delay para permitir que o React recalcule
-    return () => clearTimeout(timer); // Limpa o timer se o componente for desmontado ou a página mudar novamente
-  }, [currentPage]); // Depende da currentPage
+      setAnimateReviews(true);
+    }, 50);
+    return () => clearTimeout(timer);
+  }, [currentPage]);
 
   if (isLoading) {
     return (
@@ -250,132 +250,20 @@ export default function MeiDetailPage({
 
           <section className="bg-white p-6 rounded-3xl shadow-md md:mx-auto md:max-w-[85%]">
             <h3 className="text-2xl font-bold text-gray-900 mb-4">
-              Área de Atuação
+              Portifólio de Produdos
             </h3>
             <div className="w-full h-fit bg-gray-200 rounded-3xl overflow-hidden mb-4 border flex flex-col milecem:flex-row">
-              <div className="milecem:w-[70%] py-5 px-5 milecem:px-10 text-gray-700 break-words">
-                {" "}
-                <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
-                  <div className="px-2 py-1 md:px-4 md:py-2 rounded-xl border border-gray-400 bg-gray-100 text-gray-600 select-none text-center justify-center cursor-default duration-200 ease-in-out hover:scale-105 hover:shadow-md hover:-translate-y-1">
-                    Restaurante Central
-                  </div>
-
-                  <div className="px-2 py-1 md:px-4 md:py-2 rounded-xl border border-gray-400 bg-gray-100 text-gray-600 select-none text-center justify-center cursor-default duration-200 ease-in-out hover:scale-105 hover:shadow-md hover:-translate-y-1 ">
-                    Padaria Doce Pão
-                  </div>
-                  <div
-                    className="px-2 py-1 md:px-4 md:py-2 rounded-xl border border-gray-400 bg-gray-100 text-gray-600 select-none text-center justify-center cursor-default duration-200 ease-in-out 
-               hover:scale-105 hover:shadow-md hover:-translate-y-1  "
-                  >
-                    Restaurante Central
-                  </div>
-
-                  <div
-                    className="px-2 py-1 md:px-4 md:py-2 rounded-xl border border-gray-400 bg-gray-100 text-gray-600 select-none text-center justify-center cursor-default duration-200 ease-in-out 
-               hover:scale-105 hover:shadow-md hover:-translate-y-1 "
-                  >
-                    Padaria Doce Pão
-                  </div>
-                  <div
-                    className="px-2 py-1 md:px-4 md:py-2 rounded-xl border border-gray-400 bg-gray-100 text-gray-600 cursor-default select-none text-center justify-center transition-all duration-200 ease-in-out 
-               hover:scale-105 hover:shadow-md hover:-translate-y-1"
-                  >
-                    Farmácia Vida
-                  </div>
-                  <div
-                    className="px-2 py-1 md:px-4 md:py-2 rounded-xl border border-gray-400 bg-gray-100 text-gray-600 cursor-default select-none text-center justify-center transition-all duration-200 ease-in-out 
-               hover:scale-105 hover:shadow-md hover:-translate-y-1"
-                  >
-                    Lanchonete Express
-                  </div>
-                  <div
-                    className="px-2 py-1 md:px-4 md:py-2 rounded-xl border border-gray-400 bg-gray-100 text-gray-600 cursor-default select-none text-center justify-center transition-all duration-200 ease-in-out 
-               hover:scale-105 hover:shadow-md hover:-translate-y-1"
-                  >
-                    Barra Nova
-                  </div>
-                  <div
-                    className="px-2 py-1 md:px-4 md:py-2 rounded-xl border border-gray-400 bg-gray-100 text-gray-600 cursor-default select-none text-center justify-center transition-all duration-200 ease-in-out 
-               hover:scale-105 hover:shadow-md hover:-translate-y-1"
-                  >
-                    Vilatur
-                  </div>
-                  <div
-                    className="px-2 py-1 md:px-4 md:py-2 rounded-xl border border-gray-400 bg-gray-100 text-gray-600 cursor-default select-none text-center justify-center transition-all duration-200 ease-in-out 
-               hover:scale-105 hover:shadow-md hover:-translate-y-1"
-                  >
-                    Porto da Roça II
-                  </div>
-                  <div
-                    className="px-2 py-1 md:px-4 md:py-2 rounded-xl border border-gray-400 bg-gray-100 text-gray-600 cursor-default select-none text-center justify-center transition-all duration-200 ease-in-out 
-               hover:scale-105 hover:shadow-md hover:-translate-y-1"
-                  >
-                    Itaúna
-                  </div>
-                  <div className="px-2 py-1 md:px-4 md:py-2 rounded-xl border border-gray-400 bg-gray-100 text-gray-600 select-none text-center justify-center cursor-default duration-200 ease-in-out hover:scale-105 hover:shadow-md hover:-translate-y-1">
-                    Restaurante Central
-                  </div>
-
-                  <div className="px-2 py-1 md:px-4 md:py-2 rounded-xl border border-gray-400 bg-gray-100 text-gray-600 select-none text-center justify-center cursor-default duration-200 ease-in-out hover:scale-105 hover:shadow-md hover:-translate-y-1 ">
-                    Padaria Doce Pão
-                  </div>
-                  <div
-                    className="px-2 py-1 md:px-4 md:py-2 rounded-xl border border-gray-400 bg-gray-100 text-gray-600 select-none text-center justify-center cursor-default duration-200 ease-in-out 
-               hover:scale-105 hover:shadow-md hover:-translate-y-1  "
-                  >
-                    Restaurante Central
-                  </div>
-
-                  <div
-                    className="px-2 py-1 md:px-4 md:py-2 rounded-xl border border-gray-400 bg-gray-100 text-gray-600 select-none text-center justify-center cursor-default duration-200 ease-in-out 
-               hover:scale-105 hover:shadow-md hover:-translate-y-1 "
-                  >
-                    Padaria Doce Pão
-                  </div>
-                  <div
-                    className="px-2 py-1 md:px-4 md:py-2 rounded-xl border border-gray-400 bg-gray-100 text-gray-600 cursor-default select-none text-center justify-center transition-all duration-200 ease-in-out 
-               hover:scale-105 hover:shadow-md hover:-translate-y-1"
-                  >
-                    Farmácia Vida
-                  </div>
-                  <div
-                    className="px-2 py-1 md:px-4 md:py-2 rounded-xl border border-gray-400 bg-gray-100 text-gray-600 cursor-default select-none text-center justify-center transition-all duration-200 ease-in-out 
-               hover:scale-105 hover:shadow-md hover:-translate-y-1"
-                  >
-                    Lanchonete Express
-                  </div>
-                  <div
-                    className="px-2 py-1 md:px-4 md:py-2 rounded-xl border border-gray-400 bg-gray-100 text-gray-600 cursor-default select-none text-center justify-center transition-all duration-200 ease-in-out 
-               hover:scale-105 hover:shadow-md hover:-translate-y-1"
-                  >
-                    Barra Nova
-                  </div>
-                  <div
-                    className="px-2 py-1 md:px-4 md:py-2 rounded-xl border border-gray-400 bg-gray-100 text-gray-600 cursor-default select-none text-center justify-center transition-all duration-200 ease-in-out 
-               hover:scale-105 hover:shadow-md hover:-translate-y-1"
-                  >
-                    Vilatur
-                  </div>
-                  <div
-                    className="px-2 py-1 md:px-4 md:py-2 rounded-xl border border-gray-400 bg-gray-100 text-gray-600 cursor-default select-none text-center justify-center transition-all duration-200 ease-in-out 
-               hover:scale-105 hover:shadow-md hover:-translate-y-1"
-                  >
-                    Porto da Roça II
-                  </div>
-                  <div
-                    className="px-2 py-1 md:px-4 md:py-2 rounded-xl border border-gray-400 bg-gray-100 text-gray-600 cursor-default select-none text-center justify-center transition-all duration-200 ease-in-out 
-               hover:scale-105 hover:shadow-md hover:-translate-y-1"
-                  >
-                    Itaúna
-                  </div>
-                </div>
-              </div>
-              <div className="milecem:w-[40%] h-full relative">
+              <div className=" w-full milecem:w-[50%] h-full relative mx-auto">
                 <SwiperCarousel />
               </div>
             </div>
+          </section>
 
+          <section className="bg-white p-6 rounded-3xl shadow-md md:mx-auto md:max-w-[85%] grid grid-cols-1 milecem:grid-cols-4  gap-6">
             <div className="space-y-3 text-gray-700">
+              <h3 className="text-2xl font-bold text-gray-900 mb-4">
+                Área de Atuação
+              </h3>
               <div className="flex items-start gap-3">
                 <MapPin className="w-5 h-5 mt-1 text-gray-500 flex-shrink-0" />
                 <span>{meiDetails.endereco}</span>
@@ -383,6 +271,95 @@ export default function MeiDetailPage({
               <div className="flex items-center gap-3">
                 <Phone className="w-5 h-5 text-gray-500 flex-shrink-0" />
                 <span>{meiDetails.contatoEstabelecimento}</span>
+              </div>
+            </div>
+
+            <div className="w-full h-fit bg-gray-200 rounded-3xl overflow-hidden mb-4 border flex flex-col milecem:flex-row md:col-span-3 ">
+              <div className="">
+                <div className="milecem:w-[100%] py-5 px-5 milecem:px-10 text-gray-700 break-words">
+                  {" "}
+                  <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 miletrezentos:grid-cols-5 milesetecentos:grid-cols-6 fullhd:grid-cols-7 quadhd:grid-cols-8 telona:grid-cols-10 gap-3">
+                    <div
+                      className="px-2 py-1 md:px-4 md:py-2 rounded-xl border border-gray-400 bg-gray-100 text-gray-600 select-none 
+                   flex items-center justify-center 
+                   cursor-pointer transition-all duration-200 ease-in-out hover:scale-105 hover:shadow-md hover:-translate-y-1"
+                    >
+                      Padaria Doce Pão
+                    </div>
+                    <div
+                      className="px-2 py-1 md:px-4 md:py-2 rounded-xl border border-gray-400 bg-gray-100 text-gray-600 select-none 
+                   flex items-center justify-center 
+                   cursor-pointer transition-all duration-200 ease-in-out hover:scale-105 hover:shadow-md hover:-translate-y-1"
+                    >
+                      Restaurante Central
+                    </div>
+
+                    <div
+                      className="px-2 py-1 md:px-4 md:py-2 rounded-xl border border-gray-400 bg-gray-100 text-gray-600 select-none 
+                   flex items-center justify-center 
+                   cursor-pointer transition-all duration-200 ease-in-out hover:scale-105 hover:shadow-md hover:-translate-y-1"
+                    >
+                      Padaria Doce Pão
+                    </div>
+                    <div
+                      className="px-2 py-1 md:px-4 md:py-2 rounded-xl border border-gray-400 bg-gray-100 text-gray-600 select-none 
+                   flex items-center justify-center 
+                   cursor-pointer transition-all duration-200 ease-in-out hover:scale-105 hover:shadow-md hover:-translate-y-1"
+                    >
+                      Farmácia Vida
+                    </div>
+                    <div
+                      className="px-2 py-1 md:px-4 md:py-2 rounded-xl border border-gray-400 bg-gray-100 text-gray-600 select-none 
+                   flex items-center justify-center 
+                   cursor-pointer transition-all duration-200 ease-in-out hover:scale-105 hover:shadow-md hover:-translate-y-1"
+                    >
+                      Lanchonete Express
+                    </div>
+                    <div
+                      className="px-2 py-1 md:px-4 md:py-2 rounded-xl border border-gray-400 bg-gray-100 text-gray-600 select-none 
+                   flex items-center justify-center 
+                   cursor-pointer transition-all duration-200 ease-in-out hover:scale-105 hover:shadow-md hover:-translate-y-1"
+                    >
+                      Barra Nova
+                    </div>
+                    <div
+                      className="px-2 py-1 md:px-4 md:py-2 rounded-xl border border-gray-400 bg-gray-100 text-gray-600 select-none 
+                   flex items-center justify-center 
+                   cursor-pointer transition-all duration-200 ease-in-out hover:scale-105 hover:shadow-md hover:-translate-y-1"
+                    >
+                      Vilatur
+                    </div>
+                    <div
+                      className="px-2 py-1 md:px-4 md:py-2 rounded-xl border border-gray-400 bg-gray-100 text-gray-600 select-none 
+                   flex items-center justify-center 
+                   cursor-pointer transition-all duration-200 ease-in-out hover:scale-105 hover:shadow-md hover:-translate-y-1"
+                    >
+                      Porto da Roça II
+                    </div>
+                    <div
+                      className="px-2 py-1 md:px-4 md:py-2 rounded-xl border border-gray-400 bg-gray-100 text-gray-600 select-none 
+                   flex items-center justify-center 
+                   cursor-pointer transition-all duration-200 ease-in-out hover:scale-105 hover:shadow-md hover:-translate-y-1"
+                    >
+                      Itaúna
+                    </div>
+                    <div
+                      className="px-2 py-1 md:px-4 md:py-2 rounded-xl border border-gray-400 bg-gray-100 text-gray-600 select-none 
+                   flex items-center justify-center 
+                   cursor-pointer transition-all duration-200 ease-in-out hover:scale-105 hover:shadow-md hover:-translate-y-1"
+                    >
+                      Restaurante Central
+                    </div>
+
+                    <div
+                      className="px-2 py-1 md:px-4 md:py-2 rounded-xl border border-gray-400 bg-gray-100 text-gray-600 select-none 
+                   flex items-center justify-center 
+                   cursor-pointer transition-all duration-200 ease-in-out hover:scale-105 hover:shadow-md hover:-translate-y-1"
+                    >
+                      Padaria Doce Pão
+                    </div>
+                  </div>
+                </div>
               </div>
             </div>
           </section>
@@ -440,8 +417,6 @@ export default function MeiDetailPage({
                         </div>
                       ))}
                   </div>
-                  {/* */}
-                  {/* ======================== FIM DA CORREÇÃO ========================= */}
 
                   {totalPages > 1 && (
                     <div className="pt-4 flex justify-end rounded-lg">
