@@ -7,15 +7,19 @@ const Footer = () => {
   return (
     <footer className="bg-gray-100 border-t border-gray-200 w-full">
       <div className="container mx-auto px-6 py-12">
-        <div className="md:flex md:justify-between md:items-start text-center md:text-left">
-          <div className="mb-10 md:mb-0 md:w-1/3">
-            <Link href="/" className="inline-block">
+        {/* --- INÍCIO DA MUDANÇA --- */}
+        {/* Usamos um único grid para todo o conteúdo principal. */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-10 text-center md:text-left">
+          {/* COLUNA 1: LOGO E DESCRIÇÃO */}
+          {/* Em telas médias (md), este bloco vai ocupar duas colunas para um melhor equilíbrio visual. */}
+          <div className=" text-center">
+            <Link href="/" className="inline-block mb-4">
               <Image
                 src="/LogoExploraMonocromática.png"
                 alt="Logo MeideSaqua"
                 width={160}
                 height={57}
-                className="h-14 w-auto mb-4 mx-auto md:mx-0"
+                className="h-14 w-auto mx-auto md:mx-auto "
               />
             </Link>
             <p className="text-gray-600 max-w-xs mx-auto md:mx-0">
@@ -24,82 +28,80 @@ const Footer = () => {
             </p>
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
-            <div>
-              <h3 className="font-bold uppercase text-gray-800 mb-4">
-                Links Úteis
-              </h3>
-              <ul className="space-y-2">
-                <li>
-                  <Link
-                    href="/sobre"
-                    className="text-gray-600 hover:text-blue-600 transition-colors"
-                  >
-                    Sobre o Projeto
-                  </Link>
-                </li>
-                <li>
-                  <Link
-                    href="/espaco-mei"
-                    className="text-gray-600 hover:text-blue-600 transition-colors"
-                  >
-                    Espaço MEI
-                  </Link>
-                </li>
-                <li>
-                  <Link
-                    href="/contato"
-                    className="text-gray-600 hover:text-blue-600 transition-colors"
-                  >
-                    Fale Conosco
-                  </Link>
-                </li>
-              </ul>
-            </div>
-
-            <div>
-              <h3 className="font-bold uppercase text-gray-800 mb-4">
-                Contato
-              </h3>
-              <ul className="space-y-3 text-gray-600">
-                <li className="flex items-center justify-center md:justify-start gap-3">
-                  <Mail size={16} />
-                  <span>meidesaqua@saquarema.rj.gov.br</span>
-                </li>
-                <li className="flex items-center justify-center md:justify-start gap-3">
-                  <Phone size={16} />
-                  <span>(22) 2651-2254</span>
-                </li>
-                <li className="flex items-center justify-center md:justify-start gap-3">
-                  <MapPin size={16} />
-                  <span>R. Gatinhos gatos gatônicos, 12</span>
-                </li>
-              </ul>
-            </div>
-
-            <div>
-              <h3 className="font-bold uppercase text-gray-800 mb-4">
-                Siga-nos
-              </h3>
-              <div className="flex justify-center md:justify-start gap-5">
-                <a
-                  href="https://www.facebook.com/PrefeituradeSaquarema/"
-                  aria-label="Facebook"
-                  className="text-gray-500 hover:text-blue-700 transition-colors"
+          {/* COLUNA 2: LINKS ÚTEIS */}
+          <div className="text-center">
+            <h3 className="font-bold uppercase text-gray-800 mb-4">
+              Links Úteis
+            </h3>
+            <ul className="space-y-2">
+              <li>
+                <Link
+                  href="/sobre"
+                  className="text-gray-600 hover:text-blue-600 transition-colors"
                 >
-                  <Facebook size={24} />
-                </a>
-                <a
-                  href="https://www.instagram.com/prefeiturasaquarema/?hl=en"
-                  aria-label="Instagram"
-                  className="text-gray-500 hover:text-pink-600 transition-colors"
+                  Sobre o Projeto
+                </Link>
+              </li>
+              <li>
+                <Link
+                  href="/espaco-mei"
+                  className="text-gray-600 hover:text-blue-600 transition-colors"
                 >
-                  <Instagram size={24} />
-                </a>
-              </div>
+                  Espaço MEI
+                </Link>
+              </li>
+              <li>
+                <Link
+                  href="/contato"
+                  className="text-gray-600 hover:text-blue-600 transition-colors"
+                >
+                  Fale Conosco
+                </Link>
+              </li>
+            </ul>
+          </div>
+
+          {/* COLUNA 3: CONTATO */}
+          <div className="text-center">
+            <h3 className="font-bold uppercase text-gray-800 mb-4">Contato</h3>
+            <ul className="space-y-3 text-gray-600">
+              <li className="flex items-center justify-center gap-3">
+                <Mail size={16} />
+                <span>meidesaqua@saquarema.rj.gov.br</span>
+              </li>
+              <li className="flex items-center justify-center gap-3">
+                <Phone size={16} />
+                <span>(22) 2651-2254</span>
+              </li>
+              <li className="flex items-center justify-center gap-3 break-words">
+                <MapPin size={16} />
+                <span>R. Gatinhos gatos gatônicos, 12</span>
+              </li>
+            </ul>
+          </div>
+
+          {/* COLUNA 4: SIGA-NOS */}
+          <div className="text-center">
+            <h3 className="font-bold uppercase text-gray-800 mb-4">Siga-nos</h3>
+            <div className="flex justify-center gap-5">
+              <a
+                href="https://www.facebook.com/PrefeituradeSaquarema/"
+                aria-label="Facebook"
+                className="text-gray-500 hover:text-blue-700 transition-colors"
+              >
+                <Facebook size={24} />
+              </a>
+              <a
+                href="https://www.instagram.com/prefeiturasaquarema/?hl=en"
+                aria-label="Instagram"
+                className="text-gray-500 hover:text-pink-600 transition-colors"
+              >
+                <Instagram size={24} />
+              </a>
             </div>
           </div>
         </div>
+        {/* --- FIM DA MUDANÇA --- */}
 
         <div className="border-t border-gray-200 mt-12 pt-8 text-center text-sm text-gray-500">
           <p>
@@ -113,4 +115,3 @@ const Footer = () => {
 };
 
 export default Footer;
-
