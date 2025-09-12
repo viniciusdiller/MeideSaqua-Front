@@ -94,14 +94,14 @@ export default function NovaSenha() {
           <div className="mb-4">
             <Link
               href="/login"
-              className="flex items-center gap-2 text-gray-600 hover:text-purple-600 transition-colors"
+              className="flex items-center gap-2 text-gray-600 hover:text-[#017DB9] transition-colors"
             >
               <ArrowLeft className="w-5 h-5" />
               <span>Voltar</span>
             </Link>
           </div>
           <Card
-            className="rounded-2xl border border-purple-600/70 bg-white shadow-lg
+            className="rounded-2xl border border-[#017DB9]/70 bg-white shadow-lg
                              focus:outline-none focus:ring-2 focus:border-transparent
                              transition-all duration-300 placeholder-gray-400 text-sm
                              hover:shadow-md"
@@ -125,7 +125,7 @@ export default function NovaSenha() {
                     onChange={(e) => setNomeCompleto(e.target.value)}
                     className="w-full py-2
                                     rounded-2xl border border-gray-200 bg-white shadow-sm
-                                    focus:ring-2 focus:border-orange-500/70 transition-all duration-300
+                                    focus:ring-2 focus:border-[#22c362]/70 transition-all duration-300
                                     "
                   />
                 </div>
@@ -140,7 +140,7 @@ export default function NovaSenha() {
                     onChange={(e) => setEmail(e.target.value)}
                     className="w-full py-2
                                     rounded-2xl border border-gray-200 bg-white shadow-sm
-                                    focus:ring-2 focus:border-orange-500/70 transition-all duration-300
+                                    focus:ring-2 focus:border-[#22c362]/70 transition-all duration-300
                                     "
                   />
                 </div>
@@ -148,7 +148,7 @@ export default function NovaSenha() {
               <CardFooter>
                 <Button
                   type="submit"
-                  className="hover:bg-orange-500 rounded-2xl hover:text-white flex justify-center mx-auto px-10  text-gray-700 border border-purple-600/70"
+                  className="hover:bg-[#22c362] rounded-2xl hover:text-white flex justify-center mx-auto px-10  text-gray-700 border border-[#017DB9]/70"
                 >
                   Enviar email
                 </Button>
