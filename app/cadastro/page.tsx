@@ -1,5 +1,3 @@
-// app/cadastro/page.tsx
-
 "use client";
 
 import { useState } from "react";
@@ -19,35 +17,29 @@ import Image from "next/image";
 import { registerUser } from "@/lib/api";
 import { AnimatePresence } from "framer-motion";
 import { Notification, NotificationType } from "@/components/ui/notification";
-import { ArrowLeft } from "lucide-react";
-import { AxiosError } from "axios"; // Importe o AxiosError se você usa Axios na sua lib/api
+import { ArrowLeft, Loader2 } from "lucide-react";
+import { AxiosError } from "axios";
 
 export default function Cadastro() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [username, setUsername] = useState("");
   const [nome_completo_user, setNomeCompleto] = useState("");
-
-  // para controlar as notificações
   const [notifications, setNotifications] = useState<NotificationType[]>([]);
+  const [isLoading, setIsLoading] = useState(false);
 
-  // adicionar uma notificação
   const addNotification = (text: string, type: "success" | "error") => {
-    const newNotif: NotificationType = {
-      id: Math.random(),
-      text,
-      type,
-    };
+    const newNotif: NotificationType = { id: Math.random(), text, type };
     setNotifications((prev) => [newNotif, ...prev]);
   };
 
-  // Função para remover uma notificação
   const removeNotif = (id: number) => {
     setNotifications((pv) => pv.filter((n) => n.id !== id));
   };
 
   const handleRegister = async (e: React.FormEvent) => {
     e.preventDefault();
+    setIsLoading(true);
 
     const userData = {
       nomeCompleto: nome_completo_user,
@@ -58,36 +50,29 @@ export default function Cadastro() {
 
     try {
       await registerUser(userData);
-
-      // notificação de sucesso
       addNotification(
-        "Cadastro realizado com sucesso! Verifique seu e-mail para ativar a conta.",
+        "Cadastro realizado com sucesso! Redirecionando para o login...",
         "success"
       );
-
       setTimeout(() => {
         window.location.href = "/login";
-      }, 4000);
+      }, 2000);
     } catch (err) {
-      let errorMessage =
-        "Erro ao cadastrar. Verifique seus dados e tente novamente.";
-
-      // Este bloco agora funcionará corretamente!
+      let errorMessage = "Erro ao cadastrar. Verifique seus dados.";
       if (err instanceof AxiosError && err.response) {
-        // err.response.data agora será { "message": "Email já cadastrado..." }
         errorMessage = err.response.data.message || errorMessage;
       } else if (err instanceof Error) {
         errorMessage = err.message || errorMessage;
       }
-
       addNotification(errorMessage, "error");
       console.error(err);
+    } finally {
+      setIsLoading(false);
     }
   };
 
   return (
     <div>
-      {/* Container onde as notificações aparecerão */}
       <div className="flex flex-col gap-1 w-72 fixed top-4 right-4 z-50 pointer-events-none">
         <AnimatePresence>
           {notifications.map((n) => (
@@ -120,9 +105,9 @@ export default function Cadastro() {
           </div>
           <Card
             className="rounded-2xl border border-[#017DB9]/70 bg-white shadow-lg
-                         focus:outline-none focus:ring-2 focus:border-transparent
-                         transition-all duration-300 placeholder-gray-400 text-sm
-                         hover:shadow-md"
+                             focus:outline-none focus:ring-2 focus:border-transparent
+                             transition-all duration-300 placeholder-gray-400 text-sm
+                             hover:shadow-md"
           >
             <CardHeader className="text-center">
               <CardTitle className="text-2xl">Crie seu Cadastro</CardTitle>
@@ -141,10 +126,8 @@ export default function Cadastro() {
                     required
                     value={username}
                     onChange={(e) => setUsername(e.target.value)}
-                    className="w-full py-2
-                                 rounded-2xl border border-gray-200 bg-white shadow-sm
-                                 focus:ring-2 focus:border-[#22c362]/70 transition-all duration-300
-                                 "
+                    disabled={isLoading}
+                    className="w-full py-2 rounded-2xl border border-gray-200 bg-white shadow-sm focus:ring-2 focus:border-[#22c362]/70 transition-all duration-300"
                   />
                 </div>
                 <div className="space-y-2">
@@ -156,10 +139,8 @@ export default function Cadastro() {
                     required
                     value={nome_completo_user}
                     onChange={(e) => setNomeCompleto(e.target.value)}
-                    className="w-full py-2
-                                 rounded-2xl border border-gray-200 bg-white shadow-sm
-                                 focus:ring-2 focus:border-[#22c362]/70 transition-all duration-300
-                                 "
+                    disabled={isLoading}
+                    className="w-full py-2 rounded-2xl border border-gray-200 bg-white shadow-sm focus:ring-2 focus:border-[#22c362]/70 transition-all duration-300"
                   />
                 </div>
                 <div className="space-y-2">
@@ -171,10 +152,8 @@ export default function Cadastro() {
                     required
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
-                    className="w-full py-2
-                                 rounded-2xl border border-gray-200 bg-white shadow-sm
-                                 focus:ring-2 focus:border-[#22c362]/70 transition-all duration-300
-                                 "
+                    disabled={isLoading}
+                    className="w-full py-2 rounded-2xl border border-gray-200 bg-white shadow-sm focus:ring-2 focus:border-[#22c362]/70 transition-all duration-300"
                   />
                 </div>
                 <div className="space-y-2">
@@ -186,19 +165,25 @@ export default function Cadastro() {
                     required
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
-                    className="w-full py-2
-                                 rounded-2xl border border-gray-200 bg-white shadow-sm
-                                 focus:ring-2 focus:border-[#22c362]/70 transition-all duration-300
-                                 "
+                    disabled={isLoading}
+                    className="w-full py-2 rounded-2xl border border-gray-200 bg-white shadow-sm focus:ring-2 focus:border-[#22c362]/70 transition-all duration-300"
                   />
                 </div>
               </CardContent>
               <CardFooter>
                 <Button
                   type="submit"
-                  className="hover:bg-[#22c362] rounded-2xl hover:text-white flex justify-center mx-auto px-10  text-gray-700 border border-[#017DB9]/70"
+                  disabled={isLoading}
+                  className="w-full hover:bg-[#22c362] rounded-2xl hover:text-white flex justify-center mx-auto px-10 text-gray-700 border border-[#017DB9]/70 disabled:bg-gray-300 disabled:cursor-not-allowed"
                 >
-                  Criar Conta
+                  {isLoading ? (
+                    <>
+                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                      Aguarde...
+                    </>
+                  ) : (
+                    "Criar Conta"
+                  )}
                 </Button>
               </CardFooter>
             </form>

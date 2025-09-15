@@ -1,7 +1,7 @@
 "use client";
 
 import { useAuth } from "@/context/AuthContext";
-import { Button, buttonVariants } from "@/components/ui/button"; // Importe o buttonVariants
+import { Button, buttonVariants } from "@/components/ui/button"; 
 import {
   Card,
   CardContent,
@@ -41,12 +41,11 @@ import {
   changeUserPassword,
   deleteUserAccount,
 } from "@/lib/api";
-import { cn } from "@/lib/utils"; // Importe o cn
+import { cn } from "@/lib/utils"; 
 
 export default function PerfilPage() {
   const { user, logout, isLoading, updateUser: updateUserContext } = useAuth();
 
-  // Estados para os campos do formulário de edição
   const [username, setUsername] = useState("");
   const [email, setEmail] = useState("");
   const [currentPassword, setCurrentPassword] = useState("");
@@ -54,7 +53,6 @@ export default function PerfilPage() {
   const [confirmPassword, setConfirmPassword] = useState("");
   const [isDialogOpen, setIsDialogOpen] = useState(false);
 
-  // Popula os estados quando o usuário é carregado
   useEffect(() => {
     if (user) {
       setUsername(user.username || "");

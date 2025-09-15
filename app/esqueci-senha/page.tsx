@@ -1,5 +1,3 @@
-// app/esqueci-senha/page.tsx
-
 "use client";
 
 import { useState } from "react";
@@ -19,12 +17,12 @@ import Image from "next/image";
 import { requestPasswordReset } from "@/lib/api";
 import { AnimatePresence } from "framer-motion";
 import { Notification, NotificationType } from "@/components/ui/notification";
-import { ArrowLeft } from "lucide-react";
+import { ArrowLeft, Loader2 } from "lucide-react";
 
 export default function NovaSenha() {
   const [email, setEmail] = useState("");
-  const [nome_completo_user, setNomeCompleto] = useState("");
   const [notifications, setNotifications] = useState<NotificationType[]>([]);
+  const [isLoading, setIsLoading] = useState(false);
 
   const addNotification = (text: string, type: "success" | "error") => {
     const newNotif: NotificationType = {
@@ -41,20 +39,18 @@ export default function NovaSenha() {
 
   const handlePasswordReset = async (e: React.FormEvent) => {
     e.preventDefault();
+    setIsLoading(true);
 
     const userData = {
-      nomeCompleto: nome_completo_user,
       email: email,
     };
 
     try {
       await requestPasswordReset(userData);
-
       addNotification(
         "Email enviado com sucesso! Verifique sua caixa de entrada.",
         "success"
       );
-
       setTimeout(() => {
         window.location.href = "/login";
       }, 3000);
@@ -64,12 +60,13 @@ export default function NovaSenha() {
         "error"
       );
       console.error(err);
+    } finally {
+      setIsLoading(false);
     }
   };
 
   return (
     <div>
-      {/* Container para as notificações */}
       <div className="flex flex-col gap-1 w-72 fixed top-4 right-4 z-50 pointer-events-none">
         <AnimatePresence>
           {notifications.map((n) => (
@@ -102,33 +99,18 @@ export default function NovaSenha() {
           </div>
           <Card
             className="rounded-2xl border border-[#017DB9]/70 bg-white shadow-lg
-                             focus:outline-none focus:ring-2 focus:border-transparent
-                             transition-all duration-300 placeholder-gray-400 text-sm
-                             hover:shadow-md"
+                                 focus:outline-none focus:ring-2 focus:border-transparent
+                                 transition-all duration-300 placeholder-gray-400 text-sm
+                                 hover:shadow-md"
           >
             <CardHeader className="text-center">
               <CardTitle className="text-2xl">Recupere sua senha</CardTitle>
               <CardDescription>
-                Insira suas credenciais para receber o email de recuperação.
+                Insira seu e-mail para receber o link de recuperação.
               </CardDescription>
             </CardHeader>
             <form onSubmit={handlePasswordReset}>
               <CardContent className="space-y-4">
-                <div className="space-y-2">
-                  <Label htmlFor="nome_completo_user">Nome Completo</Label>
-                  <Input
-                    id="nome_completo_user"
-                    type="text"
-                    placeholder="Digite seu nome completo"
-                    required
-                    value={nome_completo_user}
-                    onChange={(e) => setNomeCompleto(e.target.value)}
-                    className="w-full py-2
-                                    rounded-2xl border border-gray-200 bg-white shadow-sm
-                                    focus:ring-2 focus:border-[#22c362]/70 transition-all duration-300
-                                    "
-                  />
-                </div>
                 <div className="space-y-2">
                   <Label htmlFor="email">Email</Label>
                   <Input
@@ -138,19 +120,28 @@ export default function NovaSenha() {
                     required
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
+                    disabled={isLoading}
                     className="w-full py-2
-                                    rounded-2xl border border-gray-200 bg-white shadow-sm
-                                    focus:ring-2 focus:border-[#22c362]/70 transition-all duration-300
-                                    "
+                                     rounded-2xl border border-gray-200 bg-white shadow-sm
+                                     focus:ring-2 focus:border-[#22c362]/70 transition-all duration-300
+                                     "
                   />
                 </div>
               </CardContent>
               <CardFooter>
                 <Button
                   type="submit"
-                  className="hover:bg-[#22c362] rounded-2xl hover:text-white flex justify-center mx-auto px-10  text-gray-700 border border-[#017DB9]/70"
+                  disabled={isLoading}
+                  className="w-full hover:bg-[#22c362] rounded-2xl hover:text-white flex justify-center mx-auto px-10 text-gray-700 border border-[#017DB9]/70 disabled:bg-gray-300 disabled:cursor-not-allowed"
                 >
-                  Enviar email
+                  {isLoading ? (
+                    <>
+                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                      Aguarde...
+                    </>
+                  ) : (
+                    "Enviar email"
+                  )}
                 </Button>
               </CardFooter>
             </form>

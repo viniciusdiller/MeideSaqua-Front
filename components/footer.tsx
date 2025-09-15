@@ -7,11 +7,7 @@ const Footer = () => {
   return (
     <footer className="bg-gray-100 border-t border-gray-200 w-full">
       <div className="container mx-auto px-6 py-12">
-        {/* --- INÍCIO DA MUDANÇA --- */}
-        {/* Usamos um único grid para todo o conteúdo principal. */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-10 text-center md:text-left">
-          {/* COLUNA 1: LOGO E DESCRIÇÃO */}
-          {/* Em telas médias (md), este bloco vai ocupar duas colunas para um melhor equilíbrio visual. */}
           <div className=" text-center">
             <Link href="/" className="inline-block mb-4">
               <Image
@@ -28,7 +24,6 @@ const Footer = () => {
             </p>
           </div>
 
-          {/* COLUNA 2: LINKS ÚTEIS */}
           <div className="text-center">
             <h3 className="font-bold uppercase text-gray-800 mb-4">
               Links Úteis
@@ -61,7 +56,6 @@ const Footer = () => {
             </ul>
           </div>
 
-          {/* COLUNA 3: CONTATO */}
           <div className="text-center">
             <h3 className="font-bold uppercase text-gray-800 mb-4">Contato</h3>
             <ul className="space-y-3 text-gray-600">
@@ -80,7 +74,6 @@ const Footer = () => {
             </ul>
           </div>
 
-          {/* COLUNA 4: SIGA-NOS */}
           <div className="text-center">
             <h3 className="font-bold uppercase text-gray-800 mb-4">Siga-nos</h3>
             <div className="flex justify-center gap-5">
@@ -101,7 +94,6 @@ const Footer = () => {
             </div>
           </div>
         </div>
-        {/* --- FIM DA MUDANÇA --- */}
 
         <div className="border-t border-gray-200 mt-12 pt-8 text-center text-sm text-gray-500">
           <p>

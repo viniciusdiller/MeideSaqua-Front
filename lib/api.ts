@@ -1,15 +1,11 @@
-// lib/api.ts
-
 const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8080";
 
-// Função genérica para chamadas à API
 async function fetchApi(path: string, options: RequestInit = {}) {
   const headers: Record<string, string> = {
     "Content-Type": "application/json",
     ...(options.headers as Record<string, string>),
   };
 
-  // Garante que o token seja adicionado se existir
   if (options.headers && "Authorization" in options.headers) {
     headers["Authorization"] = (options.headers as Record<string, string>)[
       "Authorization"
@@ -25,7 +21,6 @@ async function fetchApi(path: string, options: RequestInit = {}) {
   const data = text ? JSON.parse(text) : {};
 
   if (!response.ok) {
-    // Extrai a mensagem de erro do backend, se disponível
     const errorMessage =
       typeof data === "object" && data.message
         ? data.message
@@ -36,7 +31,6 @@ async function fetchApi(path: string, options: RequestInit = {}) {
   return data;
 }
 
-// Funções de Autenticação
 export const registerUser = (data: any) =>
   fetchApi("/api/auth/cadastro", {
     method: "POST",
@@ -49,7 +43,6 @@ export const loginUser = (data: any) =>
     body: JSON.stringify(data),
   });
 
-// Funções de Perfil do Usuário
 export const confirmAccount = (token: string) =>
   fetchApi(`/api/auth/confirm-account?token=${token}`, {
     method: "GET",
@@ -60,17 +53,13 @@ export const updateUserProfile = (
   token: string
 ) =>
   fetchApi("/api/users/profile", {
-    method: "POST", // Baseado no @PostMapping do seu UserController
+    method: "POST",
     headers: {
       Authorization: `Bearer ${token}`,
     },
     body: JSON.stringify(data),
   });
 
-/**
- * Altera a senha do usuário logado.
- * Requer token de autenticação e a senha atual.
- */
 export const changeUserPassword = (
   data: { currentPassword?: string; newPassword?: string },
   token: string
@@ -83,10 +72,12 @@ export const changeUserPassword = (
     body: JSON.stringify(data),
   });
 
-/**
- * Exclui a conta do usuário logado.
- * Requer token de autenticação.
- */
+export const requestPasswordReset = (data: { email: string }) =>
+  fetchApi("/api/auth/forgot-password", {
+    method: "POST",
+    body: JSON.stringify(data),
+  });
+
 export const deleteUserAccount = (token: string) =>
   fetchApi("/api/users/profile", {
     method: "DELETE",
@@ -95,7 +86,6 @@ export const deleteUserAccount = (token: string) =>
     },
   });
 
-// Funções de Estabelecimentos e Avaliações
 export const getAllEstablishments = () => fetchApi("/api/estabelecimentos");
 
 export const getEstablishmentById = (id: string) =>
@@ -116,4 +106,10 @@ export const submitReview = (data: any, token: string) =>
 export const confirmEmailChange = (token: string) =>
   fetchApi(`/api/auth/confirm-email-change?token=${token}`, {
     method: "GET",
+  });
+
+export const resetPassword = (data: { token: string; newPassword: string }) =>
+  fetchApi("/api/auth/reset-password", {
+    method: "POST",
+    body: JSON.stringify(data),
   });

@@ -1,5 +1,3 @@
-// app/login/page.tsx
-
 "use client";
 
 import { useState } from "react";
@@ -20,12 +18,13 @@ import { loginUser } from "@/lib/api";
 import { AnimatePresence } from "framer-motion";
 import { Notification, NotificationType } from "@/components/ui/notification";
 import { useAuth } from "@/context/AuthContext";
-import { ArrowLeft } from "lucide-react";
+import { ArrowLeft, Loader2 } from "lucide-react"; 
 
 export default function LoginPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [notifications, setNotifications] = useState<NotificationType[]>([]);
+  const [isLoading, setIsLoading] = useState(false);
   const { login } = useAuth();
 
   const addNotification = (text: string, type: "success" | "error") => {
@@ -43,6 +42,7 @@ export default function LoginPage() {
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
+    setIsLoading(true);
 
     const loginData = {
       username: email,
@@ -51,18 +51,16 @@ export default function LoginPage() {
 
     try {
       const userData = await loginUser(loginData);
-
       addNotification("Login bem-sucedido! Redirecionando...", "success");
-
-      // Usa a função do contexto para gerenciar o estado do usuário e o localStorage
       login(userData);
-
       setTimeout(() => {
         window.location.href = "/";
       }, 2000);
     } catch (err) {
       addNotification("Email ou senha inválidos. Tente novamente.", "error");
       console.error(err);
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -100,9 +98,9 @@ export default function LoginPage() {
           </div>
           <Card
             className="rounded-2xl border border-[#017DB9]/70 bg-white shadow-lg
-                     focus:outline-none focus:ring-2 focus:border-transparent
-                     transition-all duration-300 placeholder-gray-400 text-sm
-                     hover:shadow-md"
+                       focus:outline-none focus:ring-2 focus:border-transparent
+                       transition-all duration-300 placeholder-gray-400 text-sm
+                       hover:shadow-md"
           >
             <CardHeader className="text-center">
               <CardTitle className="text-2xl">Efetue o Login</CardTitle>
@@ -124,6 +122,7 @@ export default function LoginPage() {
                     required
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
+                    disabled={isLoading}
                     className="w-full py-2
                     rounded-2xl border border-gray-200 bg-white shadow-sm
                     focus:ring-2 focus:border-[#22c362]/70 transition-all duration-300
@@ -139,6 +138,7 @@ export default function LoginPage() {
                     required
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
+                    disabled={isLoading} 
                     className="w-full py-2
                     rounded-2xl border border-gray-200 bg-white shadow-sm
                     focus:ring-2 focus:border-[#22c362]/70 transition-all duration-300
@@ -149,9 +149,17 @@ export default function LoginPage() {
               <CardFooter className="flex flex-col items-center space-y-4">
                 <Button
                   type="submit"
-                  className="hover:bg-[#22c362] rounded-2xl hover:text-white flex justify-center mx-auto px-10  text-gray-700 border border-[#017DB9]/70"
+                  disabled={isLoading}
+                  className="hover:bg-[#22c362] rounded-2xl hover:text-white flex justify-center mx-auto px-10 text-gray-700 border border-[#017DB9]/70 w-full disabled:bg-gray-300 disabled:cursor-not-allowed"
                 >
-                  Entrar
+                  {isLoading ? (
+                    <>
+                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                      Aguarde...
+                    </>
+                  ) : (
+                    "Entrar"
+                  )}
                 </Button>
                 <Link href="/cadastro" className=" text-gray-600 ">
                   Novo por aqui?{" "}
@@ -176,3 +184,4 @@ export default function LoginPage() {
     </div>
   );
 }
+
