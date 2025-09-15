@@ -112,3 +112,8 @@ export const submitReview = (data: any, token: string) =>
     },
     body: JSON.stringify(data),
   });
+
+export const confirmEmailChange = (token: string) =>
+  fetchApi(`/api/auth/confirm-email-change?token=${token}`, {
+    method: "GET",
+  });
