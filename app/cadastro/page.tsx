@@ -17,7 +17,7 @@ import Image from "next/image";
 import { registerUser } from "@/lib/api";
 import { AnimatePresence } from "framer-motion";
 import { Notification, NotificationType } from "@/components/ui/notification";
-import { ArrowLeft, Loader2 } from "lucide-react";
+import { ArrowLeft, Loader2, Eye, EyeOff } from "lucide-react";
 import { AxiosError } from "axios";
 
 export default function Cadastro() {
@@ -27,6 +27,7 @@ export default function Cadastro() {
   const [nome_completo_user, setNomeCompleto] = useState("");
   const [notifications, setNotifications] = useState<NotificationType[]>([]);
   const [isLoading, setIsLoading] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
 
   const addNotification = (text: string, type: "success" | "error") => {
     const newNotif: NotificationType = { id: Math.random(), text, type };
@@ -105,9 +106,9 @@ export default function Cadastro() {
           </div>
           <Card
             className="rounded-2xl border border-[#017DB9]/70 bg-white shadow-lg
-                             focus:outline-none focus:ring-2 focus:border-transparent
-                             transition-all duration-300 placeholder-gray-400 text-sm
-                             hover:shadow-md"
+                                 focus:outline-none focus:ring-2 focus:border-transparent
+                                 transition-all duration-300 placeholder-gray-400 text-sm
+                                 hover:shadow-md"
           >
             <CardHeader className="text-center">
               <CardTitle className="text-2xl">Crie seu Cadastro</CardTitle>
@@ -127,7 +128,7 @@ export default function Cadastro() {
                     value={username}
                     onChange={(e) => setUsername(e.target.value)}
                     disabled={isLoading}
-                    className="w-full py-2 rounded-2xl border border-gray-200 bg-white shadow-sm focus:ring-2 focus:border-[#22c362]/70 transition-all duration-300"
+                    className="w-full py-2 rounded-2xl placeholder:text-gray-400 border border-gray-200 bg-white shadow-sm focus:ring-2 focus:border-[#22c362]/70 transition-all duration-300"
                   />
                 </div>
                 <div className="space-y-2">
@@ -140,7 +141,7 @@ export default function Cadastro() {
                     value={nome_completo_user}
                     onChange={(e) => setNomeCompleto(e.target.value)}
                     disabled={isLoading}
-                    className="w-full py-2 rounded-2xl border border-gray-200 bg-white shadow-sm focus:ring-2 focus:border-[#22c362]/70 transition-all duration-300"
+                    className="w-full py-2 rounded-2xl placeholder:text-gray-400 border border-gray-200 bg-white shadow-sm focus:ring-2 focus:border-[#22c362]/70 transition-all duration-300"
                   />
                 </div>
                 <div className="space-y-2">
@@ -153,21 +154,31 @@ export default function Cadastro() {
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
                     disabled={isLoading}
-                    className="w-full py-2 rounded-2xl border border-gray-200 bg-white shadow-sm focus:ring-2 focus:border-[#22c362]/70 transition-all duration-300"
+                    className="w-full py-2 rounded-2xl placeholder:text-gray-400 border border-gray-200 bg-white shadow-sm focus:ring-2 focus:border-[#22c362]/70 transition-all duration-300"
                   />
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="password">Senha</Label>
-                  <Input
-                    id="password"
-                    type="password"
-                    placeholder="Sua senha"
-                    required
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    disabled={isLoading}
-                    className="w-full py-2 rounded-2xl border border-gray-200 bg-white shadow-sm focus:ring-2 focus:border-[#22c362]/70 transition-all duration-300"
-                  />
+                  <div className="relative">
+                    <Input
+                      id="password"
+                      type={showPassword ? "text" : "password"}
+                      placeholder="Sua senha"
+                      required
+                      value={password}
+                      onChange={(e) => setPassword(e.target.value)}
+                      disabled={isLoading}
+                      className="w-full py-2 pr-10 rounded-2xl placeholder:text-gray-400 border border-gray-200 bg-white shadow-sm focus:ring-2 focus:border-[#22c362]/70 transition-all duration-300"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setShowPassword(!showPassword)}
+                      className="absolute inset-y-0 right-0 flex items-center pr-3 text-gray-400 hover:text-gray-600"
+                      aria-label={showPassword ? "Esconder senha" : "Mostrar senha"}
+                    >
+                      {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
+                    </button>
+                  </div>
                 </div>
               </CardContent>
               <CardFooter>
@@ -193,3 +204,4 @@ export default function Cadastro() {
     </div>
   );
 }
+

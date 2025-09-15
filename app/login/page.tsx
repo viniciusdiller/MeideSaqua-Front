@@ -18,13 +18,14 @@ import { loginUser } from "@/lib/api";
 import { AnimatePresence } from "framer-motion";
 import { Notification, NotificationType } from "@/components/ui/notification";
 import { useAuth } from "@/context/AuthContext";
-import { ArrowLeft, Loader2 } from "lucide-react"; 
+import { ArrowLeft, Loader2, Eye, EyeOff } from "lucide-react";
 
 export default function LoginPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [notifications, setNotifications] = useState<NotificationType[]>([]);
   const [isLoading, setIsLoading] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
   const { login } = useAuth();
 
   const addNotification = (text: string, type: "success" | "error") => {
@@ -125,25 +126,35 @@ export default function LoginPage() {
                     disabled={isLoading}
                     className="w-full py-2
                     rounded-2xl border border-gray-200 bg-white shadow-sm
-                    focus:ring-2 focus:border-[#22c362]/70 transition-all duration-300
+                    focus:ring-2 focus:border-[#22c362]/70 transition-all duration-300 placeholder:text-gray-400
                     "
                   />
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="password">Senha</Label>
-                  <Input
-                    id="password"
-                    type="password"
-                    placeholder="Sua senha"
-                    required
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    disabled={isLoading} 
-                    className="w-full py-2
-                    rounded-2xl border border-gray-200 bg-white shadow-sm
-                    focus:ring-2 focus:border-[#22c362]/70 transition-all duration-300
-                    "
-                  />
+                  <div className="relative">
+                    <Input
+                      id="password"
+                      type={showPassword ? "text" : "password"}
+                      placeholder="Sua senha"
+                      required
+                      value={password}
+                      onChange={(e) => setPassword(e.target.value)}
+                      disabled={isLoading}
+                      className="w-full py-2 pr-10
+                      rounded-2xl border border-gray-200 bg-white shadow-sm
+                      focus:ring-2 focus:border-[#22c362]/70 transition-all duration-300 placeholder:text-gray-400
+                      "
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setShowPassword(!showPassword)}
+                      className="absolute inset-y-0 right-0 flex items-center pr-3 text-gray-400 hover:text-gray-600"
+                      aria-label={showPassword ? "Esconder senha" : "Mostrar senha"}
+                    >
+                      {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
+                    </button>
+                  </div>
                 </div>
               </CardContent>
               <CardFooter className="flex flex-col items-center space-y-4">

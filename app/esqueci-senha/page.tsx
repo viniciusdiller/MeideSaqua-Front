@@ -122,7 +122,7 @@ export default function NovaSenha() {
                     onChange={(e) => setEmail(e.target.value)}
                     disabled={isLoading}
                     className="w-full py-2
-                                     rounded-2xl border border-gray-200 bg-white shadow-sm
+                                     rounded-2xl border border-gray-200 bg-white shadow-sm placeholder:text-gray-400
                                      focus:ring-2 focus:border-[#22c362]/70 transition-all duration-300
                                      "
                   />
