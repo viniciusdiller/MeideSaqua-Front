@@ -1,4 +1,3 @@
-// app/cadastro
 // app/cadastro/page.tsx
 
 "use client";
@@ -21,6 +20,7 @@ import { registerUser } from "@/lib/api";
 import { AnimatePresence } from "framer-motion";
 import { Notification, NotificationType } from "@/components/ui/notification";
 import { ArrowLeft } from "lucide-react";
+import { AxiosError } from "axios"; // Importe o AxiosError se você usa Axios na sua lib/api
 
 export default function Cadastro() {
   const [email, setEmail] = useState("");
@@ -28,10 +28,10 @@ export default function Cadastro() {
   const [username, setUsername] = useState("");
   const [nome_completo_user, setNomeCompleto] = useState("");
 
-  //  para controlar as notificações
+  // para controlar as notificações
   const [notifications, setNotifications] = useState<NotificationType[]>([]);
 
-  //  adicionar uma notificação
+  // adicionar uma notificação
   const addNotification = (text: string, type: "success" | "error") => {
     const newNotif: NotificationType = {
       id: Math.random(),
@@ -53,26 +53,34 @@ export default function Cadastro() {
       nomeCompleto: nome_completo_user,
       username: username,
       email: email,
-      password: password, // A API espera 'senha', não 'password'
+      password: password,
     };
 
     try {
       await registerUser(userData);
 
-      //  notificação de sucesso
+      // notificação de sucesso
       addNotification(
-        "Cadastro realizado com sucesso! Você será redirecionado.",
+        "Cadastro realizado com sucesso! Verifique seu e-mail para ativar a conta.",
         "success"
       );
 
       setTimeout(() => {
         window.location.href = "/login";
-      }, 3000);
+      }, 4000);
     } catch (err) {
-      addNotification(
-        "Erro ao cadastrar. Verifique seus dados e tente novamente.",
-        "error"
-      );
+      let errorMessage =
+        "Erro ao cadastrar. Verifique seus dados e tente novamente.";
+
+      // Este bloco agora funcionará corretamente!
+      if (err instanceof AxiosError && err.response) {
+        // err.response.data agora será { "message": "Email já cadastrado..." }
+        errorMessage = err.response.data.message || errorMessage;
+      } else if (err instanceof Error) {
+        errorMessage = err.message || errorMessage;
+      }
+
+      addNotification(errorMessage, "error");
       console.error(err);
     }
   };
@@ -88,7 +96,7 @@ export default function Cadastro() {
         </AnimatePresence>
       </div>
 
-      <div className="flex items-center justify-center h-screen bg-gray-50 px-4 ">
+      <div className="flex items-center justify-center min-h-screen bg-gray-50 px-4 py-8">
         <div className="w-full max-w-md">
           <div className="text-center mb-6">
             <Link href="/" passHref>
@@ -112,15 +120,14 @@ export default function Cadastro() {
           </div>
           <Card
             className="rounded-2xl border border-[#017DB9]/70 bg-white shadow-lg
-                             focus:outline-none focus:ring-2 focus:border-transparent
-                             transition-all duration-300 placeholder-gray-400 text-sm
-                             hover:shadow-md"
+                         focus:outline-none focus:ring-2 focus:border-transparent
+                         transition-all duration-300 placeholder-gray-400 text-sm
+                         hover:shadow-md"
           >
             <CardHeader className="text-center">
               <CardTitle className="text-2xl">Crie seu Cadastro</CardTitle>
               <CardDescription>
-                Insira suas credenciais para ter a possibilidade de avaliar os
-                estabelecimentos.
+                Insira suas credenciais para poder avaliar os estabelecimentos.
               </CardDescription>
             </CardHeader>
             <form onSubmit={handleRegister}>
@@ -135,9 +142,9 @@ export default function Cadastro() {
                     value={username}
                     onChange={(e) => setUsername(e.target.value)}
                     className="w-full py-2
-                                    rounded-2xl border border-gray-200 bg-white shadow-sm
-                                    focus:ring-2 focus:border-[#22c362]/70 transition-all duration-300
-                                    "
+                                 rounded-2xl border border-gray-200 bg-white shadow-sm
+                                 focus:ring-2 focus:border-[#22c362]/70 transition-all duration-300
+                                 "
                   />
                 </div>
                 <div className="space-y-2">
@@ -150,9 +157,9 @@ export default function Cadastro() {
                     value={nome_completo_user}
                     onChange={(e) => setNomeCompleto(e.target.value)}
                     className="w-full py-2
-                                    rounded-2xl border border-gray-200 bg-white shadow-sm
-                                    focus:ring-2 focus:border-[#22c362]/70 transition-all duration-300
-                                    "
+                                 rounded-2xl border border-gray-200 bg-white shadow-sm
+                                 focus:ring-2 focus:border-[#22c362]/70 transition-all duration-300
+                                 "
                   />
                 </div>
                 <div className="space-y-2">
@@ -165,9 +172,9 @@ export default function Cadastro() {
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
                     className="w-full py-2
-                                    rounded-2xl border border-gray-200 bg-white shadow-sm
-                                    focus:ring-2 focus:border-[#22c362]/70 transition-all duration-300
-                                    "
+                                 rounded-2xl border border-gray-200 bg-white shadow-sm
+                                 focus:ring-2 focus:border-[#22c362]/70 transition-all duration-300
+                                 "
                   />
                 </div>
                 <div className="space-y-2">
@@ -180,9 +187,9 @@ export default function Cadastro() {
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
                     className="w-full py-2
-                                    rounded-2xl border border-gray-200 bg-white shadow-sm
-                                    focus:ring-2 focus:border-[#22c362]/70 transition-all duration-300
-                                    "
+                                 rounded-2xl border border-gray-200 bg-white shadow-sm
+                                 focus:ring-2 focus:border-[#22c362]/70 transition-all duration-300
+                                 "
                   />
                 </div>
               </CardContent>
