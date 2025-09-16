@@ -41,9 +41,13 @@ export const SwiperCarousel = () => {
           </div>
           <div className="swiper-slide">
             <div className="bg-indigo-50 rounded-2xl h-96 flex justify-center items-center">
-              <span className="text-3xl font-semibold text-indigo-600">
-                Slide 2
-              </span>
+              <Image
+                src="/foto-4k.jpg"
+                alt="Slide 3"
+                fill
+                className="object-cover"
+                sizes="(max-width: 768px) 100vw, 50vw"
+              />
             </div>
           </div>
           <div className="swiper-slide">

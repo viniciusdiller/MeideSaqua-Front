@@ -24,6 +24,7 @@ import {
   PaginationLink,
 } from "@/components/ui/pagination";
 import SwiperCarousel from "@/components/CarouselMEI";
+import Masonry from "@/components/ImagesMEI";
 
 const StarRating = ({ rating }: { rating: number }) => {
   const totalStars = 5;
@@ -45,6 +46,38 @@ const StarRating = ({ rating }: { rating: number }) => {
     </div>
   );
 };
+
+const item = [
+  {
+    id: "1",
+    img: "/foto-4k.jpg",
+    src: "/foto-4k.jpg",
+    url: "/foto-4k.jpg",
+    alt: "Imagem 1",
+    height: 300,
+  },
+  {
+    id: "2",
+    img: "/teste.jpg",
+    url: "/teste.jpg",
+    alt: "Imagem 2",
+    height: 300,
+  },
+  {
+    id: "3",
+    img: "/gatinho.jpg",
+    url: "/gatinho.jpg",
+    alt: "Imagem 3",
+    height: 300,
+  },
+  {
+    id: "4",
+    img: "/gatooculos.jpg",
+    url: "/gatooculos.jpg",
+    alt: "Imagem 3",
+    height: 300,
+  },
+];
 
 const REVIEWS_PER_PAGE = 4;
 
@@ -264,10 +297,21 @@ export default function MeiDetailPage({
             <h3 className="text-2xl font-bold text-gray-900 mb-4">
               Portifólio de Produdos
             </h3>
-            <div className="w-full h-fit bg-gray-200 rounded-3xl overflow-hidden mb-4 border flex flex-col milecem:flex-row">
-              <div className=" w-full milecem:w-[50%] h-full relative mx-auto">
-                <SwiperCarousel />
-              </div>
+            <span className="text-gray-600">
+              (Clique para ver a Imagem completa)
+            </span>
+            <div className="w-full mt-4">
+              <Masonry
+                items={item}
+                ease="power3.out"
+                duration={0.6}
+                stagger={0.05}
+                animateFrom="bottom"
+                scaleOnHover={true}
+                hoverScale={0.95}
+                blurToFocus={true}
+                colorShiftOnHover={false}
+              />
             </div>
           </section>
 
