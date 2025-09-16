@@ -15,7 +15,7 @@ import { Label } from "@/components/ui/label";
 import Link from "next/link";
 import Image from "next/image";
 import { registerUser } from "@/lib/api";
-import { AnimatePresence } from "framer-motion";
+import { AnimatePresence, motion } from "framer-motion";
 import { Notification, NotificationType } from "@/components/ui/notification";
 import { ArrowLeft, Loader2, Eye, EyeOff } from "lucide-react";
 import { AxiosError } from "axios";
@@ -52,7 +52,7 @@ export default function Cadastro() {
     try {
       await registerUser(userData);
       addNotification(
-        "Cadastro realizado com sucesso! Redirecionando para o login...",
+        "Cadastro realizado com sucesso! Para finalizar, verifique seu email. Você será redirecionado para a página de login.",
         "success"
       );
       setTimeout(() => {
@@ -174,7 +174,9 @@ export default function Cadastro() {
                       type="button"
                       onClick={() => setShowPassword(!showPassword)}
                       className="absolute inset-y-0 right-0 flex items-center pr-3 text-gray-400 hover:text-gray-600"
-                      aria-label={showPassword ? "Esconder senha" : "Mostrar senha"}
+                      aria-label={
+                        showPassword ? "Esconder senha" : "Mostrar senha"
+                      }
                     >
                       {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
                     </button>
@@ -204,4 +206,3 @@ export default function Cadastro() {
     </div>
   );
 }
-
