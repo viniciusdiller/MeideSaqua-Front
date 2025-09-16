@@ -260,7 +260,7 @@ export default function MeiDetailPage({
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8 items-center">
             <div className="md:col-span-2 flex flex-col">
               <div className="mb-6 text-center md:text-left">
-                <h2 className="text-3xl font-bold text-gray-900 mb-2">
+                <h2 className="text-3xl font-bold text-gray-900 mb-2 border-l-4 border-[#017DB9] pl-3">
                   {meiDetails.nomeFantasia}
                 </h2>
                 <div className="flex items-center justify-center md:justify-start gap-2">
@@ -315,7 +315,8 @@ export default function MeiDetailPage({
 
             {/* --- LOGO --- */}
             <div className="flex items-center justify-center md:col-span-1">
-              <div className="w-40 h-40 md:w-56 md:h-56 bg-gray-50 border border-gray-200 rounded-2xl shadow-sm flex items-center justify-center p-4">
+              <div className="w-40 h-40 md:w-56 md:h-56 bg-gray-50 border border-gray-200 rounded-2xl shadow-sm 
+              flex items-center justify-center p-4">
                 <TiltImage
                   src={meiDetails.logoUrl || "/placeholder-logo.png"}
                   alt={`Logo de ${meiDetails.nomeFantasia}`}
