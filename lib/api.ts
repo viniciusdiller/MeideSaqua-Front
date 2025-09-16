@@ -113,3 +113,5 @@ export const resetPassword = (data: { token: string; newPassword: string }) =>
     method: "POST",
     body: JSON.stringify(data),
   });
+
+

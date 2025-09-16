@@ -42,6 +42,7 @@ import {
   deleteUserAccount,
 } from "@/lib/api";
 import { cn } from "@/lib/utils"; 
+import { contemPalavrao } from "@/lib/profanityFilter";
 
 export default function PerfilPage() {
   const { user, logout, isLoading, updateUser: updateUserContext } = useAuth();
@@ -76,6 +77,10 @@ export default function PerfilPage() {
   }
 
   const handleSaveChanges = async () => {
+    if (contemPalavrao(username)) {
+      toast.error("Você utilizou palavras inapropriadas.");
+      return;
+    }
     if (!user?.token) {
       toast.error("Erro de autenticação. Por favor, faça login novamente.");
       return;

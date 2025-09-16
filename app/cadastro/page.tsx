@@ -19,6 +19,7 @@ import { AnimatePresence, motion } from "framer-motion";
 import { Notification, NotificationType } from "@/components/ui/notification";
 import { ArrowLeft, Loader2, Eye, EyeOff } from "lucide-react";
 import { AxiosError } from "axios";
+import { contemPalavrao } from "@/lib/profanityFilter";
 
 export default function Cadastro() {
   const [email, setEmail] = useState("");
@@ -40,6 +41,10 @@ export default function Cadastro() {
 
   const handleRegister = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (contemPalavrao(username)) {
+      addNotification("Você utilizou palavras inapropriadas.", "error");
+      return;
+    }
     setIsLoading(true);
 
     const userData = {

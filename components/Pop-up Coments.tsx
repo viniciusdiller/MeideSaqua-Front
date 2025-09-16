@@ -6,6 +6,7 @@ import { Star } from "lucide-react";
 import { submitReview } from "@/lib/api";
 import { useAuth } from "@/context/AuthContext";
 import { toast } from "sonner";
+import { contemPalavrao } from "@/lib/profanityFilter";
 
 
 const AvaliacaoModalButton = ({
@@ -68,6 +69,11 @@ const SpringModal = ({
   const handleAvaliarClick = async () => {
     if (rating === 0) {
       toast.warning("Por favor, selecione uma nota de 1 a 5 estrelas.");
+      return;
+    }
+
+    if (contemPalavrao(comment)) {
+      toast.error("Você utilizou palavras inapropriadas.");
       return;
     }
 
@@ -176,4 +182,3 @@ const SpringModal = ({
 };
 
 export default AvaliacaoModalButton;
-

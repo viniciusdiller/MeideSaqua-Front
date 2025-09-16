@@ -304,7 +304,7 @@ export default function MeiDetailPage({
                       <div
                         key={index}
                         className="px-2 py-1 md:px-4 md:py-2 rounded-xl border border-gray-400 bg-gray-100 text-gray-600 select-none
-                        flex items-center justify-center cursor-pointer transition-all duration-200 ease-in-out hover:scale-105 hover:shadow-md hover:-translate-y-1"
+                        flex items-center justify-center transition-all duration-200 ease-in-out hover:scale-105 hover:shadow-md hover:-translate-y-1"
                       >
                         {local}
                       </div>
