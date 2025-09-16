@@ -8,7 +8,6 @@ import {
   MapPin,
   Phone,
   PhoneForwarded,
-  Globe,
   Instagram,
 } from "lucide-react";
 import React, { useState, useEffect } from "react";
@@ -62,6 +61,7 @@ export default function MeiDetailPage({
   const [isClient, setIsClient] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
   const [animateReviews, setAnimateReviews] = useState(false);
+  const [locaisExpandidos, setLocaisExpandidos] = useState(false);
 
   useEffect(() => {
     const fetchMeiData = async () => {
@@ -136,6 +136,43 @@ export default function MeiDetailPage({
     }
   };
 
+  // Locais de atuação mockados (substitua depois pelos vindos da API se tiver)
+  const locais = [
+    "Padaria Doce Pão",
+    "Restaurante Central",
+    "Padaria Doce Pão pao pao pao pao",
+    "Farmácia Vida",
+    "Lanchonete Express",
+    "Barra Nova",
+    "Vilatur",
+    "Porto da Roça II",
+    "Itaúna",
+    "Restaurante Central",
+    "Padaria Doce Pão",
+    "Padaria Doce Pão",
+    "Restaurante Central",
+    "Padaria Doce Pão pao pao pao pao",
+    "Farmácia Vida",
+    "Lanchonete Express",
+    "Barra Nova",
+    "Vilatur",
+    "Porto da Roça II",
+    "Itaúna",
+    "Restaurante Central",
+    "Padaria Doce Pão",
+  ];
+
+  // quantidade máxima de itens antes do "ver mais"
+  const linhasVisiveis = 3;
+  const colunas = 4; // ajuste conforme breakpoints se necessário
+  const limite = linhasVisiveis * colunas;
+
+  let locaisVisiveis = locais;
+  if (!locaisExpandidos && locais.length > limite) {
+    locaisVisiveis = locais.slice(0, limite - 1); // reserva 1 slot pro botão
+    locaisVisiveis.push("SHOW_MORE_BUTTON");
+  }
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-[#017DB9] to-[#22c362]">
       <header className="sticky top-0 bg-white shadow-sm z-10">
@@ -155,6 +192,7 @@ export default function MeiDetailPage({
 
       <main className="w-full p-4 md:p-6 ">
         <div className="space-y-8">
+          {/* ---------------------- INFORMAÇÕES BÁSICAS ---------------------- */}
           <section className="bg-white p-6 rounded-3xl shadow-md md:mx-auto md:max-w-[85%]">
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
               <div className="md:col-span-2 flex flex-col">
@@ -179,7 +217,6 @@ export default function MeiDetailPage({
                       {meiDetails.descricao}
                     </p>
                   </div>
-                  {/* Se houver um campo de diferencial, pode ser adicionado aqui */}
                   <div className="hidden quinhentos:mt-6 quinhentos:flex items-center md:mt-10 ">
                     <span>Instagram:</span>
                     <a
@@ -211,7 +248,7 @@ export default function MeiDetailPage({
               <div className="flex items-center justify-center md:col-span-1">
                 <div className="w-auto h-auto rounded-lg">
                   <TiltImage
-                    src={meiDetails.logoUrl || "/placeholder-logo.png"} // Usa um placeholder se não houver logo
+                    src={meiDetails.logoUrl || "/placeholder-logo.png"}
                     alt={`Logo de ${meiDetails.nomeFantasia}`}
                     width={500}
                     height={500}
@@ -219,35 +256,10 @@ export default function MeiDetailPage({
                   />
                 </div>
               </div>
-              <div className="mt-6 flex items-center quinhentos:hidden">
-                <span>Instagram:</span>
-                <a
-                  href={meiDetails.instagram}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="text-gray-600 hover:text-pink-600 transition-colors ml-1"
-                >
-                  <Instagram size={22} strokeWidth={2} />
-                </a>
-
-                <span className="ml-2.5 milecem:ml-5 desktop:ml-10">
-                  Whatsapp:
-                </span>
-                <a
-                  href={`https://wa.me/${meiDetails.contatoEstabelecimento.replace(
-                    /\D/g,
-                    ""
-                  )}`}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="text-gray-600 hover:text-[#22c362] transition-colors ml-1"
-                >
-                  <PhoneForwarded size={22} strokeWidth={2} />
-                </a>
-              </div>
             </div>
           </section>
 
+          {/* ---------------------- PORTFÓLIO ---------------------- */}
           <section className="bg-white p-6 rounded-3xl shadow-md md:mx-auto md:max-w-[85%]">
             <h3 className="text-2xl font-bold text-gray-900 mb-4">
               Portifólio de Produdos
@@ -259,7 +271,8 @@ export default function MeiDetailPage({
             </div>
           </section>
 
-          <section className="bg-white p-6 rounded-3xl shadow-md md:mx-auto md:max-w-[85%] grid grid-cols-1 milecem:grid-cols-4  gap-6">
+          {/* ---------------------- ÁREA DE ATUAÇÃO ---------------------- */}
+          <section className="bg-white p-6 rounded-3xl shadow-md md:mx-auto md:max-w-[85%] grid grid-cols-1 milecem:grid-cols-4 gap-6">
             <div className="space-y-3 text-gray-700">
               <h3 className="text-2xl font-bold text-gray-900 mb-4">
                 Área de Atuação
@@ -275,95 +288,43 @@ export default function MeiDetailPage({
             </div>
 
             <div className="w-full h-fit bg-gray-200 rounded-3xl overflow-hidden mb-4 border flex flex-col milecem:flex-row md:col-span-3 ">
-              <div className="">
-                <div className="milecem:w-[100%] py-5 px-5 milecem:px-10 text-gray-700 break-words">
-                  {" "}
-                  <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 miletrezentos:grid-cols-5 milesetecentos:grid-cols-6 fullhd:grid-cols-7 quadhd:grid-cols-8 telona:grid-cols-10 gap-3">
-                    <div
-                      className="px-2 py-1 md:px-4 md:py-2 rounded-xl border border-gray-400 bg-gray-100 text-gray-600 select-none 
-                   flex items-center justify-center 
-                   cursor-pointer transition-all duration-200 ease-in-out hover:scale-105 hover:shadow-md hover:-translate-y-1"
+              <div className="milecem:w-[100%] py-5 px-5 milecem:px-10 text-gray-700 break-words">
+                <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
+                  {locaisVisiveis.map((local, index) =>
+                    local === "SHOW_MORE_BUTTON" ? (
+                      <button
+                        key={index}
+                        onClick={() => setLocaisExpandidos(true)}
+                        className="px-2 py-1 md:px-4 md:py-2 rounded-xl border border-[#017DB9] bg-blue-50 text-blue-600 font-semibold
+                        flex items-center justify-center cursor-pointer transition-all duration-200 ease-in-out hover:scale-105 hover:shadow-md hover:-translate-y-1"
+                      >
+                        Ver Todos
+                      </button>
+                    ) : (
+                      <div
+                        key={index}
+                        className="px-2 py-1 md:px-4 md:py-2 rounded-xl border border-gray-400 bg-gray-100 text-gray-600 select-none
+                        flex items-center justify-center cursor-pointer transition-all duration-200 ease-in-out hover:scale-105 hover:shadow-md hover:-translate-y-1"
+                      >
+                        {local}
+                      </div>
+                    )
+                  )}
+                  {locaisExpandidos && (
+                    <button
+                      onClick={() => setLocaisExpandidos(false)}
+                      className="px-2 py-1 md:px-4 md:py-2 rounded-xl border border-[#22c362] bg-green-50 text-green-600 font-semibold
+                      flex items-center justify-center cursor-pointer transition-all duration-200 ease-in-out hover:scale-105 hover:shadow-md hover:-translate-y-1 col-span-full"
                     >
-                      Padaria Doce Pão
-                    </div>
-                    <div
-                      className="px-2 py-1 md:px-4 md:py-2 rounded-xl border border-gray-400 bg-gray-100 text-gray-600 select-none 
-                   flex items-center justify-center 
-                   cursor-pointer transition-all duration-200 ease-in-out hover:scale-105 hover:shadow-md hover:-translate-y-1"
-                    >
-                      Restaurante Central
-                    </div>
-
-                    <div
-                      className="px-2 py-1 md:px-4 md:py-2 rounded-xl border border-gray-400 bg-gray-100 text-gray-600 select-none 
-                   flex items-center justify-center 
-                   cursor-pointer transition-all duration-200 ease-in-out hover:scale-105 hover:shadow-md hover:-translate-y-1"
-                    >
-                      Padaria Doce Pão pao pao pao pao
-                    </div>
-                    <div
-                      className="px-2 py-1 md:px-4 md:py-2 rounded-xl border border-gray-400 bg-gray-100 text-gray-600 select-none 
-                   flex items-center justify-center 
-                   cursor-pointer transition-all duration-200 ease-in-out hover:scale-105 hover:shadow-md hover:-translate-y-1"
-                    >
-                      Farmácia Vida
-                    </div>
-                    <div
-                      className="px-2 py-1 md:px-4 md:py-2 rounded-xl border border-gray-400 bg-gray-100 text-gray-600 select-none 
-                   flex items-center justify-center 
-                   cursor-pointer transition-all duration-200 ease-in-out hover:scale-105 hover:shadow-md hover:-translate-y-1"
-                    >
-                      Lanchonete Express
-                    </div>
-                    <div
-                      className="px-2 py-1 md:px-4 md:py-2 rounded-xl border border-gray-400 bg-gray-100 text-gray-600 select-none 
-                   flex items-center justify-center 
-                   cursor-pointer transition-all duration-200 ease-in-out hover:scale-105 hover:shadow-md hover:-translate-y-1"
-                    >
-                      Barra Nova
-                    </div>
-                    <div
-                      className="px-2 py-1 md:px-4 md:py-2 rounded-xl border border-gray-400 bg-gray-100 text-gray-600 select-none 
-                   flex items-center justify-center 
-                   cursor-pointer transition-all duration-200 ease-in-out hover:scale-105 hover:shadow-md hover:-translate-y-1"
-                    >
-                      Vilatur
-                    </div>
-                    <div
-                      className="px-2 py-1 md:px-4 md:py-2 rounded-xl border border-gray-400 bg-gray-100 text-gray-600 select-none 
-                   flex items-center justify-center 
-                   cursor-pointer transition-all duration-200 ease-in-out hover:scale-105 hover:shadow-md hover:-translate-y-1"
-                    >
-                      Porto da Roça II
-                    </div>
-                    <div
-                      className="px-2 py-1 md:px-4 md:py-2 rounded-xl border border-gray-400 bg-gray-100 text-gray-600 select-none 
-                   flex items-center justify-center 
-                   cursor-pointer transition-all duration-200 ease-in-out hover:scale-105 hover:shadow-md hover:-translate-y-1"
-                    >
-                      Itaúna
-                    </div>
-                    <div
-                      className="px-2 py-1 md:px-4 md:py-2 rounded-xl border border-gray-400 bg-gray-100 text-gray-600 select-none 
-                   flex items-center justify-center 
-                   cursor-pointer transition-all duration-200 ease-in-out hover:scale-105 hover:shadow-md hover:-translate-y-1"
-                    >
-                      Restaurante Central
-                    </div>
-
-                    <div
-                      className="px-2 py-1 md:px-4 md:py-2 rounded-xl border border-gray-400 bg-gray-100 text-gray-600 select-none 
-                   flex items-center justify-center 
-                   cursor-pointer transition-all duration-200 ease-in-out hover:scale-105 hover:shadow-md hover:-translate-y-1"
-                    >
-                      Padaria Doce Pão
-                    </div>
-                  </div>
+                      Ver Menos
+                    </button>
+                  )}
                 </div>
               </div>
             </div>
           </section>
 
+          {/* ---------------------- AVALIAÇÕES ---------------------- */}
           <section className="bg-white p-6 rounded-3xl shadow-md md:mx-auto md:max-w-[85%]">
             <h3 className="text-2xl font-bold text-gray-900 mb-6">
               Avaliações
