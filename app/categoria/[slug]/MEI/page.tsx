@@ -24,7 +24,7 @@ import {
   PaginationLink,
 } from "@/components/ui/pagination";
 import SwiperCarousel from "@/components/CarouselMEI";
-import Masonry from "@/components/ImagesMEI";
+import ImageGrid from "@/components/ImagesMEI";
 
 const StarRating = ({ rating }: { rating: number }) => {
   const totalStars = 5;
@@ -300,19 +300,10 @@ export default function MeiDetailPage({
             <span className="text-gray-600">
               (Clique para ver a Imagem completa)
             </span>
-            <div className="w-full mt-4">
-              <Masonry
-                items={item}
-                ease="power3.out"
-                duration={0.6}
-                stagger={0.05}
-                animateFrom="bottom"
-                scaleOnHover={true}
-                hoverScale={0.95}
-                blurToFocus={true}
-                colorShiftOnHover={false}
-              />
-            </div>
+
+          <div className="bg-white p-4 sm:p-6 rounded-2xl shadow-lg border border-gray-200">
+            <ImageGrid items={item} />
+          </div>
           </section>
 
           {/* ---------------------- ÁREA DE ATUAÇÃO ---------------------- */}
