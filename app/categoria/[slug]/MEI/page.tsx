@@ -9,6 +9,8 @@ import {
   Phone,
   PhoneForwarded,
   Instagram,
+  Palette, Brush, Store, Wrench, PartyPopper, Utensils, HeartPulse,
+  Briefcase, Car, Laptop, Plane, Tractor, ChevronLeft
 } from "lucide-react";
 import React, { useState, useEffect } from "react";
 import { TiltImage } from "@/components/ui/TiltImage";
@@ -25,6 +27,25 @@ import {
 } from "@/components/ui/pagination";
 import SwiperCarousel from "@/components/CarouselMEI";
 import ImageGrid from "@/components/ImagesMEI";
+import { motion } from "framer-motion";
+import TagsAnimate from "@/components/ui/tagsanimate";
+
+
+
+const categoryIcons: { [key: string]: React.ElementType } = {
+  artesanato: Brush,
+  beleza: Palette,
+  comercio: Store,
+  construcao: Wrench,
+  festas: PartyPopper,
+  gastronomia: Utensils,
+  saude: HeartPulse,
+  "servicos-administrativos": Briefcase,
+  "servicos-automotivos": Car,
+  tecnologia: Laptop,
+  turismo: Plane,
+  rural: Tractor,
+};
 
 const StarRating = ({ rating }: { rating: number }) => {
   const totalStars = 5;
@@ -208,138 +229,163 @@ export default function MeiDetailPage({
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-[#017DB9] to-[#22c362]">
-      <header className="sticky top-0 bg-white shadow-sm z-10">
-        <div className="max-w-4xl mx-auto px-4 py-3 flex items-center">
-          <Link
-            href={`/categoria/${categorySlug}`}
-            className="flex items-center gap-2 text-gray-600 hover:text-[#017DB9] transition-colors"
-          >
-            <ArrowLeft className="w-5 h-5 mr-3 md:mr-0" />
-            <p className="hidden md:block">Voltar</p>
-          </Link>
-          <h1 className="flex-1 text-center text-lg font-semibold text-gray-800 truncate pr-12">
-            {meiDetails.nomeFantasia}
-          </h1>
+      {/* ===== HEADER ===== */}
+      <motion.header
+        className="sticky top-0 z-20"
+        initial={{ y: "-100%", opacity: 0 }}
+        animate={{ y: "0%", opacity: 1 }}
+        transition={{ duration: 0.5, ease: "easeOut" }}
+      >
+        <div className="bg-white/80 backdrop-blur-md border-b border-gray-200/80">
+          <div className="w-full px-4 sm:px-6 py-3 grid grid-cols-[auto_1fr_auto] items-center">
+                <Link
+              href={`/categoria/${categorySlug}`}
+              className="flex items-center gap-1.5 text-sm text-gray-600 hover:text-[#017DB9] transition-colors p-2 ml-1 sm:ml-8 md:ml-12 lg:ml-36 rounded-lg"
+            >
+              <ArrowLeft className="w-4 h-4" />
+              <span className="font-medium">Voltar</span>
+            </Link>
+            <h1 className="absolute left-1/2 -translate-x-1/2 text-md font-semibold text-gray-800 truncate">
+              {meiDetails.nomeFantasia}
+            </h1>
+          </div>
         </div>
-      </header>
+      </motion.header>
+
 
       <main className="w-full p-4 md:p-6 ">
         <div className="space-y-8">
           {/* ---------------------- INFORMAÇÕES BÁSICAS ---------------------- */}
-          <section className="bg-white p-6 rounded-3xl shadow-md md:mx-auto md:max-w-[85%]">
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-              <div className="md:col-span-2 flex flex-col">
-                <div className="mb-4 text-center">
-                  <h2 className="text-3xl font-bold text-gray-900">
-                    {meiDetails.nomeFantasia}
-                  </h2>
-                  <div className="flex items-center gap-2 mt-2 px-auto justify-center">
-                    <StarRating rating={rating} />
-                    <span className="text-gray-600 font-semibold">
-                      {rating.toFixed(1)}
-                    </span>
-                    <span className="text-gray-500">
-                      ({reviews.length} avaliações)
-                    </span>
-                  </div>
-                </div>
-
-                <div className="milecem:pl-10 milecem:mt-6 flex flex-col h-full ">
-                  <div>
-                    <p className="text-gray-700 leading-relaxed">
-                      {meiDetails.descricao}
-                    </p>
-                  </div>
-                  <div className="hidden quinhentos:mt-6 quinhentos:flex items-center md:mt-10 ">
-                    <span>Instagram:</span>
-                    <a
-                      href={meiDetails.instagram}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="text-gray-600 hover:text-pink-600 transition-colors ml-1"
-                    >
-                      <Instagram size={22} strokeWidth={2} />
-                    </a>
-                    <span className="ml-2.5 milecem:ml-5 desktop:ml-10">
-                      Whatsapp:
-                    </span>
-                    <a
-                      href={`https://wa.me/${meiDetails.contatoEstabelecimento.replace(
-                        /\D/g,
-                        ""
-                      )}`}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="text-gray-600 hover:text-[#22c362] transition-colors ml-1"
-                    >
-                      <PhoneForwarded size={22} strokeWidth={2} />
-                    </a>
-                  </div>
+        <section className="bg-white p-6 rounded-3xl shadow-lg md:mx-auto md:max-w-[85%]">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 items-center">
+            <div className="md:col-span-2 flex flex-col">
+              <div className="mb-6 text-center md:text-left">
+                <h2 className="text-3xl font-bold text-gray-900 mb-2">
+                  {meiDetails.nomeFantasia}
+                </h2>
+                <div className="flex items-center justify-center md:justify-start gap-2">
+                  <StarRating rating={rating} />
+                  <span className="text-gray-700 font-semibold">{rating.toFixed(1)}</span>
+                  <span className="text-gray-500 text-sm">
+                    ({reviews.length} avaliações)
+                  </span>
                 </div>
               </div>
 
-              <div className="flex items-center justify-center md:col-span-1">
-                <div className="w-auto h-auto rounded-lg">
-                  <TiltImage
-                    src={meiDetails.logoUrl || "/placeholder-logo.png"}
-                    alt={`Logo de ${meiDetails.nomeFantasia}`}
-                    width={500}
-                    height={500}
-                    className="w-full h-full object-contain"
-                  />
+              <p className="text-gray-700 leading-relaxed md:pl-2">
+                {meiDetails.descricao}
+              </p>
+              <div className="hidden quinhentos:flex flex-col md:flex-row md:items-center md:justify-between gap-6 mt-6">
+                <div className="flex items-center gap-6">
+                  <a
+                    href={meiDetails.instagram}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="flex items-center gap-2 text-gray-600 hover:text-pink-600 transition-colors"
+                  >
+                    <div className="w-9 h-9 rounded-full bg-pink-100 flex items-center justify-center">
+                      <Instagram size={18} strokeWidth={2} />
+                    </div>
+                    <span className="text-sm font-medium">Instagram</span>
+                  </a>
+
+                  <a
+                    href={`https://wa.me/${meiDetails.contatoEstabelecimento.replace(
+                      /\D/g,
+                      ""
+                    )}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="flex items-center gap-2 text-gray-600 hover:text-[#22c362] transition-colors"
+                  >
+                    <div className="w-9 h-9 rounded-full bg-green-100 flex items-center justify-center">
+                      <PhoneForwarded size={18} strokeWidth={2} />
+                    </div>
+                    <span className="text-sm font-medium">WhatsApp</span>
+                  </a>
+                </div>
+
+                {/* tags(dps vamos adicionar as reais, puxando de acordo com o que estabelecimento escolher no colab) */}
+                <div className="flex flex-wrap gap-2">
+                  <TagsAnimate />
                 </div>
               </div>
             </div>
-          </section>
+               
+
+            {/* --- LOGO --- */}
+            <div className="flex items-center justify-center md:col-span-1">
+              <div className="w-40 h-40 md:w-56 md:h-56 bg-gray-50 border border-gray-200 rounded-2xl shadow-sm flex items-center justify-center p-4">
+                <TiltImage
+                  src={meiDetails.logoUrl || "/placeholder-logo.png"}
+                  alt={`Logo de ${meiDetails.nomeFantasia}`}
+                  width={500}
+                  height={500}
+                  className="w-full h-full object-contain"
+                />
+              </div>
+            </div>
+          </div>
+        </section>
+
 
           {/* ---------------------- PORTFÓLIO ---------------------- */}
-          <section className="bg-white p-6 rounded-3xl shadow-md md:mx-auto md:max-w-[85%]">
-            <h3 className="text-2xl font-bold text-gray-900 mb-4">
-              Portifólio de Produdos
-            </h3>
-            <span className="text-gray-600">
-              (Clique para ver a Imagem completa)
-            </span>
+          <section className="bg-white p-6 rounded-3xl shadow-lg md:mx-auto md:max-w-[85%] space-y-6">
+            <div>
+              <h3 className="text-2xl font-bold text-gray-900 mb-2 border-l-4 border-[#017DB9] pl-3">
+                Portfólio de Produtos
+              </h3>
+              <p className="text-sm text-gray-600">
+                Clique em uma imagem para visualizar em tamanho completo
+              </p>
+            </div>
 
-          <div className="bg-white p-4 sm:p-6 rounded-2xl shadow-lg border border-gray-200">
-            <ImageGrid items={item} />
-          </div>
+            <div className="bg-gray-50 p-4 sm:p-6 rounded-2xl shadow-md border border-gray-200">
+              <ImageGrid items={item} />
+            </div>
           </section>
 
+
           {/* ---------------------- ÁREA DE ATUAÇÃO ---------------------- */}
-          <section className="bg-white p-6 rounded-3xl shadow-md md:mx-auto md:max-w-[85%] grid grid-cols-1 milecem:grid-cols-4 gap-6">
-            <div className="space-y-3 text-gray-700">
-              <h3 className="text-2xl font-bold text-gray-900 mb-4">
+         <section className="bg-white p-6 rounded-3xl shadow-lg md:mx-auto md:max-w-[85%] grid grid-cols-1 milecem:grid-cols-4 gap-8">
+            <div className="space-y-5 text-gray-700">
+              <h3 className="text-2xl font-bold text-gray-900 mb-4 border-l-4 border-[#017DB9] pl-3">
                 Área de Atuação
               </h3>
+
               <div className="flex items-start gap-3">
-                <MapPin className="w-5 h-5 mt-1 text-gray-500 flex-shrink-0" />
-                <span>{meiDetails.endereco}</span>
+                <div className="w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center">
+                  <MapPin className="w-4 h-4 text-[#017DB9]" />
+                </div>
+                <span className="leading-relaxed">{meiDetails.endereco}</span>
               </div>
+
               <div className="flex items-center gap-3">
-                <Phone className="w-5 h-5 text-gray-500 flex-shrink-0" />
+                <div className="w-8 h-8 rounded-full bg-green-100 flex items-center justify-center">
+                  <Phone className="w-4 h-4 text-green-600" />
+                </div>
                 <span>{meiDetails.contatoEstabelecimento}</span>
               </div>
             </div>
 
-            <div className="w-full h-fit bg-gray-200 rounded-3xl overflow-hidden mb-4 border flex flex-col milecem:flex-row md:col-span-3 ">
-              <div className="milecem:w-[100%] py-5 px-5 milecem:px-10 text-gray-700 break-words">
-                <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
+            <div className="w-full h-fit bg-gray-50 rounded-3xl border border-gray-200 overflow-hidden milecem:col-span-3">
+              <div className="p-5 md:p-8 text-gray-700">
+                <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
                   {locaisVisiveis.map((local, index) =>
                     local === "SHOW_MORE_BUTTON" ? (
                       <button
                         key={index}
                         onClick={() => setLocaisExpandidos(true)}
-                        className="px-2 py-1 md:px-4 md:py-2 rounded-xl border border-[#017DB9] bg-blue-50 text-blue-600 font-semibold
-                        flex items-center justify-center cursor-pointer transition-all duration-200 ease-in-out hover:scale-105 hover:shadow-md hover:-translate-y-1"
+                        className="px-3 py-2 rounded-xl border border-[#017DB9] bg-blue-50 text-[#017DB9] font-medium
+                        flex items-center justify-center transition-all duration-200 hover:scale-105 hover:shadow-md hover:-translate-y-1"
                       >
                         Ver Todos
                       </button>
                     ) : (
                       <div
                         key={index}
-                        className="px-2 py-1 md:px-4 md:py-2 rounded-xl border border-gray-400 bg-gray-100 text-gray-600 select-none
-                        flex items-center justify-center transition-all duration-200 ease-in-out hover:scale-105 hover:shadow-md hover:-translate-y-1"
+                        className="px-3 py-2 rounded-xl border border-gray-300 bg-white text-gray-700 shadow-sm
+                        flex items-center justify-center text-sm font-medium transition-all duration-200 hover:scale-105 hover:shadow-md hover:-translate-y-1"
                       >
                         {local}
                       </div>
@@ -348,8 +394,8 @@ export default function MeiDetailPage({
                   {locaisExpandidos && (
                     <button
                       onClick={() => setLocaisExpandidos(false)}
-                      className="px-2 py-1 md:px-4 md:py-2 rounded-xl border border-[#22c362] bg-green-50 text-green-600 font-semibold
-                      flex items-center justify-center cursor-pointer transition-all duration-200 ease-in-out hover:scale-105 hover:shadow-md hover:-translate-y-1 col-span-full"
+                      className="px-3 py-2 rounded-xl border border-[#017DB9] bg-blue-50 text-[#017DB9] font-medium
+                      flex items-center justify-center transition-all duration-200 hover:scale-105 hover:shadow-md hover:-translate-y-1 col-span-full"
                     >
                       Ver Menos
                     </button>
@@ -358,6 +404,7 @@ export default function MeiDetailPage({
               </div>
             </div>
           </section>
+
 
           {/* ---------------------- AVALIAÇÕES ---------------------- */}
           <section className="bg-white p-6 rounded-3xl shadow-md md:mx-auto md:max-w-[85%]">
