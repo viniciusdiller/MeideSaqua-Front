@@ -13,14 +13,9 @@ export default function TagsAnimadas() {
           initial={{ opacity: 0, scale: 0.8, y: 20 }}
           animate={{ opacity: 1, scale: 1, y: 0 }}
           transition={{ duration: 0.4, delay: i * 0.1, type: "spring" }}
-          whileHover={{
-            scale: 1.15,
-            rotate: [-2, 2, -2, 0], // balancinho
-            transition: { duration: 0.4 },
-          }}
-          className="px-3 py-1 text-xs font-semibold rounded-full text-white shadow-md "
+          className="px-3 py-1 text-xs font-semibold rounded-full text-gray-800 shadow-md "
           style={{
-            backgroundColor: ["#f97316", "#3b82f6", "#ec4899", "#22c55e"][i % 4],
+            backgroundColor: ["#f9fafb"][Math.floor(Math.random() * 1)],
           }}
         >
           {tag}

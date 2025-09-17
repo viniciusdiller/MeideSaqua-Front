@@ -1,8 +1,8 @@
 "use client";
 
-import { MotionConfig, motion } from "framer-motion";
+import { MotionConfig, motion, AnimatePresence } from "framer-motion";
 import Image from "next/image";
-import { useState } from "react";
+import { useState, useEffect, useRef, ReactElement } from "react";
 import Link from "next/link";
 import {
   Instagram,
@@ -13,6 +13,55 @@ import {
   MessageCircleQuestion,
 } from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
+
+const AnimatedLogo = () => {
+  const logos = [
+    { 
+      src: "/LogoMeideSaqua.png", 
+      alt: "Logo MeideSaqua", 
+      className: "h-10 w-auto" 
+    },
+    { 
+      src: "/logo2sq.png", 
+      alt: "Logo Prefeitura de Saquarema", 
+      className: "h-12 w-auto" 
+    },
+  ];
+
+  const [index, setIndex] = useState(0);
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setIndex((prevIndex) => (prevIndex + 1) % logos.length);
+    }, 5000); // Alterna a cada 3 segundos
+
+    return () => clearInterval(interval);
+  }, [logos.length]);
+
+  return (
+    <div className="relative h-16 w-48 flex items-center justify-center overflow-hidden">
+      <AnimatePresence mode="wait">
+        <motion.div
+          key={logos[index].src}
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          exit={{ opacity: 0, y: -20 }}
+          transition={{ duration: 0.5, ease: "easeInOut" }}
+          className="absolute"
+        >
+          <Image
+            src={logos[index].src}
+            alt={logos[index].alt}
+            width={160}
+            height={48}
+            className={`object-contain ${logos[index].className}`}
+            priority
+          />
+        </motion.div>
+      </AnimatePresence>
+    </div>
+  );
+};
 
 const VARIANTS = {
   top: {
@@ -88,19 +137,14 @@ export function Navbar() {
     <header className="bg-white/90 backdrop-blur-sm border-b border-blue-100 sticky top-0 z-50 shadow-md">
       <div className="relative container mx-auto px-4 py-1 sm:py-1 md:py-1 flex items-center justify-between">
         <div className="hidden teste:flex items-center gap-10">
+          
           <Link
-            href="https://www.saquarema.rj.gov.br/"
-            target="_blank"
-            aria-label="Página da Prefeitura de Saquarema"
+            href="/"
+            aria-label="Página Inicial"
           >
-            <Image
-              src="/logo2sq.png"
-              alt="Logo Prefeitura de Saquarema"
-              width={2660}
-              height={898}
-              className="block w-auto h-12"
-            />
+            <AnimatedLogo />
           </Link>
+
           <nav className="flex items-center gap-6">
             <Link
               href="/"
@@ -130,14 +174,8 @@ export function Navbar() {
         </div>
 
         <div className="teste:hidden w-full">
-          <Link href="/" target="_blank" aria-label="Página Inicial">
-            <Image
-              src="/logo2sq.png"
-              alt="Logo Prefeitura de Saquarema"
-              width={2660}
-              height={898}
-              className="block mx-auto w-auto h-10 sm:h-14"
-            />
+          <Link href="/" aria-label="Página Inicial" className="flex justify-center">
+             <AnimatedLogo />
           </Link>
         </div>
 
@@ -159,7 +197,6 @@ export function Navbar() {
             <Globe size={24} strokeWidth={2} />
           </a>
 
-          {/* Lógica de autenticação para Desktop */}
           {isLoading ? (
             <div className="h-9 w-24 bg-gray-200 rounded-full animate-pulse" />
           ) : user ? (
@@ -169,7 +206,6 @@ export function Navbar() {
                 className="flex items-center gap-3 text-gray-700 hover:text-blue-600 transition-colors"
               >
                 <UserIcon size={22} />
-
                 <span className="font-medium">{user.username}</span>
               </Link>
               <button
@@ -229,7 +265,6 @@ export function Navbar() {
             </Link>
             <hr className="border-gray-200" />
 
-            {/* Lógica de autenticação para Mobile */}
             {isLoading ? (
               <div className="h-6 w-32 bg-gray-200 rounded-md animate-pulse" />
             ) : user ? (
@@ -239,7 +274,6 @@ export function Navbar() {
                   className="flex items-center gap-3 text-gray-700 hover:text-blue-600 transition-colors font-medium"
                   onClick={() => setIsOpen(false)}
                 >
-                  {/* LÓGICA DO AVATAR AQUI */}
                   {user.chosenAvatar ? (
                     <Image
                       src={`/avatars/${user.chosenAvatar}`}

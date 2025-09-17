@@ -240,12 +240,12 @@ export default function MeiDetailPage({
           <div className="w-full px-4 sm:px-6 py-3 grid grid-cols-[auto_1fr_auto] items-center">
                 <Link
               href={`/categoria/${categorySlug}`}
-              className="flex items-center gap-1.5 text-sm text-gray-600 hover:text-[#017DB9] transition-colors p-2 ml-1 sm:ml-8 md:ml-12 lg:ml-36 rounded-lg"
+              className="flex items-center gap-1.5 text-sm text-gray-600 hover:text-[#017DB9] transition-colors p-2 -ml-3 sm:ml-8 md:ml-12 lg:ml-36 rounded-lg"
             >
               <ArrowLeft className="w-4 h-4" />
               <span className="font-medium">Voltar</span>
             </Link>
-            <h1 className="absolute left-1/2 -translate-x-1/2 text-md font-semibold text-gray-800 truncate">
+            <h1 className="absolute left-1/2 -translate-x-1/2 text-md font-semibold text-gray-800 truncate ml-3 break-words max-w-[60%] sm:max-w-[70%] md:max-w-[50%] lg:max-w-[40%]">
               {meiDetails.nomeFantasia}
             </h1>
           </div>
@@ -334,7 +334,7 @@ export default function MeiDetailPage({
           <section className="bg-white p-6 rounded-3xl shadow-lg md:mx-auto md:max-w-[85%] space-y-6">
             <div>
               <h3 className="text-2xl font-bold text-gray-900 mb-2 border-l-4 border-[#017DB9] pl-3">
-                Portfólio de Produtos
+                Portfólio
               </h3>
               <p className="text-sm text-gray-600">
                 Clique em uma imagem para visualizar em tamanho completo
@@ -386,7 +386,7 @@ export default function MeiDetailPage({
                       <div
                         key={index}
                         className="px-3 py-2 rounded-xl border border-gray-300 bg-white text-gray-700 shadow-sm
-                        flex items-center justify-center text-sm font-medium transition-all duration-200 hover:scale-105 hover:shadow-md hover:-translate-y-1"
+                        flex items-center justify-center text-sm font-medium hover:cursor-default"
                       >
                         {local}
                       </div>
@@ -409,7 +409,7 @@ export default function MeiDetailPage({
 
           {/* ---------------------- AVALIAÇÕES ---------------------- */}
           <section className="bg-white p-6 rounded-3xl shadow-md md:mx-auto md:max-w-[85%]">
-            <h3 className="text-2xl font-bold text-gray-900 mb-6">
+            <h3 className="text-2xl font-bold text-gray-900 mb-6 border-l-4 border-[#017DB9] pl-3">
               Avaliações
             </h3>
 
