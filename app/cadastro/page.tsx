@@ -57,12 +57,12 @@ export default function Cadastro() {
     try {
       await registerUser(userData);
       addNotification(
-        "Cadastro realizado com sucesso! Para finalizar, verifique seu email. Você será redirecionado para a página de login.",
+        "Cadastro realizado com sucesso! Para finalizar, verifique seu email.",
         "success"
       );
       setTimeout(() => {
         window.location.href = "/login";
-      }, 2000);
+      }, 4000);
     } catch (err) {
       let errorMessage = "Erro ao cadastrar. Verifique seus dados.";
       if (err instanceof AxiosError && err.response) {

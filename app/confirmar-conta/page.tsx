@@ -48,7 +48,7 @@ const ConfirmationContent = () => {
 
         setTimeout(() => {
           window.location.href = "/login";
-        }, 5000);
+        }, 2000);
       } catch (error: any) {
         setStatus("error");
         setMessage(
