@@ -1,7 +1,7 @@
 "use client";
 
 import { useAuth } from "@/context/AuthContext";
-import { Button, buttonVariants } from "@/components/ui/button"; 
+import { Button, buttonVariants } from "@/components/ui/button";
 import {
   Card,
   CardContent,
@@ -41,18 +41,22 @@ import {
   changeUserPassword,
   deleteUserAccount,
 } from "@/lib/api";
-import { cn } from "@/lib/utils"; 
+import { cn } from "@/lib/utils";
 import { contemPalavrao } from "@/lib/profanityFilter";
 
 export default function PerfilPage() {
   const { user, logout, isLoading, updateUser: updateUserContext } = useAuth();
 
+  // Estados para o formulário de perfil
   const [username, setUsername] = useState("");
   const [email, setEmail] = useState("");
+  const [isProfileDialogOpen, setIsProfileDialogOpen] = useState(false);
+
+  // Estados para o formulário de senha
   const [currentPassword, setCurrentPassword] = useState("");
   const [newPassword, setNewPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
-  const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [isPasswordDialogOpen, setIsPasswordDialogOpen] = useState(false);
 
   useEffect(() => {
     if (user) {
@@ -76,9 +80,9 @@ export default function PerfilPage() {
     return null;
   }
 
-  const handleSaveChanges = async () => {
+  const handleProfileUpdate = async () => {
     if (contemPalavrao(username)) {
-      toast.error("Você utilizou palavras inapropriadas.");
+      toast.error("Você utilizou palavras inapropriadas no nome de usuário.");
       return;
     }
     if (!user?.token) {
@@ -91,40 +95,46 @@ export default function PerfilPage() {
       email: email !== user.email ? email : undefined,
     };
 
-    if (profileData.username || profileData.email) {
-      try {
-        const updatedUser = await updateUserProfile(profileData, user.token);
-        updateUserContext(updatedUser);
-        toast.success("Perfil atualizado com sucesso!");
-      } catch (error: any) {
-        toast.error(`Erro ao atualizar perfil: ${error.message}`);
-        return;
-      }
+    if (!profileData.username && !profileData.email) {
+      toast.info("Nenhuma alteração foi feita.");
+      setIsProfileDialogOpen(false);
+      return;
     }
 
-    if (newPassword) {
-      if (newPassword !== confirmPassword) {
-        toast.error("As novas senhas não coincidem.");
-        return;
-      }
-      if (!currentPassword) {
-        toast.error("Por favor, insira sua senha atual para alterar a senha.");
-        return;
-      }
+    try {
+      const updatedUser = await updateUserProfile(profileData, user.token);
+      updateUserContext(updatedUser);
+      toast.success("Perfil atualizado com sucesso!");
+      setIsProfileDialogOpen(false);
+    } catch (error: any) {
+      toast.error(`Erro ao atualizar perfil: ${error.message}`);
+    }
+  };
 
-      try {
-        await changeUserPassword({ currentPassword, newPassword }, user.token);
-        toast.success("Senha alterada com sucesso!");
-      } catch (error: any) {
-        toast.error(`Erro ao alterar senha: ${error.message}`);
+  const handlePasswordChange = async () => {
+    if (!newPassword || !currentPassword) {
+        toast.error("Preencha todos os campos de senha.");
         return;
-      }
+    }
+    if (newPassword !== confirmPassword) {
+      toast.error("As novas senhas não coincidem.");
+      return;
+    }
+    if (!user?.token) {
+        toast.error("Erro de autenticação. Por favor, faça login novamente.");
+        return;
     }
 
-    setCurrentPassword("");
-    setNewPassword("");
-    setConfirmPassword("");
-    setIsDialogOpen(false);
+    try {
+      await changeUserPassword({ currentPassword, newPassword }, user.token);
+      toast.success("Senha alterada com sucesso!");
+      setCurrentPassword("");
+      setNewPassword("");
+      setConfirmPassword("");
+      setIsPasswordDialogOpen(false);
+    } catch (error: any) {
+      toast.error(`Erro ao alterar senha: ${error.message}`);
+    }
   };
 
   const handleDeleteAccount = async () => {
@@ -173,19 +183,20 @@ export default function PerfilPage() {
             </Card>
           </div>
           <div className="md:col-span-2 space-y-8">
+            {/* Card de Configurações da Conta */}
             <Card className="rounded-xl shadow-md">
               <CardHeader>
                 <CardTitle>Configurações da Conta</CardTitle>
                 <CardDescription>
-                  Visualize suas informações ou clique no botão para editar.
+                  Altere seu nome de usuário e e-mail.
                 </CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
                 <div>
-                  <Label htmlFor="currentNome">Nome Completo</Label>
+                  <Label htmlFor="currentUsername">Nome de Usuário</Label>
                   <Input
-                    id="currentNome"
-                    value={user.nomeCompleto}
+                    id="currentUsername"
+                    value={username}
                     readOnly
                     disabled
                     className="mt-1 bg-gray-100 cursor-not-allowed"
@@ -195,17 +206,7 @@ export default function PerfilPage() {
                   <Label htmlFor="currentEmail">Email</Label>
                   <Input
                     id="currentEmail"
-                    value={user.email}
-                    readOnly
-                    disabled
-                    className="mt-1 bg-gray-100 cursor-not-allowed"
-                  />
-                </div>
-                <div>
-                  <Label htmlFor="currentUsername">Nome de Usuário</Label>
-                  <Input
-                    id="currentUsername"
-                    value={user.username}
+                    value={email}
                     readOnly
                     disabled
                     className="mt-1 bg-gray-100 cursor-not-allowed"
@@ -213,7 +214,7 @@ export default function PerfilPage() {
                 </div>
               </CardContent>
               <CardFooter className="flex justify-center">
-                <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+                <Dialog open={isProfileDialogOpen} onOpenChange={setIsProfileDialogOpen}>
                   <DialogTrigger asChild>
                     <Button className="w-fit rounded-full bg-gray-800 text-white transition-all transform hover:scale-105 hover:bg-gray-700 active:scale-95">
                       Alterar Dados
@@ -223,76 +224,38 @@ export default function PerfilPage() {
                     <DialogHeader>
                       <DialogTitle>Editar Perfil</DialogTitle>
                       <DialogDescription>
-                        Faça alterações no seu perfil aqui. Clique em salvar
-                        quando terminar.
+                        Faça alterações no seu perfil aqui. Clique em salvar quando terminar.
                       </DialogDescription>
                     </DialogHeader>
                     <div className="grid gap-4 py-4">
                       <div>
-                        <Label htmlFor="username">Nome de Usuário</Label>
+                        <Label htmlFor="usernameEdit">Nome de Usuário</Label>
                         <Input
-                          id="username"
+                          id="usernameEdit"
                           value={username}
                           onChange={(e) => setUsername(e.target.value)}
-                          className="mt-1 rounded-xl border-gray-300 placeholder-gray-300 transition-all hover:border-blue-500 focus:border-blue-500 focus:ring-2 focus:ring-blue-200"
+                          className="mt-1 rounded-xl w-full py-2
+                         rounded-2xl border border-gray-200 bg-white shadow-sm
+                         focus:ring-2 focus:border-[#22c362]/70 transition-all duration-300 placeholder:text-gray-400"
                         />
                       </div>
                       <div>
-                        <Label htmlFor="email">E-mail</Label>
+                        <Label htmlFor="emailEdit">E-mail</Label>
                         <Input
-                          id="email"
+                          id="emailEdit"
                           value={email}
                           onChange={(e) => setEmail(e.target.value)}
-                          className="mt-1 rounded-xl border-gray-300 placeholder-gray-300 transition-all hover:border-blue-500 focus:border-blue-500 focus:ring-2 focus:ring-blue-200"
-                        />
-                      </div>
-                      <hr className="my-2" />
-                      <div>
-                        <Label htmlFor="currentPassword">Senha Atual</Label>
-                        <Input
-                          id="currentPassword"
-                          type="password"
-                          placeholder="Sua senha atual"
-                          value={currentPassword}
-                          onChange={(e) => setCurrentPassword(e.target.value)}
-                          className="mt-1 rounded-xl border-gray-300 placeholder-gray-300 transition-all hover:border-blue-500 focus:border-blue-500 focus:ring-2 focus:ring-blue-200"
-                        />
-                      </div>
-                      <div>
-                        <Label htmlFor="newPassword">Nova Senha</Label>
-                        <Input
-                          id="newPassword"
-                          type="password"
-                          placeholder="Deixe em branco para não alterar"
-                          value={newPassword}
-                          onChange={(e) => setNewPassword(e.target.value)}
-                          className="mt-1 rounded-xl border-gray-300 placeholder-gray-300 transition-all hover:border-blue-500 focus:border-blue-500 focus:ring-2 focus:ring-blue-200"
-                        />
-                      </div>
-                      <div>
-                        <Label htmlFor="confirmPassword">
-                          Confirmar Nova Senha
-                        </Label>
-                        <Input
-                          id="confirmPassword"
-                          type="password"
-                          value={confirmPassword}
-                          placeholder="Digite novamente sua nova senha"
-                          onChange={(e) => setConfirmPassword(e.target.value)}
-                          className="mt-1 rounded-xl border-gray-300 placeholder-gray-300 transition-all hover:border-blue-500 focus:border-blue-500 focus:ring-2 focus:ring-blue-200"
+                          className="mt-1 rounded-xl w-full py-2
+                          rounded-2xl border border-gray-200 bg-white shadow-sm
+                          focus:ring-2 focus:border-[#22c362]/70 transition-all duration-300 placeholder:text-gray-400"
                         />
                       </div>
                     </div>
                     <DialogFooter>
                       <DialogClose asChild>
-                        <Button variant="outline" className="rounded-full">
-                          Cancelar
-                        </Button>
+                        <Button variant="outline" className="rounded-full transition-all transform hover:scale-105">Cancelar</Button>
                       </DialogClose>
-                      <Button
-                        onClick={handleSaveChanges}
-                        className="w-fit rounded-full bg-gray-800 text-white transition-all transform hover:scale-105 hover:bg-gray-700 active:scale-95"
-                      >
+                      <Button onClick={handleProfileUpdate} className="w-fit rounded-full transition-all transform hover:scale-105 hover:bg-green-500 active:scale-95 border-2 border-transparent hover:border-green-700">
                         Salvar Alterações
                       </Button>
                     </DialogFooter>
@@ -301,6 +264,83 @@ export default function PerfilPage() {
               </CardFooter>
             </Card>
 
+            {/* Card de Alteração de Senha */}
+            <Card className="rounded-xl shadow-md">
+                <CardHeader>
+                    <CardTitle>Alterar Senha</CardTitle>
+                    <CardDescription>
+                        Para sua segurança, recomendamos o uso de senhas fortes.
+                    </CardDescription>
+                </CardHeader>
+                <CardContent className="flex justify-center">
+                <Dialog open={isPasswordDialogOpen} onOpenChange={setIsPasswordDialogOpen}>
+                  <DialogTrigger asChild>
+                    <Button variant="secondary" className="w-fit rounded-full bg-gray-800 text-white transition-all transform hover:scale-105 hover:bg-gray-700 active:scale-95">
+                      Alterar Senha
+                    </Button>
+                  </DialogTrigger>
+                  <DialogContent className="sm:max-w-[425px]">
+                    <DialogHeader>
+                      <DialogTitle>Alterar sua senha</DialogTitle>
+                      <DialogDescription>
+                        Preencha os campos abaixo para definir uma nova senha.
+                      </DialogDescription>
+                    </DialogHeader>
+                    <div className="grid gap-4 py-4">
+                      <div>
+                        <Label htmlFor="currentPassword">Senha Atual</Label>
+                        <Input
+                          id="currentPassword"
+                          type="password"
+                          placeholder="Sua senha atual"
+                          value={currentPassword}
+                          onChange={(e) => setCurrentPassword(e.target.value)}
+                          className="mt-1 rounded-xl w-full py-2
+                         rounded-2xl border border-gray-200 bg-white shadow-sm
+                         focus:ring-2 focus:border-[#22c362]/70 transition-all duration-300 placeholder:text-gray-400"
+                        />
+                      </div>
+                      <div>
+                        <Label htmlFor="newPassword">Nova Senha</Label>
+                        <Input
+                          id="newPassword"
+                          type="password"
+                          placeholder="Digite a nova senha"
+                          value={newPassword}
+                          onChange={(e) => setNewPassword(e.target.value)}
+                          className="mt-1 rounded-xl w-full py-2
+                          rounded-2xl border border-gray-200 bg-white shadow-sm
+                         focus:ring-2 focus:border-[#22c362]/70 transition-all duration-300 placeholder:text-gray-400"
+                        />
+                      </div>
+                      <div>
+                        <Label htmlFor="confirmPassword">Confirmar Nova Senha</Label>
+                        <Input
+                          id="confirmPassword"
+                          type="password"
+                          placeholder="Digite novamente sua nova senha"
+                          value={confirmPassword}
+                          onChange={(e) => setConfirmPassword(e.target.value)}
+                          className="mt-1 rounded-xl w-full py-2
+                          rounded-2xl border border-gray-200 bg-white shadow-sm
+                          focus:ring-2 focus:border-[#22c362]/70 transition-all duration-300 placeholder:text-gray-400"
+                        />
+                      </div>
+                    </div>
+                    <DialogFooter>
+                      <DialogClose asChild>
+                        <Button variant="outline" className="rounded-full transition-all transform hover:scale-105">Cancelar</Button>
+                      </DialogClose>
+                      <Button onClick={handlePasswordChange} className="w-fit rounded-full transition-all transform hover:scale-105 hover:bg-green-500 active:scale-95 border-2 border-transparent hover:border-green-700">
+                        Salvar Nova Senha
+                      </Button>
+                    </DialogFooter>
+                  </DialogContent>
+                </Dialog>
+                </CardContent>
+            </Card>
+            
+            {/* Card da Zona de Perigo */}
             <Card className="border-red-500 rounded-xl shadow-md">
               <CardHeader>
                 <CardTitle className="text-red-600">Zona de Perigo</CardTitle>
@@ -330,11 +370,12 @@ export default function PerfilPage() {
                       </AlertDialogDescription>
                     </AlertDialogHeader>
                     <AlertDialogFooter>
-                      <AlertDialogCancel>Cancelar</AlertDialogCancel>
+                      <AlertDialogCancel className="w-fit rounded-full  transform hover:scale-105 bg-green-500 active:scale-95 border-2 border-transparent hover:border-green-700">
+                        Cancelar</AlertDialogCancel>
                       <AlertDialogAction
                         onClick={handleDeleteAccount}
                         className={cn(
-                          buttonVariants({ variant: "destructive" })
+                          buttonVariants({ variant: "destructive" }) + " w-fit rounded-full transition-all transform hover:scale-105 hover:bg-red-500 active:scale-95 border-2 border-transparent hover:border-red-700"
                         )}
                       >
                         Continuar
