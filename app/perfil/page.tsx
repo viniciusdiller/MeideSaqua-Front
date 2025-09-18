@@ -36,6 +36,7 @@ import { Label } from "@/components/ui/label";
 import Image from "next/image";
 import { useState, useEffect } from "react";
 import { toast } from "sonner";
+import { Loader2 } from "lucide-react"; // Importando o ícone
 import {
   updateUserProfile,
   changeUserPassword,
@@ -51,12 +52,14 @@ export default function PerfilPage() {
   const [username, setUsername] = useState("");
   const [email, setEmail] = useState("");
   const [isProfileDialogOpen, setIsProfileDialogOpen] = useState(false);
+  const [isUpdatingProfile, setIsUpdatingProfile] = useState(false); // Estado de carregamento
 
   // Estados para o formulário de senha
   const [currentPassword, setCurrentPassword] = useState("");
   const [newPassword, setNewPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [isPasswordDialogOpen, setIsPasswordDialogOpen] = useState(false);
+  const [isChangingPassword, setIsChangingPassword] = useState(false); // Estado de carregamento
 
   useEffect(() => {
     if (user) {
@@ -92,7 +95,7 @@ export default function PerfilPage() {
 
     const profileData = {
       username: username !== user.username ? username : undefined,
-      email: email !== user.email ? email : undefined,
+      email: email.toLowerCase() !== user.email.toLowerCase() ? email : undefined,
     };
 
     if (!profileData.username && !profileData.email) {
@@ -101,30 +104,41 @@ export default function PerfilPage() {
       return;
     }
 
+    setIsUpdatingProfile(true); // Inicia o carregamento
     try {
       const updatedUser = await updateUserProfile(profileData, user.token);
       updateUserContext(updatedUser);
-      toast.success("Perfil atualizado com sucesso!");
+
+      if (profileData.email) {
+        toast.success(
+          "Dados atualizados! Um e-mail de confirmação foi enviado para o seu novo endereço.",
+        );
+      } else {
+        toast.success("Nome de usuário atualizado com sucesso!");
+      }
       setIsProfileDialogOpen(false);
     } catch (error: any) {
       toast.error(`Erro ao atualizar perfil: ${error.message}`);
+    } finally {
+      setIsUpdatingProfile(false); // Finaliza o carregamento
     }
   };
 
   const handlePasswordChange = async () => {
     if (!newPassword || !currentPassword) {
-        toast.error("Preencha todos os campos de senha.");
-        return;
+      toast.error("Preencha todos os campos de senha.");
+      return;
     }
     if (newPassword !== confirmPassword) {
       toast.error("As novas senhas não coincidem.");
       return;
     }
     if (!user?.token) {
-        toast.error("Erro de autenticação. Por favor, faça login novamente.");
-        return;
+      toast.error("Erro de autenticação. Por favor, faça login novamente.");
+      return;
     }
 
+    setIsChangingPassword(true); // Inicia o carregamento
     try {
       await changeUserPassword({ currentPassword, newPassword }, user.token);
       toast.success("Senha alterada com sucesso!");
@@ -134,6 +148,8 @@ export default function PerfilPage() {
       setIsPasswordDialogOpen(false);
     } catch (error: any) {
       toast.error(`Erro ao alterar senha: ${error.message}`);
+    } finally {
+      setIsChangingPassword(false); // Finaliza o carregamento
     }
   };
 
@@ -214,7 +230,10 @@ export default function PerfilPage() {
                 </div>
               </CardContent>
               <CardFooter className="flex justify-center">
-                <Dialog open={isProfileDialogOpen} onOpenChange={setIsProfileDialogOpen}>
+                <Dialog
+                  open={isProfileDialogOpen}
+                  onOpenChange={setIsProfileDialogOpen}
+                >
                   <DialogTrigger asChild>
                     <Button className="w-fit rounded-full bg-gray-800 text-white transition-all transform hover:scale-105 hover:bg-gray-700 active:scale-95">
                       Alterar Dados
@@ -224,7 +243,8 @@ export default function PerfilPage() {
                     <DialogHeader>
                       <DialogTitle>Editar Perfil</DialogTitle>
                       <DialogDescription>
-                        Faça alterações no seu perfil aqui. Clique em salvar quando terminar.
+                        Faça alterações no seu perfil aqui. Clique em salvar
+                        quando terminar.
                       </DialogDescription>
                     </DialogHeader>
                     <div className="grid gap-4 py-4">
@@ -235,8 +255,8 @@ export default function PerfilPage() {
                           value={username}
                           onChange={(e) => setUsername(e.target.value)}
                           className="mt-1 rounded-xl w-full py-2
-                         rounded-2xl border border-gray-200 bg-white shadow-sm
-                         focus:ring-2 focus:border-[#22c362]/70 transition-all duration-300 placeholder:text-gray-400"
+                          rounded-2xl border border-gray-200 bg-white shadow-sm
+                          focus:ring-2 focus:border-[#22c362]/70 transition-all duration-300 placeholder:text-gray-400"
                         />
                       </div>
                       <div>
@@ -253,10 +273,23 @@ export default function PerfilPage() {
                     </div>
                     <DialogFooter>
                       <DialogClose asChild>
-                        <Button variant="outline" className="rounded-full transition-all transform hover:scale-105">Cancelar</Button>
+                        <Button
+                          variant="outline"
+                          className="rounded-full transition-all transform hover:scale-105"
+                          disabled={isUpdatingProfile}
+                        >
+                          Cancelar
+                        </Button>
                       </DialogClose>
-                      <Button onClick={handleProfileUpdate} className="w-fit rounded-full transition-all transform hover:scale-105 hover:bg-green-500 active:scale-95 border-2 border-transparent hover:border-green-700">
-                        Salvar Alterações
+                      <Button
+                        onClick={handleProfileUpdate}
+                        className="w-fit rounded-full transition-all transform hover:scale-105 hover:bg-green-500 active:scale-95 border-2 border-transparent hover:border-green-700"
+                        disabled={isUpdatingProfile}
+                      >
+                        {isUpdatingProfile && (
+                          <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                        )}
+                        {isUpdatingProfile ? "Salvando..." : "Salvar Alterações"}
                       </Button>
                     </DialogFooter>
                   </DialogContent>
@@ -266,16 +299,22 @@ export default function PerfilPage() {
 
             {/* Card de Alteração de Senha */}
             <Card className="rounded-xl shadow-md">
-                <CardHeader>
-                    <CardTitle>Alterar Senha</CardTitle>
-                    <CardDescription>
-                        Para sua segurança, recomendamos o uso de senhas fortes.
-                    </CardDescription>
-                </CardHeader>
-                <CardContent className="flex justify-center">
-                <Dialog open={isPasswordDialogOpen} onOpenChange={setIsPasswordDialogOpen}>
+              <CardHeader>
+                <CardTitle>Alterar Senha</CardTitle>
+                <CardDescription>
+                  Para sua segurança, recomendamos o uso de senhas fortes.
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="flex justify-center">
+                <Dialog
+                  open={isPasswordDialogOpen}
+                  onOpenChange={setIsPasswordDialogOpen}
+                >
                   <DialogTrigger asChild>
-                    <Button variant="secondary" className="w-fit rounded-full bg-gray-800 text-white transition-all transform hover:scale-105 hover:bg-gray-700 active:scale-95">
+                    <Button
+                      variant="secondary"
+                      className="w-fit rounded-full bg-gray-800 text-white transition-all transform hover:scale-105 hover:bg-gray-700 active:scale-95"
+                    >
                       Alterar Senha
                     </Button>
                   </DialogTrigger>
@@ -296,8 +335,8 @@ export default function PerfilPage() {
                           value={currentPassword}
                           onChange={(e) => setCurrentPassword(e.target.value)}
                           className="mt-1 rounded-xl w-full py-2
-                         rounded-2xl border border-gray-200 bg-white shadow-sm
-                         focus:ring-2 focus:border-[#22c362]/70 transition-all duration-300 placeholder:text-gray-400"
+                          rounded-2xl border border-gray-200 bg-white shadow-sm
+                          focus:ring-2 focus:border-[#22c362]/70 transition-all duration-300 placeholder:text-gray-400"
                         />
                       </div>
                       <div>
@@ -310,11 +349,13 @@ export default function PerfilPage() {
                           onChange={(e) => setNewPassword(e.target.value)}
                           className="mt-1 rounded-xl w-full py-2
                           rounded-2xl border border-gray-200 bg-white shadow-sm
-                         focus:ring-2 focus:border-[#22c362]/70 transition-all duration-300 placeholder:text-gray-400"
+                          focus:ring-2 focus:border-[#22c362]/70 transition-all duration-300 placeholder:text-gray-400"
                         />
                       </div>
                       <div>
-                        <Label htmlFor="confirmPassword">Confirmar Nova Senha</Label>
+                        <Label htmlFor="confirmPassword">
+                          Confirmar Nova Senha
+                        </Label>
                         <Input
                           id="confirmPassword"
                           type="password"
@@ -329,17 +370,30 @@ export default function PerfilPage() {
                     </div>
                     <DialogFooter>
                       <DialogClose asChild>
-                        <Button variant="outline" className="rounded-full transition-all transform hover:scale-105">Cancelar</Button>
+                        <Button
+                          variant="outline"
+                          className="rounded-full transition-all transform hover:scale-105"
+                          disabled={isChangingPassword}
+                        >
+                          Cancelar
+                        </Button>
                       </DialogClose>
-                      <Button onClick={handlePasswordChange} className="w-fit rounded-full transition-all transform hover:scale-105 hover:bg-green-500 active:scale-95 border-2 border-transparent hover:border-green-700">
-                        Salvar Nova Senha
+                      <Button
+                        onClick={handlePasswordChange}
+                        className="w-fit rounded-full transition-all transform hover:scale-105 hover:bg-green-500 active:scale-95 border-2 border-transparent hover:border-green-700"
+                        disabled={isChangingPassword}
+                      >
+                        {isChangingPassword && (
+                          <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                        )}
+                        {isChangingPassword ? "Alterando..." : "Salvar Nova Senha"}
                       </Button>
                     </DialogFooter>
                   </DialogContent>
                 </Dialog>
-                </CardContent>
+              </CardContent>
             </Card>
-            
+
             {/* Card da Zona de Perigo */}
             <Card className="border-red-500 rounded-xl shadow-md">
               <CardHeader>
@@ -371,11 +425,13 @@ export default function PerfilPage() {
                     </AlertDialogHeader>
                     <AlertDialogFooter>
                       <AlertDialogCancel className="w-fit rounded-full  transform hover:scale-105 bg-green-500 active:scale-95 border-2 border-transparent hover:border-green-700">
-                        Cancelar</AlertDialogCancel>
+                        Cancelar
+                      </AlertDialogCancel>
                       <AlertDialogAction
                         onClick={handleDeleteAccount}
                         className={cn(
-                          buttonVariants({ variant: "destructive" }) + " w-fit rounded-full transition-all transform hover:scale-105 hover:bg-red-500 active:scale-95 border-2 border-transparent hover:border-red-700"
+                          buttonVariants({ variant: "destructive" }) +
+                            " w-fit rounded-full transition-all transform hover:scale-105 hover:bg-red-500 active:scale-95 border-2 border-transparent hover:border-red-700",
                         )}
                       >
                         Continuar
