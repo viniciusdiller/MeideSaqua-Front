@@ -42,28 +42,40 @@ export default function LoginPage() {
   };
 
   const handleLogin = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setIsLoading(true);
+  e.preventDefault();
+  setIsLoading(true);
 
-    const loginData = {
-      username: email,
-      password: password,
-    };
-
-    try {
-      const userData = await loginUser(loginData);
-      addNotification("Login bem-sucedido! Redirecionando...", "success");
-      login(userData);
-      setTimeout(() => {
-        window.location.href = "/";
-      }, 2000);
-    } catch (err) {
-      addNotification("Email ou senha inválidos. Tente novamente.", "error");
-      console.error(err);
-    } finally {
-      setIsLoading(false);
-    }
+  const loginData = {
+    username: email,
+    password: password,
   };
+
+  try {
+    const userData = await loginUser(loginData);
+    addNotification("Login bem-sucedido! Redirecionando...", "success");
+    login(userData);
+    setTimeout(() => {
+      window.location.href = "/";
+    }, 2000);
+  } catch (err: any) {
+    const errorMessage = err?.response?.data?.message || err.message;
+
+      if (errorMessage.includes("Conta não ativada")) {
+      addNotification(
+        "Sua conta ainda não foi verificada. Por favor, confirme seu e-mail antes de entrar.",
+        "error"
+      );
+    } else {
+      addNotification("Email ou senha inválidos. Tente novamente.", "error");
+    }
+
+
+    console.error(err);
+  } finally {
+    setIsLoading(false);
+  }
+};
+
 
   return (
     <div>
