@@ -8,10 +8,9 @@ import { useAuth } from "@/context/AuthContext";
 import { toast } from "sonner";
 import { contemPalavrao } from "@/lib/profanityFilter";
 
-
 const AvaliacaoModalButton = ({
   estabelecimentoId,
-  onReviewSubmit, // Opcional: callback para atualizar a página
+  onReviewSubmit,
 }: {
   estabelecimentoId: number;
   onReviewSubmit?: () => void;
@@ -20,13 +19,11 @@ const AvaliacaoModalButton = ({
   const { user } = useAuth();
 
   const handleButtonClick = () => {
-    // Se não houver utilizador, mostra a notificação de erro
     if (!user) {
       toast.error(
         "Para realizar um comentário, é necessário estar logado em uma conta."
       );
     } else {
-      // Se houver utilizador, abre o modal
       setIsOpen(true);
     }
   };
@@ -95,7 +92,6 @@ const SpringModal = ({
       setRating(0);
       setComment("");
 
-      // Se a função de callback for fornecida, execute-a
       if (onReviewSubmit) {
         onReviewSubmit();
       }

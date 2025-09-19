@@ -75,35 +75,10 @@ const StarRating = ({ rating }: { rating: number }) => {
 };
 
 const item = [
-  {
-    id: "1",
-    img: "/foto-4k.jpg",
-    src: "/foto-4k.jpg",
-    url: "/foto-4k.jpg",
-    alt: "Imagem 1",
-    height: 300,
-  },
-  {
-    id: "2",
-    img: "/teste.jpg",
-    url: "/teste.jpg",
-    alt: "Imagem 2",
-    height: 300,
-  },
-  {
-    id: "3",
-    img: "/gatinho.jpg",
-    url: "/gatinho.jpg",
-    alt: "Imagem 3",
-    height: 300,
-  },
-  {
-    id: "4",
-    img: "/gatooculos.jpg",
-    url: "/gatooculos.jpg",
-    alt: "Imagem 3",
-    height: 300,
-  },
+  { id: "1", img: "/foto-4k.jpg", src: "/foto-4k.jpg", url: "/foto-4k.jpg", alt: "Imagem 1", height: 300 },
+  { id: "2", img: "/teste.jpg", url: "/teste.jpg", alt: "Imagem 2", height: 300 },
+  { id: "3", img: "/gatinho.jpg", url: "/gatinho.jpg", alt: "Imagem 3", height: 300 },
+  { id: "4", img: "/gatooculos.jpg", url: "/gatooculos.jpg", alt: "Imagem 3", height: 300 },
 ];
 
 const REVIEWS_PER_PAGE = 4;
@@ -160,29 +135,31 @@ export default function MeiDetailPage({
   const [animateReviews, setAnimateReviews] = useState(false);
   const [locaisExpandidos, setLocaisExpandidos] = useState(false);
 
+  const fetchMeiData = async () => {
+    const meiId = params.slug;
+    if (!meiId) return;
+
+    try {
+      const detailsData = await getEstablishmentById(meiId);
+      const reviewsData = await getReviewsByEstablishment(meiId);
+
+      setMeiDetails(detailsData);
+      setReviews(reviewsData);
+      setRating(detailsData.media || 0);
+      setAnimateReviews(true);
+    } catch (error) {
+      console.error("Falha ao buscar dados do MEI:", error);
+      setMeiDetails(null);
+    }
+  };
+  
   useEffect(() => {
-    const fetchMeiData = async () => {
-      const meiId = params.slug;
-      if (!meiId) return;
-
-      try {
+    const initialFetch = async () => {
         setIsLoading(true);
-        const detailsData = await getEstablishmentById(meiId);
-        const reviewsData = await getReviewsByEstablishment(meiId);
-
-        setMeiDetails(detailsData);
-        setReviews(reviewsData);
-        setRating(detailsData.media || 0);
-        setAnimateReviews(true);
-      } catch (error) {
-        console.error("Falha ao buscar dados do MEI:", error);
-        setMeiDetails(null);
-      } finally {
+        await fetchMeiData();
         setIsLoading(false);
-      }
-    };
-
-    fetchMeiData();
+    }
+    initialFetch();
   }, [params.slug]);
 
   useEffect(() => {
@@ -230,28 +207,11 @@ export default function MeiDetailPage({
   };
 
   const locais = [
-    "Padaria Doce Pão",
-    "Restaurante Central",
-    "Padaria Doce Pão pao pao pao pao",
-    "Farmácia Vida",
-    "Lanchonete Express",
-    "Barra Nova",
-    "Vilatur",
-    "Porto da Roça II",
-    "Itaúna",
-    "Restaurante Central",
-    "Padaria Doce Pão",
-    "Padaria Doce Pão",
-    "Restaurante Central",
-    "Padaria Doce Pão pao pao pao pao",
-    "Farmácia Vida",
-    "Lanchonete Express",
-    "Barra Nova",
-    "Vilatur",
-    "Porto da Roça II",
-    "Itaúna",
-    "Restaurante Central",
-    "Padaria Doce Pão",
+    "Padaria Doce Pão", "Restaurante Central", "Padaria Doce Pão pao pao pao pao", "Farmácia Vida",
+    "Lanchonete Express", "Barra Nova", "Vilatur", "Porto da Roça II", "Itaúna", "Restaurante Central",
+    "Padaria Doce Pão", "Padaria Doce Pão", "Restaurante Central", "Padaria Doce Pão pao pao pao pao",
+    "Farmácia Vida", "Lanchonete Express", "Barra Nova", "Vilatur", "Porto da Roça II", "Itaúna",
+    "Restaurante Central", "Padaria Doce Pão",
   ];
 
   const linhasVisiveis = 3;
@@ -321,26 +281,13 @@ export default function MeiDetailPage({
                 </p>
                 <div className="hidden quinhentos:flex flex-col md:flex-row md:items-center md:justify-between gap-6 mt-6">
                   <div className="flex items-center gap-6">
-                    <a
-                      href={meiDetails.instagram}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="flex items-center gap-2 text-gray-600 hover:text-pink-600 transition-colors"
-                    >
+                    <a href={meiDetails.instagram} target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 text-gray-600 hover:text-pink-600 transition-colors">
                       <div className="w-9 h-9 rounded-full bg-pink-100 flex items-center justify-center">
                         <Instagram size={18} strokeWidth={2} />
                       </div>
                       <span className="text-sm font-medium">Instagram</span>
                     </a>
-                    <a
-                      href={`https://wa.me/${meiDetails.contatoEstabelecimento.replace(
-                        /\D/g,
-                        ""
-                      )}`}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="flex items-center gap-2 text-gray-600 hover:text-[#22c362] transition-colors"
-                    >
+                    <a href={`https://wa.me/${meiDetails.contatoEstabelecimento.replace(/\D/g, "")}`} target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 text-gray-600 hover:text-[#22c362] transition-colors">
                       <div className="w-9 h-9 rounded-full bg-green-100 flex items-center justify-center">
                         <PhoneForwarded size={18} strokeWidth={2} />
                       </div>
@@ -444,6 +391,7 @@ export default function MeiDetailPage({
               </h3>
               <AvaliacaoModalButton
                 estabelecimentoId={meiDetails.estabelecimentoId}
+                onReviewSubmit={fetchMeiData}
               />
               <div className="space-y-4">
                 {reviews.length > 0 ? (
