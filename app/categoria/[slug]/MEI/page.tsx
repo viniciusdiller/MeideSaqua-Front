@@ -20,13 +20,30 @@ import {
   Laptop,
   Plane,
   Tractor,
+  Trash2,
+  Palette,
+  Brush,
+  Store,
+  Wrench,
+  PartyPopper,
+  Utensils,
+  HeartPulse,
+  Briefcase,
+  Car,
+  Laptop,
+  Plane,
+  Tractor,
 } from "lucide-react";
 import React, { useState, useEffect, useRef } from "react";
 import { TiltImage } from "@/components/ui/TiltImage";
 import "leaflet/dist/leaflet.css";
 import { categories } from "@/app/page";
 import Image from "next/image";
-import { getEstablishmentById, getReviewsByEstablishment } from "@/lib/api";
+import {
+  getEstablishmentById,
+  getReviewsByEstablishment,
+  deleteReview,
+} from "@/lib/api";
 import AvaliacaoModalButton from "@/components/Pop-up Coments";
 import {
   Pagination,
@@ -134,6 +151,7 @@ export default function MeiDetailPage({
   const [currentPage, setCurrentPage] = useState(1);
   const [animateReviews, setAnimateReviews] = useState(false);
   const [locaisExpandidos, setLocaisExpandidos] = useState(false);
+  const { user } = useAuth();
 
   const fetchMeiData = async () => {
     const meiId = params.slug;
@@ -206,6 +224,29 @@ export default function MeiDetailPage({
     }
   };
 
+  const handleDelete = async (avaliacaoId: number) => {
+    if (!user?.token) {
+      toast.error("Você precisa estar logado para excluir um comentário.");
+      return;
+    }
+
+    if (
+      confirm(
+        "Tem certeza que deseja excluir seu comentário? Esta ação não pode ser desfeita."
+      )
+    ) {
+      try {
+        await deleteReview(avaliacaoId, user.token);
+        toast.success("Comentário excluído com sucesso!");
+        // Atualiza a lista de reviews no estado, removendo o que foi excluído
+        setReviews(reviews.filter((r) => r.avaliacoesId !== avaliacaoId));
+      } catch (error: any) {
+        console.error("Erro ao excluir avaliação:", error);
+        toast.error(error.message || "Não foi possível excluir o comentário.");
+      }
+    }
+  };
+
   const locais = [
     "Padaria Doce Pão", "Restaurante Central", "Padaria Doce Pão pao pao pao pao", "Farmácia Vida",
     "Lanchonete Express", "Barra Nova", "Vilatur", "Porto da Roça II", "Itaúna", "Restaurante Central",
@@ -234,6 +275,7 @@ export default function MeiDetailPage({
       >
         <div className="bg-white/80 backdrop-blur-md border-b border-gray-200/80">
           <div className="w-full px-4 sm:px-6 py-3 grid grid-cols-[auto_1fr_auto] items-center">
+            <Link
             <Link
               href={`/categoria/${categorySlug}`}
               className="flex items-center gap-1.5 text-sm text-gray-600 hover:text-[#017DB9] transition-colors p-2 -ml-3 sm:ml-8 md:ml-12 lg:ml-36 rounded-lg"

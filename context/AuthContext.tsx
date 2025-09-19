@@ -1,23 +1,28 @@
 "use client";
 
-import React, { createContext, useState, useContext, useEffect, ReactNode } from 'react';
-
+import React, {
+  createContext,
+  useState,
+  useContext,
+  useEffect,
+  ReactNode,
+} from "react";
 
 interface User {
-  id: number;
+  usuarioId: number;
   nomeCompleto: string;
   username: string;
   email: string;
   token?: string;
-  chosenAvatar?: string; 
+  chosenAvatar?: string;
 }
 
 interface AuthContextType {
   user: User | null;
-  login: (loginData: { user: User; token: string }) => void; 
+  login: (loginData: { user: User; token: string }) => void;
   logout: () => void;
   isLoading: boolean;
-  updateUser: (updatedData: Partial<User>) => void; 
+  updateUser: (updatedData: Partial<User>) => void;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -28,15 +33,18 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
   useEffect(() => {
     try {
-      const storedUser = localStorage.getItem('user');
+      const storedUser = localStorage.getItem("user");
       if (storedUser) {
         setUser(JSON.parse(storedUser));
       }
     } catch (error) {
-      console.error("Falha ao carregar dados do usuário do localStorage", error);
-      localStorage.removeItem('user');
+      console.error(
+        "Falha ao carregar dados do usuário do localStorage",
+        error
+      );
+      localStorage.removeItem("user");
     } finally {
-        setIsLoading(false); 
+      setIsLoading(false);
     }
   }, []);
 
@@ -44,21 +52,21 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     //  objeto completo do usuário é salvo, incluindo o token
     const userDataWithToken = { ...loginData.user, token: loginData.token };
     setUser(userDataWithToken);
-    localStorage.setItem('user', JSON.stringify(userDataWithToken));
+    localStorage.setItem("user", JSON.stringify(userDataWithToken));
   };
 
   const logout = () => {
     setUser(null);
-    localStorage.removeItem('user');
-    window.location.href = '/login'; 
+    localStorage.removeItem("user");
+    window.location.href = "/login";
   };
-  
+
   //  Nova função para atualizar o usuário
   const updateUser = (updatedData: Partial<User>) => {
-    setUser(currentUser => {
+    setUser((currentUser) => {
       if (currentUser) {
         const newUser = { ...currentUser, ...updatedData };
-        localStorage.setItem('user', JSON.stringify(newUser));
+        localStorage.setItem("user", JSON.stringify(newUser));
         return newUser;
       }
       return null;
@@ -66,7 +74,9 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   };
 
   return (
-    <AuthContext.Provider value={{ user, login, logout, isLoading, updateUser }}>
+    <AuthContext.Provider
+      value={{ user, login, logout, isLoading, updateUser }}
+    >
       {children}
     </AuthContext.Provider>
   );
@@ -75,7 +85,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 export const useAuth = () => {
   const context = useContext(AuthContext);
   if (context === undefined) {
-    throw new Error('useAuth deve ser usado dentro de um AuthProvider');
+    throw new Error("useAuth deve ser usado dentro de um AuthProvider");
   }
   return context;
 };
