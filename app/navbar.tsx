@@ -26,6 +26,11 @@ const AnimatedLogo = () => {
       alt: "Logo Prefeitura de Saquarema", 
       className: "h-12 w-auto" 
     },
+    {
+      src: "/logoSMGS.png",
+      alt:"Logo Secretaria Municipal de Governança e Sustentabilidade",
+      className: "h-12 w-auto"
+    }
   ];
 
   const [index, setIndex] = useState(0);
