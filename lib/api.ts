@@ -114,4 +114,10 @@ export const resetPassword = (data: { token: string; newPassword: string }) =>
     body: JSON.stringify(data),
   });
 
-
+export const deleteReview = (id: number, token: string) =>
+  fetchApi(`/api/avaliacoes/${id}`, {
+    method: "DELETE",
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  });

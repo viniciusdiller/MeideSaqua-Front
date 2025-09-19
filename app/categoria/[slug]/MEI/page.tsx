@@ -9,15 +9,30 @@ import {
   Phone,
   PhoneForwarded,
   Instagram,
-  Palette, Brush, Store, Wrench, PartyPopper, Utensils, HeartPulse,
-  Briefcase, Car, Laptop, Plane, Tractor, ChevronLeft
+  Palette,
+  Brush,
+  Store,
+  Wrench,
+  PartyPopper,
+  Utensils,
+  HeartPulse,
+  Briefcase,
+  Car,
+  Laptop,
+  Plane,
+  Tractor,
+  Trash2,
 } from "lucide-react";
 import React, { useState, useEffect } from "react";
 import { TiltImage } from "@/components/ui/TiltImage";
 import "leaflet/dist/leaflet.css";
 import { categories } from "@/app/page";
 import Image from "next/image";
-import { getEstablishmentById, getReviewsByEstablishment } from "@/lib/api";
+import {
+  getEstablishmentById,
+  getReviewsByEstablishment,
+  deleteReview,
+} from "@/lib/api";
 import AvaliacaoModalButton from "@/components/Pop-up Coments";
 import {
   Pagination,
@@ -29,23 +44,8 @@ import SwiperCarousel from "@/components/CarouselMEI";
 import ImageGrid from "@/components/ImagesMEI";
 import { motion } from "framer-motion";
 import TagsAnimate from "@/components/ui/tagsanimate";
-
-
-
-const categoryIcons: { [key: string]: React.ElementType } = {
-  artesanato: Brush,
-  beleza: Palette,
-  comercio: Store,
-  construcao: Wrench,
-  festas: PartyPopper,
-  gastronomia: Utensils,
-  saude: HeartPulse,
-  "servicos-administrativos": Briefcase,
-  "servicos-automotivos": Car,
-  tecnologia: Laptop,
-  turismo: Plane,
-  rural: Tractor,
-};
+import { useAuth } from "@/context/AuthContext";
+import { toast } from "sonner";
 
 const StarRating = ({ rating }: { rating: number }) => {
   const totalStars = 5;
@@ -116,6 +116,7 @@ export default function MeiDetailPage({
   const [currentPage, setCurrentPage] = useState(1);
   const [animateReviews, setAnimateReviews] = useState(false);
   const [locaisExpandidos, setLocaisExpandidos] = useState(false);
+  const { user } = useAuth();
 
   useEffect(() => {
     const fetchMeiData = async () => {
@@ -190,6 +191,29 @@ export default function MeiDetailPage({
     }
   };
 
+  const handleDelete = async (avaliacaoId: number) => {
+    if (!user?.token) {
+      toast.error("Você precisa estar logado para excluir um comentário.");
+      return;
+    }
+
+    if (
+      confirm(
+        "Tem certeza que deseja excluir seu comentário? Esta ação não pode ser desfeita."
+      )
+    ) {
+      try {
+        await deleteReview(avaliacaoId, user.token);
+        toast.success("Comentário excluído com sucesso!");
+        // Atualiza a lista de reviews no estado, removendo o que foi excluído
+        setReviews(reviews.filter((r) => r.avaliacoesId !== avaliacaoId));
+      } catch (error: any) {
+        console.error("Erro ao excluir avaliação:", error);
+        toast.error(error.message || "Não foi possível excluir o comentário.");
+      }
+    }
+  };
+
   // Locais de atuação mockados (substitua depois pelos vindos da API se tiver)
   const locais = [
     "Padaria Doce Pão",
@@ -238,7 +262,7 @@ export default function MeiDetailPage({
       >
         <div className="bg-white/80 backdrop-blur-md border-b border-gray-200/80">
           <div className="w-full px-4 sm:px-6 py-3 grid grid-cols-[auto_1fr_auto] items-center">
-                <Link
+            <Link
               href={`/categoria/${categorySlug}`}
               className="flex items-center gap-1.5 text-sm text-gray-600 hover:text-[#017DB9] transition-colors p-2 -ml-3 sm:ml-8 md:ml-12 lg:ml-36 rounded-lg"
             >
@@ -252,83 +276,84 @@ export default function MeiDetailPage({
         </div>
       </motion.header>
 
-
       <main className="w-full p-4 md:p-6 ">
         <div className="space-y-8">
           {/* ---------------------- INFORMAÇÕES BÁSICAS ---------------------- */}
-        <section className="bg-white p-6 rounded-3xl shadow-lg md:mx-auto md:max-w-[85%]">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 items-center">
-            <div className="md:col-span-2 flex flex-col">
-              <div className="mb-6 text-center md:text-left">
-                <h2 className="text-3xl font-bold text-gray-900 mb-2 border-l-4 border-[#017DB9] pl-3">
-                  {meiDetails.nomeFantasia}
-                </h2>
-                <div className="flex items-center justify-center md:justify-start gap-2">
-                  <StarRating rating={rating} />
-                  <span className="text-gray-700 font-semibold">{rating.toFixed(1)}</span>
-                  <span className="text-gray-500 text-sm">
-                    ({reviews.length} avaliações)
-                  </span>
+          <section className="bg-white p-6 rounded-3xl shadow-lg md:mx-auto md:max-w-[85%]">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-8 items-center">
+              <div className="md:col-span-2 flex flex-col">
+                <div className="mb-6 text-center md:text-left">
+                  <h2 className="text-3xl font-bold text-gray-900 mb-2 border-l-4 border-[#017DB9] pl-3">
+                    {meiDetails.nomeFantasia}
+                  </h2>
+                  <div className="flex items-center justify-center md:justify-start gap-2">
+                    <StarRating rating={rating} />
+                    <span className="text-gray-700 font-semibold">
+                      {rating.toFixed(1)}
+                    </span>
+                    <span className="text-gray-500 text-sm">
+                      ({reviews.length} avaliações)
+                    </span>
+                  </div>
+                </div>
+
+                <p className="text-gray-700 leading-relaxed md:pl-2">
+                  {meiDetails.descricao}
+                </p>
+                <div className="hidden quinhentos:flex flex-col md:flex-row md:items-center md:justify-between gap-6 mt-6">
+                  <div className="flex items-center gap-6">
+                    <a
+                      href={meiDetails.instagram}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="flex items-center gap-2 text-gray-600 hover:text-pink-600 transition-colors"
+                    >
+                      <div className="w-9 h-9 rounded-full bg-pink-100 flex items-center justify-center">
+                        <Instagram size={18} strokeWidth={2} />
+                      </div>
+                      <span className="text-sm font-medium">Instagram</span>
+                    </a>
+
+                    <a
+                      href={`https://wa.me/${meiDetails.contatoEstabelecimento.replace(
+                        /\D/g,
+                        ""
+                      )}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="flex items-center gap-2 text-gray-600 hover:text-[#22c362] transition-colors"
+                    >
+                      <div className="w-9 h-9 rounded-full bg-green-100 flex items-center justify-center">
+                        <PhoneForwarded size={18} strokeWidth={2} />
+                      </div>
+                      <span className="text-sm font-medium">WhatsApp</span>
+                    </a>
+                  </div>
+
+                  {/* tags(dps vamos adicionar as reais, puxando de acordo com o que estabelecimento escolher no colab) */}
+                  <div className="flex flex-wrap gap-2">
+                    <TagsAnimate />
+                  </div>
                 </div>
               </div>
 
-              <p className="text-gray-700 leading-relaxed md:pl-2">
-                {meiDetails.descricao}
-              </p>
-              <div className="hidden quinhentos:flex flex-col md:flex-row md:items-center md:justify-between gap-6 mt-6">
-                <div className="flex items-center gap-6">
-                  <a
-                    href={meiDetails.instagram}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="flex items-center gap-2 text-gray-600 hover:text-pink-600 transition-colors"
-                  >
-                    <div className="w-9 h-9 rounded-full bg-pink-100 flex items-center justify-center">
-                      <Instagram size={18} strokeWidth={2} />
-                    </div>
-                    <span className="text-sm font-medium">Instagram</span>
-                  </a>
-
-                  <a
-                    href={`https://wa.me/${meiDetails.contatoEstabelecimento.replace(
-                      /\D/g,
-                      ""
-                    )}`}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="flex items-center gap-2 text-gray-600 hover:text-[#22c362] transition-colors"
-                  >
-                    <div className="w-9 h-9 rounded-full bg-green-100 flex items-center justify-center">
-                      <PhoneForwarded size={18} strokeWidth={2} />
-                    </div>
-                    <span className="text-sm font-medium">WhatsApp</span>
-                  </a>
-                </div>
-
-                {/* tags(dps vamos adicionar as reais, puxando de acordo com o que estabelecimento escolher no colab) */}
-                <div className="flex flex-wrap gap-2">
-                  <TagsAnimate />
+              {/* --- LOGO --- */}
+              <div className="flex items-center justify-center md:col-span-1">
+                <div
+                  className="w-40 h-40 md:w-56 md:h-56 bg-gray-50 border border-gray-200 rounded-2xl shadow-sm 
+              flex items-center justify-center p-4"
+                >
+                  <TiltImage
+                    src={meiDetails.logoUrl || "/placeholder-logo.png"}
+                    alt={`Logo de ${meiDetails.nomeFantasia}`}
+                    width={500}
+                    height={500}
+                    className="w-full h-full object-contain"
+                  />
                 </div>
               </div>
             </div>
-               
-
-            {/* --- LOGO --- */}
-            <div className="flex items-center justify-center md:col-span-1">
-              <div className="w-40 h-40 md:w-56 md:h-56 bg-gray-50 border border-gray-200 rounded-2xl shadow-sm 
-              flex items-center justify-center p-4">
-                <TiltImage
-                  src={meiDetails.logoUrl || "/placeholder-logo.png"}
-                  alt={`Logo de ${meiDetails.nomeFantasia}`}
-                  width={500}
-                  height={500}
-                  className="w-full h-full object-contain"
-                />
-              </div>
-            </div>
-          </div>
-        </section>
-
+          </section>
 
           {/* ---------------------- PORTFÓLIO ---------------------- */}
           <section className="bg-white p-6 rounded-3xl shadow-lg md:mx-auto md:max-w-[85%] space-y-6">
@@ -346,9 +371,8 @@ export default function MeiDetailPage({
             </div>
           </section>
 
-
           {/* ---------------------- ÁREA DE ATUAÇÃO ---------------------- */}
-         <section className="bg-white p-6 rounded-3xl shadow-lg md:mx-auto md:max-w-[85%] grid grid-cols-1 milecem:grid-cols-4 gap-8">
+          <section className="bg-white p-6 rounded-3xl shadow-lg md:mx-auto md:max-w-[85%] grid grid-cols-1 milecem:grid-cols-4 gap-8">
             <div className="space-y-5 text-gray-700">
               <h3 className="text-2xl font-bold text-gray-900 mb-4 border-l-4 border-[#017DB9] pl-3">
                 Área de Atuação
@@ -406,7 +430,6 @@ export default function MeiDetailPage({
             </div>
           </section>
 
-
           {/* ---------------------- AVALIAÇÕES ---------------------- */}
           <section className="bg-white p-6 rounded-3xl shadow-md md:mx-auto md:max-w-[85%]">
             <h3 className="text-2xl font-bold text-gray-900 mb-6 border-l-4 border-[#017DB9] pl-3">
@@ -427,30 +450,39 @@ export default function MeiDetailPage({
                       .map((review, index) => (
                         <div
                           key={review.avaliacoesId}
-                          className={`
-                          flex gap-4 py-2 items-start border bt-1px rounded-3xl shadow-lg
-                          transition-all duration-500 ease-out
-                          ${
+                          className={`flex gap-4 py-2 items-start border bt-1px rounded-3xl shadow-lg transition-all duration-500 ease-out ${
                             animateReviews
                               ? "opacity-100 translate-y-0"
                               : "opacity-0 translate-y-4"
-                          }
-                        `}
+                          }`}
                           style={{ transitionDelay: `${index * 50}ms` }}
                         >
                           <div className="w-12 h-12 bg-gray-200 rounded-full flex-shrink-0 my-auto ml-4">
-                            <Image
-                              src="/avatars/default-avatar.png"
-                              alt={`Avatar de ${review.usuario.nomeCompleto}`}
-                              width={48}
-                              height={48}
-                              className="rounded-full w-full h-full object-cover"
-                            />
+                            {/* ... Imagem do Avatar ... */}
                           </div>
-                          <div>
-                            <p className="font-semibold text-gray-800">
-                              {review.usuario.nomeCompleto}
-                            </p>
+                          <div className="w-full pr-4">
+                            {" "}
+                            {/* Adicionado w-full e pr-4 para dar espaço */}
+                            <div className="flex justify-between items-start">
+                              {" "}
+                              {/* Container para nome e botão */}
+                              <p className="font-semibold text-gray-800">
+                                {review.usuario.nomeCompleto}
+                              </p>
+                              {/* LÓGICA DE EXIBIÇÃO CONDICIONAL */}
+                              {user &&
+                                user.usuarioId === review.usuario.usuarioId && (
+                                  <button
+                                    onClick={() =>
+                                      handleDelete(review.avaliacoesId)
+                                    }
+                                    className="text-red-500 hover:text-red-700 p-1 rounded-full hover:bg-red-100 transition-colors"
+                                    aria-label="Deletar comentário"
+                                  >
+                                    <Trash2 size={16} />
+                                  </button>
+                                )}
+                            </div>
                             <div className="flex items-center gap-1 my-1">
                               <StarRating rating={review.nota} />
                             </div>
