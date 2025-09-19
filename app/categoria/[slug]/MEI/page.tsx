@@ -21,18 +21,6 @@ import {
   Plane,
   Tractor,
   Trash2,
-  Palette,
-  Brush,
-  Store,
-  Wrench,
-  PartyPopper,
-  Utensils,
-  HeartPulse,
-  Briefcase,
-  Car,
-  Laptop,
-  Plane,
-  Tractor,
 } from "lucide-react";
 import React, { useState, useEffect, useRef } from "react";
 import { TiltImage } from "@/components/ui/TiltImage";
@@ -54,21 +42,8 @@ import {
 import { motion, useInView } from "framer-motion";
 import TagsAnimate from "@/components/ui/tagsanimate";
 import ImageGrid from "@/components/ImagesMEI";
-
-const categoryIcons: { [key: string]: React.ElementType } = {
-  artesanato: Brush,
-  beleza: Palette,
-  comercio: Store,
-  construcao: Wrench,
-  festas: PartyPopper,
-  gastronomia: Utensils,
-  saude: HeartPulse,
-  "servicos-administrativos": Briefcase,
-  "servicos-automotivos": Car,
-  tecnologia: Laptop,
-  turismo: Plane,
-  rural: Tractor,
-};
+import { useAuth } from "@/context/AuthContext";
+import { toast } from "sonner";
 
 const StarRating = ({ rating }: { rating: number }) => {
   const totalStars = 5;
@@ -92,10 +67,35 @@ const StarRating = ({ rating }: { rating: number }) => {
 };
 
 const item = [
-  { id: "1", img: "/foto-4k.jpg", src: "/foto-4k.jpg", url: "/foto-4k.jpg", alt: "Imagem 1", height: 300 },
-  { id: "2", img: "/teste.jpg", url: "/teste.jpg", alt: "Imagem 2", height: 300 },
-  { id: "3", img: "/gatinho.jpg", url: "/gatinho.jpg", alt: "Imagem 3", height: 300 },
-  { id: "4", img: "/gatooculos.jpg", url: "/gatooculos.jpg", alt: "Imagem 3", height: 300 },
+  {
+    id: "1",
+    img: "/foto-4k.jpg",
+    src: "/foto-4k.jpg",
+    url: "/foto-4k.jpg",
+    alt: "Imagem 1",
+    height: 300,
+  },
+  {
+    id: "2",
+    img: "/teste.jpg",
+    url: "/teste.jpg",
+    alt: "Imagem 2",
+    height: 300,
+  },
+  {
+    id: "3",
+    img: "/gatinho.jpg",
+    url: "/gatinho.jpg",
+    alt: "Imagem 3",
+    height: 300,
+  },
+  {
+    id: "4",
+    img: "/gatooculos.jpg",
+    url: "/gatooculos.jpg",
+    alt: "Imagem 3",
+    height: 300,
+  },
 ];
 
 const REVIEWS_PER_PAGE = 4;
@@ -170,13 +170,13 @@ export default function MeiDetailPage({
       setMeiDetails(null);
     }
   };
-  
+
   useEffect(() => {
     const initialFetch = async () => {
-        setIsLoading(true);
-        await fetchMeiData();
-        setIsLoading(false);
-    }
+      setIsLoading(true);
+      await fetchMeiData();
+      setIsLoading(false);
+    };
     initialFetch();
   }, [params.slug]);
 
@@ -248,11 +248,28 @@ export default function MeiDetailPage({
   };
 
   const locais = [
-    "Padaria Doce Pão", "Restaurante Central", "Padaria Doce Pão pao pao pao pao", "Farmácia Vida",
-    "Lanchonete Express", "Barra Nova", "Vilatur", "Porto da Roça II", "Itaúna", "Restaurante Central",
-    "Padaria Doce Pão", "Padaria Doce Pão", "Restaurante Central", "Padaria Doce Pão pao pao pao pao",
-    "Farmácia Vida", "Lanchonete Express", "Barra Nova", "Vilatur", "Porto da Roça II", "Itaúna",
-    "Restaurante Central", "Padaria Doce Pão",
+    "Padaria Doce Pão",
+    "Restaurante Central",
+    "Padaria Doce Pão pao pao pao pao",
+    "Farmácia Vida",
+    "Lanchonete Express",
+    "Barra Nova",
+    "Vilatur",
+    "Porto da Roça II",
+    "Itaúna",
+    "Restaurante Central",
+    "Padaria Doce Pão",
+    "Padaria Doce Pão",
+    "Restaurante Central",
+    "Padaria Doce Pão pao pao pao pao",
+    "Farmácia Vida",
+    "Lanchonete Express",
+    "Barra Nova",
+    "Vilatur",
+    "Porto da Roça II",
+    "Itaúna",
+    "Restaurante Central",
+    "Padaria Doce Pão",
   ];
 
   const linhasVisiveis = 3;
@@ -275,7 +292,6 @@ export default function MeiDetailPage({
       >
         <div className="bg-white/80 backdrop-blur-md border-b border-gray-200/80">
           <div className="w-full px-4 sm:px-6 py-3 grid grid-cols-[auto_1fr_auto] items-center">
-            <Link
             <Link
               href={`/categoria/${categorySlug}`}
               className="flex items-center gap-1.5 text-sm text-gray-600 hover:text-[#017DB9] transition-colors p-2 -ml-3 sm:ml-8 md:ml-12 lg:ml-36 rounded-lg"
@@ -323,13 +339,26 @@ export default function MeiDetailPage({
                 </p>
                 <div className="hidden quinhentos:flex flex-col md:flex-row md:items-center md:justify-between gap-6 mt-6">
                   <div className="flex items-center gap-6">
-                    <a href={meiDetails.instagram} target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 text-gray-600 hover:text-pink-600 transition-colors">
+                    <a
+                      href={meiDetails.instagram}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="flex items-center gap-2 text-gray-600 hover:text-pink-600 transition-colors"
+                    >
                       <div className="w-9 h-9 rounded-full bg-pink-100 flex items-center justify-center">
                         <Instagram size={18} strokeWidth={2} />
                       </div>
                       <span className="text-sm font-medium">Instagram</span>
                     </a>
-                    <a href={`https://wa.me/${meiDetails.contatoEstabelecimento.replace(/\D/g, "")}`} target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 text-gray-600 hover:text-[#22c362] transition-colors">
+                    <a
+                      href={`https://wa.me/${meiDetails.contatoEstabelecimento.replace(
+                        /\D/g,
+                        ""
+                      )}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="flex items-center gap-2 text-gray-600 hover:text-[#22c362] transition-colors"
+                    >
                       <div className="w-9 h-9 rounded-full bg-green-100 flex items-center justify-center">
                         <PhoneForwarded size={18} strokeWidth={2} />
                       </div>
@@ -461,6 +490,7 @@ export default function MeiDetailPage({
                                 className="rounded-full w-full h-full object-cover"
                               />
                             </div>
+
                             <div>
                               <p className="font-semibold text-gray-800">
                                 {review.usuario.nomeCompleto}
@@ -471,6 +501,18 @@ export default function MeiDetailPage({
                               <p className="text-gray-600 break-words">
                                 {review.comentario}
                               </p>
+                              {user &&
+                                user.usuarioId === review.usuario.usuarioId && (
+                                  <button
+                                    onClick={() =>
+                                      handleDelete(review.avaliacoesId)
+                                    }
+                                    className="text-red-500 hover:text-red-700 p-1 rounded-full hover:bg-red-100 transition-colors"
+                                    aria-label="Deletar comentário"
+                                  >
+                                    <Trash2 size={16} />
+                                  </button>
+                                )}
                             </div>
                           </div>
                         ))}
