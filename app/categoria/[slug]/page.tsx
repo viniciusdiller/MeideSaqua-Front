@@ -107,7 +107,7 @@ export default function CategoryPage({ params }: PageProps) {
         />
         <div className="absolute inset-0 bg-black/50 backdrop-blur-sm z-10"></div>
 
-        <div className="container mx-auto px-4 relative z-20 text-center">
+        <div className="container mx-auto  px-4 relative z-20 text-center">
           <Link
             href="/"
             className="absolute -top-6 left-4 md:top-6 md:left-6 flex items-center gap-2 text-white/80 hover:text-white transition-colors bg-white/10 hover:bg-white/20 px-3 py-1.5 rounded-lg text-sm"
@@ -139,7 +139,7 @@ export default function CategoryPage({ params }: PageProps) {
         </div>
       </header>
 
-      <main className="container mx-auto px-4 py-8">
+      <main className="container mx-auto px-4 py-8 milecem:px-24">
         <div className="grid grid-cols-1 milecem:grid-cols-5 gap-8">
           <div className="flex flex-col milecem:col-span-4">
             <div className="flex items-center justify-between mb-4">
