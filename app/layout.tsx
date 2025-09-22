@@ -5,7 +5,9 @@ import "./globals.css";
 import { Navbar } from "./navbar";
 import { AuthProvider } from "@/context/AuthContext";
 import { Toaster } from "@/components/ui/sonner";
-import Footer from "@/components/footer"; 
+import Footer from "@/components/footer";
+import AccessibilityFeatures from "@/components/AccessibilityFeatures";
+import AccessibilityStyles from "@/components/AccessibilityStyles"; // 1. IMPORTE O NOVO COMPONENTE
 
 const poppins = Poppins({
   subsets: ["latin"],
@@ -43,6 +45,9 @@ export default function RootLayout({
 }) {
   return (
     <html lang="pt-BR">
+      <head>
+        <AccessibilityStyles /> {/* 2. ADICIONE O COMPONENTE DE ESTILOS AQUI */}
+      </head>
       <body
         className={`${poppins.variable} bg-white flex flex-col min-h-screen`}
       >
@@ -51,9 +56,23 @@ export default function RootLayout({
           <main className="flex-grow">{children}</main>
           <Footer />
           <Toaster richColors />
+          <AccessibilityFeatures />
         </AuthProvider>
+
+        {/* Script do VLibras */}
+        <div className="enabled">
+          <div vw-access-button="true" className="active"></div>
+          <div vw-plugin-wrapper="true">
+            <div className="vw-plugin-top-wrapper"></div>
+          </div>
+        </div>
+        <script src="https://vlibras.gov.br/app/vlibras-plugin.js" async></script>
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `new window.VLibras.Widget('https://vlibras.gov.br/app');`,
+          }}
+        />
       </body>
     </html>
   );
 }
-
