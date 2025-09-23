@@ -58,20 +58,6 @@ export default function RootLayout({
           <Toaster richColors />
           <AccessibilityFeatures />
         </AuthProvider>
-
-        {/* Script do VLibras */}
-        <div className="enabled">
-          <div vw-access-button="true" className="active"></div>
-          <div vw-plugin-wrapper="true">
-            <div className="vw-plugin-top-wrapper"></div>
-          </div>
-        </div>
-        <script src="https://vlibras.gov.br/app/vlibras-plugin.js" async></script>
-        <script
-          dangerouslySetInnerHTML={{
-            __html: `new window.VLibras.Widget('https://vlibras.gov.br/app');`,
-          }}
-        />
       </body>
     </html>
   );

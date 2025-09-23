@@ -1,7 +1,14 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { Contrast, Link as LinkIcon, ZoomIn, ZoomOut, BookAudio, X } from "lucide-react";
+import {
+  Contrast,
+  Link as LinkIcon,
+  ZoomIn,
+  ZoomOut,
+  BookAudio,
+  X,
+} from "lucide-react";
 import {
   Tooltip,
   TooltipContent,
@@ -23,17 +30,25 @@ const AccessibilityFeatures = () => {
   // Efeito para a INVERSÃO DE CORES
   useEffect(() => {
     // Aplica o atributo no <html> para máxima prioridade!
-    document.documentElement.setAttribute('data-theme', isInverted ? 'inverted' : 'default');
+    document.documentElement.setAttribute(
+      "data-theme",
+      isInverted ? "inverted" : "default"
+    );
   }, [isInverted]);
 
   // Efeito para o Destaque de Links (aplicado no body)
   useEffect(() => {
-     document.body.setAttribute('data-links', isHighlightingLinks ? 'highlight' : 'default');
+    document.body.setAttribute(
+      "data-links",
+      isHighlightingLinks ? "highlight" : "default"
+    );
   }, [isHighlightingLinks]);
 
   // Limpa a fala ao sair da página
   useEffect(() => {
-    return () => { speechSynthesis.cancel(); };
+    return () => {
+      speechSynthesis.cancel();
+    };
   }, []);
 
   const increaseFontSize = () => setFontSize((s) => Math.min(s + 0.1, 1.5));
@@ -63,11 +78,31 @@ const AccessibilityFeatures = () => {
   };
 
   const accessibilityButtons = [
-    { label: "Aumentar Fonte", icon: <ZoomIn size={20} />, onClick: increaseFontSize },
-    { label: "Diminuir Fonte", icon: <ZoomOut size={20} />, onClick: decreaseFontSize },
-    { label: "Inverter Cores", icon: <Contrast size={20} />, onClick: toggleInvertColors },
-    { label: "Destacar Clicáveis", icon: <LinkIcon size={20} />, onClick: toggleHighlightLinks },
-    { label: isReading ? "Parar Leitura" : "Leitor de Tela", icon: isReading ? <X size={20} /> : <BookAudio size={20} />, onClick: handleToggleReading },
+    {
+      label: "Aumentar Fonte",
+      icon: <ZoomIn size={20} />,
+      onClick: increaseFontSize,
+    },
+    {
+      label: "Diminuir Fonte",
+      icon: <ZoomOut size={20} />,
+      onClick: decreaseFontSize,
+    },
+    {
+      label: "Inverter Cores",
+      icon: <Contrast size={20} />,
+      onClick: toggleInvertColors,
+    },
+    {
+      label: "Destacar Clicáveis",
+      icon: <LinkIcon size={20} />,
+      onClick: toggleHighlightLinks,
+    },
+    {
+      label: isReading ? "Parar Leitura" : "Leitor de Tela",
+      icon: isReading ? <X size={20} /> : <BookAudio size={20} />,
+      onClick: handleToggleReading,
+    },
   ];
 
   return (
@@ -84,7 +119,9 @@ const AccessibilityFeatures = () => {
                 {btn.icon}
               </button>
             </TooltipTrigger>
-            <TooltipContent side="left"><p>{btn.label}</p></TooltipContent>
+            <TooltipContent side="left">
+              <p>{btn.label}</p>
+            </TooltipContent>
           </Tooltip>
         ))}
       </div>
