@@ -501,22 +501,22 @@ export default function MeiDetailPage({
 
                             <div>
                               <div className="flex items-center gap-2">
-                                <p className="font-semibold text-gray-800">
+                                <p className="font-semibold text-gray-800 ">
                                   {review.usuario.nomeCompleto}
+                                  {user &&
+                                    user.usuarioId === review.usuarioId && (
+                                      <button
+                                        // Altere esta linha
+                                        onClick={() =>
+                                          handleDeleteClick(review.avaliacoesId)
+                                        }
+                                        className="ml-3 text-sm text-red-500 hover:text-red-700"
+                                        aria-label="Excluir seu comentário"
+                                      >
+                                        <Trash2 className="w-4 h-4" />
+                                      </button>
+                                    )}
                                 </p>
-                                {user &&
-                                  user.usuarioId === review.usuarioId && (
-                                    <button
-                                      // Altere esta linha
-                                      onClick={() =>
-                                        handleDeleteClick(review.avaliacoesId)
-                                      }
-                                      className="ml-auto text-sm text-red-500 hover:text-red-700"
-                                      aria-label="Excluir seu comentário"
-                                    >
-                                      <Trash2 className="w-4 h-4" />
-                                    </button>
-                                  )}
                               </div>
                               <div className="flex items-center gap-1 my-1">
                                 <StarRating rating={review.nota} />
