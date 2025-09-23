@@ -4,11 +4,7 @@ import { useState, useEffect, useRef } from "react";
 import Image from "next/image";
 import { ChevronLeft, ChevronRight } from "lucide-react"; // Using icons for a cleaner look
 
-const slides = [
-  { src: "/saquarema.png", alt: "Vista de Saquarema" },
-  { src: "/gatinho.jpg", alt: "A cute cat" },
-  { src: "/saquarema.png", alt: "Another view of Saquarema" },
-];
+const slides = [{ src: "/saquarema.png", alt: "Vista de Saquarema" }];
 
 export default function ImageCarousel() {
   const [current, setCurrent] = useState(0);
