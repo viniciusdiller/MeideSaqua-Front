@@ -8,18 +8,6 @@ import {
   Phone,
   PhoneForwarded,
   Instagram,
-  Palette,
-  Brush,
-  Store,
-  Wrench,
-  PartyPopper,
-  Utensils,
-  HeartPulse,
-  Briefcase,
-  Car,
-  Laptop,
-  Plane,
-  Tractor,
   Trash2,
 } from "lucide-react";
 import React, { useState, useEffect, useRef } from "react";
@@ -44,6 +32,16 @@ import TagsAnimate from "@/components/ui/tagsanimate";
 import ImageGrid from "@/components/ImagesMEI";
 import { useAuth } from "@/context/AuthContext";
 import { toast } from "sonner";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 
 const StarRating = ({ rating }: { rating: number }) => {
   const totalStars = 5;
@@ -152,6 +150,8 @@ export default function MeiDetailPage({
   const [animateReviews, setAnimateReviews] = useState(false);
   const [locaisExpandidos, setLocaisExpandidos] = useState(false);
   const { user } = useAuth();
+  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
+  const [reviewToDelete, setReviewToDelete] = useState<number | null>(null);
 
   const fetchMeiData = async () => {
     const meiId = params.slug;
@@ -224,26 +224,34 @@ export default function MeiDetailPage({
     }
   };
 
-  const handleDelete = async (avaliacaoId: number) => {
+  const handleDeleteClick = (avaliacaoId: number) => {
     if (!user?.token) {
       toast.error("Você precisa estar logado para excluir um comentário.");
       return;
     }
+    setReviewToDelete(avaliacaoId);
+    setIsDeleteDialogOpen(true);
+  };
 
-    if (
-      confirm(
-        "Tem certeza que deseja excluir seu comentário? Esta ação não pode ser desfeita."
-      )
-    ) {
-      try {
-        await deleteReview(avaliacaoId, user.token);
-        toast.success("Comentário excluído com sucesso!");
-        // Atualiza a lista de reviews no estado, removendo o que foi excluído
-        setReviews(reviews.filter((r) => r.avaliacoesId !== avaliacaoId));
-      } catch (error: any) {
-        console.error("Erro ao excluir avaliação:", error);
-        toast.error(error.message || "Não foi possível excluir o comentário.");
-      }
+  // Função que executa a exclusão após a confirmação
+  const handleConfirmDelete = async () => {
+    if (!reviewToDelete || !user?.token) {
+      // Se não houver ID ou token, apenas fecha o diálogo
+      setIsDeleteDialogOpen(false);
+      return;
+    }
+
+    try {
+      await deleteReview(reviewToDelete, user.token);
+      toast.success("Comentário excluído com sucesso!");
+      setReviews(reviews.filter((r) => r.avaliacoesId !== reviewToDelete));
+    } catch (error: any) {
+      console.error("Erro ao excluir avaliação:", error);
+      toast.error(error.message || "Não foi possível excluir o comentário.");
+    } finally {
+      // Garante que o diálogo feche após a operação
+      setIsDeleteDialogOpen(false);
+      setReviewToDelete(null);
     }
   };
 
@@ -492,27 +500,30 @@ export default function MeiDetailPage({
                             </div>
 
                             <div>
-                              <p className="font-semibold text-gray-800">
-                                {review.usuario.nomeCompleto}
-                              </p>
+                              <div className="flex items-center gap-2">
+                                <p className="font-semibold text-gray-800">
+                                  {review.usuario.nomeCompleto}
+                                </p>
+                                {user &&
+                                  user.usuarioId === review.usuarioId && (
+                                    <button
+                                      // Altere esta linha
+                                      onClick={() =>
+                                        handleDeleteClick(review.avaliacoesId)
+                                      }
+                                      className="ml-auto text-sm text-red-500 hover:text-red-700"
+                                      aria-label="Excluir seu comentário"
+                                    >
+                                      <Trash2 className="w-4 h-4" />
+                                    </button>
+                                  )}
+                              </div>
                               <div className="flex items-center gap-1 my-1">
                                 <StarRating rating={review.nota} />
                               </div>
                               <p className="text-gray-600 break-words">
                                 {review.comentario}
                               </p>
-                              {user &&
-                                user.usuarioId === review.usuario.usuarioId && (
-                                  <button
-                                    onClick={() =>
-                                      handleDelete(review.avaliacoesId)
-                                    }
-                                    className="text-red-500 hover:text-red-700 p-1 rounded-full hover:bg-red-100 transition-colors"
-                                    aria-label="Deletar comentário"
-                                  >
-                                    <Trash2 size={16} />
-                                  </button>
-                                )}
                             </div>
                           </div>
                         ))}
@@ -554,6 +565,35 @@ export default function MeiDetailPage({
                   </p>
                 )}
               </div>
+              <AlertDialog
+                open={isDeleteDialogOpen}
+                onOpenChange={setIsDeleteDialogOpen}
+              >
+                <AlertDialogContent>
+                  <AlertDialogHeader>
+                    <AlertDialogTitle>Você tem certeza?</AlertDialogTitle>
+                    <AlertDialogDescription>
+                      Esta ação não pode ser desfeita. Isso excluirá
+                      permanentemente o seu comentário.
+                    </AlertDialogDescription>
+                  </AlertDialogHeader>
+                  <AlertDialogFooter>
+                    <AlertDialogCancel
+                      onClick={() => setReviewToDelete(null)}
+                      className="rounded-full border-2 border-gray-300 hover:border-gray-400 transition-all transform hover:scale-105 active:scale-95 px-4 py-2"
+                    >
+                      Cancelar
+                    </AlertDialogCancel>
+                    <AlertDialogAction
+                      onClick={handleConfirmDelete}
+                      asChild
+                      className="rounded-full bg-red-600 hover:bg-red-700 text-white transition-all transform hover:scale-105 active:scale-95 px-4 py-2"
+                    >
+                      <button>Sim, excluir</button>
+                    </AlertDialogAction>
+                  </AlertDialogFooter>
+                </AlertDialogContent>
+              </AlertDialog>
             </div>
           </AnimatedSection>
         </div>
