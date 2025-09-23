@@ -6,7 +6,6 @@ const AccessibilityStyles = () => {
   const [isClient, setIsClient] = useState(false);
 
   useEffect(() => {
-    // Este hook só roda no cliente, então podemos marcar que estamos no navegador.
     setIsClient(true);
   }, []);
 
@@ -46,14 +45,14 @@ const AccessibilityStyles = () => {
     html[data-theme='inverted'] [data-links='highlight'] a[href*="/categoria/"] > div {
         outline-color: #ff9a00 !important;
     }
+    
+    
   `;
 
-  // Se não estiver no cliente, não renderiza nada, evitando o erro de hidratação.
   if (!isClient) {
     return null;
   }
 
-  // Após montar no cliente, injeta a tag de estilo.
   return <style>{styles}</style>;
 };
 

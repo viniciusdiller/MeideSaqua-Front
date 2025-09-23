@@ -1,131 +1,185 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import {
-  Contrast,
-  Link as LinkIcon,
+  Accessibility,
   ZoomIn,
   ZoomOut,
-  BookAudio,
-  X,
+  Contrast,
+  ArrowUp,
+  MousePointerClick,
+  BookAudio, 
 } from "lucide-react";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from "@/components/ui/tooltip";
+import { motion, AnimatePresence } from "framer-motion";
+import AccessibilityStyles from "./AccessibilityStyles";
 
 const AccessibilityFeatures = () => {
-  const [fontSize, setFontSize] = useState(1);
-  const [isInverted, setIsInverted] = useState(false); // Nome mais claro
-  const [isHighlightingLinks, setIsHighlightingLinks] = useState(false);
-  const [isReading, setIsReading] = useState(false);
+  const [fontSize, setFontSize] = useState(16);
+  const [highContrast, setHighContrast] = useState(false);
+  const [highlightLinks, setHighlightLinks] = useState(false);
+  const [isReadingMode, setIsReadingMode] = useState(false);
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
 
-  // Efeito para o tamanho da fonte
-  useEffect(() => {
-    document.documentElement.style.fontSize = `${fontSize}rem`;
-  }, [fontSize]);
-
-  // Efeito para a INVERSÃO DE CORES
-  useEffect(() => {
-    // Aplica o atributo no <html> para máxima prioridade!
-    document.documentElement.setAttribute(
-      "data-theme",
-      isInverted ? "inverted" : "default"
-    );
-  }, [isInverted]);
-
-  // Efeito para o Destaque de Links (aplicado no body)
-  useEffect(() => {
-    document.body.setAttribute(
-      "data-links",
-      isHighlightingLinks ? "highlight" : "default"
-    );
-  }, [isHighlightingLinks]);
-
-  // Limpa a fala ao sair da página
-  useEffect(() => {
-    return () => {
-      speechSynthesis.cancel();
-    };
-  }, []);
-
-  const increaseFontSize = () => setFontSize((s) => Math.min(s + 0.1, 1.5));
-  const decreaseFontSize = () => setFontSize((s) => Math.max(s - 0.1, 0.8));
-  const toggleInvertColors = () => setIsInverted((prev) => !prev); // Função com nome claro
-  const toggleHighlightLinks = () => setIsHighlightingLinks((prev) => !prev);
-
-  const handleToggleReading = () => {
-    // ... (lógica do leitor de tela continua a mesma)
-    if (isReading) {
-      speechSynthesis.cancel();
-      setIsReading(false);
-      return;
-    }
-    const navContent = document.querySelector("nav")?.innerText || "";
-    const mainContent = document.querySelector("main")?.innerText || "";
-    const contentToRead = `Navegação: ${navContent}. Conteúdo principal: ${mainContent}`;
-
-    if (contentToRead.trim().length > 0) {
-      const utterance = new SpeechSynthesisUtterance(contentToRead);
-      utterance.lang = "pt-BR";
-      utterance.onstart = () => setIsReading(true);
-      utterance.onend = () => setIsReading(false);
-      utterance.onerror = () => setIsReading(false);
-      speechSynthesis.speak(utterance);
-    }
+ 
+  const speak = (text: string) => {
+    window.speechSynthesis.cancel();
+    const utterance = new SpeechSynthesisUtterance(text);
+    utterance.lang = "pt-BR"; 
+    window.speechSynthesis.speak(utterance);
   };
 
-  const accessibilityButtons = [
-    {
-      label: "Aumentar Fonte",
-      icon: <ZoomIn size={20} />,
-      onClick: increaseFontSize,
+
+  const cancelSpeech = () => {
+    window.speechSynthesis.cancel();
+  };
+
+  useEffect(() => {
+    const handleMouseOver = (event: MouseEvent) => {
+      const target = event.target as HTMLElement;
+      const readableTags = ['P', 'H1', 'H2', 'H3', 'H4', 'H5', 'H6', 'A', 'BUTTON', 'LI', 'SPAN', 'LABEL', 'TD'];
+      if (readableTags.includes(target.tagName) && target.textContent) {
+        speak(target.textContent);
+      }
+    };
+
+    if (isReadingMode) {
+      document.body.addEventListener("mouseover", handleMouseOver);
+      document.body.addEventListener("mouseout", cancelSpeech);
+    } else {
+      cancelSpeech();
+    }
+
+    return () => {
+      document.body.removeEventListener("mouseover", handleMouseOver);
+      document.body.removeEventListener("mouseout", cancelSpeech);
+    };
+  }, [isReadingMode]);
+
+
+  useEffect(() => {
+    const root = document.documentElement;
+    const body = document.body;
+
+    root.style.fontSize = `${fontSize}px`;
+    
+    if (highContrast) {
+      root.setAttribute("data-theme", "inverted");
+    } else {
+      root.removeAttribute("data-theme");
+    }
+
+    if (highlightLinks) {
+      body.setAttribute("data-links", "highlight");
+    } else {
+      body.removeAttribute("data-links");
+    }
+  }, [fontSize, highContrast, highlightLinks]);
+
+  const increaseFontSize = () => setFontSize((size) => Math.min(size + 2, 24));
+  const decreaseFontSize = () => setFontSize((size) => Math.max(size - 2, 12));
+  const toggleHighContrast = () => setHighContrast((prev) => !prev);
+  const toggleHighlightLinks = () => setHighlightLinks((prev) => !prev);
+  const toggleReadingMode = () => setIsReadingMode((prev) => !prev); 
+  const scrollToTop = () => window.scrollTo({ top: 0, behavior: "smooth" });
+
+  const buttonClasses =
+    "bg-blue-600 hover:bg-green-500 text-white rounded-full p-3 shadow-lg flex items-center justify-center transition-all duration-300 transform hover:scale-110";
+
+  const menuVariants = {
+    hidden: { opacity: 0, y: 20, scale: 0.95 },
+    visible: {
+      opacity: 1,
+      y: 0,
+      scale: 1,
+      transition: {
+        staggerChildren: 0.07,
+        delayChildren: 0.1,
+      },
     },
-    {
-      label: "Diminuir Fonte",
-      icon: <ZoomOut size={20} />,
-      onClick: decreaseFontSize,
-    },
-    {
-      label: "Inverter Cores",
-      icon: <Contrast size={20} />,
-      onClick: toggleInvertColors,
-    },
-    {
-      label: "Destacar Clicáveis",
-      icon: <LinkIcon size={20} />,
-      onClick: toggleHighlightLinks,
-    },
-    {
-      label: isReading ? "Parar Leitura" : "Leitor de Tela",
-      icon: isReading ? <X size={20} /> : <BookAudio size={20} />,
-      onClick: handleToggleReading,
-    },
-  ];
+    exit: { opacity: 0, y: 20, scale: 0.95 },
+  };
+
+  const itemVariants = {
+    hidden: { opacity: 0, y: 20 },
+    visible: { opacity: 1, y: 0 },
+  };
 
   return (
-    <TooltipProvider delayDuration={150}>
-      <div className="fixed bottom-4 right-4 z-50 flex flex-col gap-2">
-        {accessibilityButtons.map((btn) => (
-          <Tooltip key={btn.label}>
-            <TooltipTrigger asChild>
-              <button
-                onClick={btn.onClick}
-                className="bg-gray-800 text-white p-3 rounded-full shadow-lg hover:bg-gray-700 transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500"
-                aria-label={btn.label}
+    <>
+      <AccessibilityStyles />
+      <div className="fixed bottom-6 right-6 z-50 flex flex-col items-center gap-3">
+        <AnimatePresence>
+          {isMenuOpen && (
+            <motion.div
+              variants={menuVariants}
+              initial="hidden"
+              animate="visible"
+              exit="exit"
+              className="flex flex-col items-center gap-3"
+            >
+              <motion.button
+                variants={itemVariants}
+                onClick={scrollToTop}
+                aria-label="Voltar ao topo"
+                className={buttonClasses}
               >
-                {btn.icon}
-              </button>
-            </TooltipTrigger>
-            <TooltipContent side="left">
-              <p>{btn.label}</p>
-            </TooltipContent>
-          </Tooltip>
-        ))}
+                <ArrowUp size={24} />
+              </motion.button>
+              <motion.button
+                variants={itemVariants}
+                onClick={toggleReadingMode}
+                aria-label="Ativar leitor de texto"
+                className={`${buttonClasses} ${isReadingMode ? 'bg-green-500' : ''}`} 
+              >
+                <BookAudio size={24} />
+              </motion.button>
+              <motion.button
+                variants={itemVariants}
+                onClick={toggleHighlightLinks}
+                aria-label="Destacar links clicáveis"
+                className={buttonClasses}
+              >
+                <MousePointerClick size={24} />
+              </motion.button>
+              <motion.button
+                variants={itemVariants}
+                onClick={toggleHighContrast}
+                aria-label="Alternar alto contraste"
+                className={buttonClasses}
+              >
+                <Contrast size={24} />
+              </motion.button>
+              <motion.button
+                variants={itemVariants}
+                onClick={decreaseFontSize}
+                aria-label="Diminuir fonte"
+                className={buttonClasses}
+              >
+                <ZoomOut size={24} />
+              </motion.button>
+              <motion.button
+                variants={itemVariants}
+                onClick={increaseFontSize}
+                aria-label="Aumentar fonte"
+                className={buttonClasses}
+              >
+                <ZoomIn size={24} />
+              </motion.button>
+            </motion.div>
+          )}
+        </AnimatePresence>
+
+        <button
+          onClick={() => setIsMenuOpen(!isMenuOpen)}
+          aria-label="Abrir menu de acessibilidade"
+          className={`${buttonClasses} ${
+            isMenuOpen ? "bg-green-500" : "bg-blue-600"
+          }`}
+        >
+          <Accessibility size={24} />
+        </button>
       </div>
-    </TooltipProvider>
+    </>
   );
 };
 
