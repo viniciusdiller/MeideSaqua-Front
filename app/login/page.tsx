@@ -21,7 +21,7 @@ import { useAuth } from "@/context/AuthContext";
 import { ArrowLeft, Loader2, Eye, EyeOff } from "lucide-react";
 
 export default function LoginPage() {
-  const [email, setEmail] = useState("");
+  const [emailOrUsername, setEmailOrUsername] = useState("");
   const [password, setPassword] = useState("");
   const [notifications, setNotifications] = useState<NotificationType[]>([]);
   const [isLoading, setIsLoading] = useState(false);
@@ -42,40 +42,38 @@ export default function LoginPage() {
   };
 
   const handleLogin = async (e: React.FormEvent) => {
-  e.preventDefault();
-  setIsLoading(true);
+    e.preventDefault();
+    setIsLoading(true);
 
-  const loginData = {
-    username: email,
-    password: password,
-  };
+    const loginData = {
+      username: emailOrUsername,
+      password: password,
+    };
 
-  try {
-    const userData = await loginUser(loginData);
-    addNotification("Login bem-sucedido! Redirecionando...", "success");
-    login(userData);
-    setTimeout(() => {
-      window.location.href = "/";
-    }, 2000);
-  } catch (err: any) {
-    const errorMessage = err?.response?.data?.message || err.message;
+    try {
+      const userData = await loginUser(loginData);
+      addNotification("Login bem-sucedido! Redirecionando...", "success");
+      login(userData);
+      setTimeout(() => {
+        window.location.href = "/";
+      }, 2000);
+    } catch (err: any) {
+      const errorMessage = err?.response?.data?.message || err.message;
 
       if (errorMessage.includes("Conta não ativada")) {
-      addNotification(
-        "Sua conta ainda não foi verificada. Por favor, confirme seu e-mail antes de entrar.",
-        "error"
-      );
-    } else {
-      addNotification("Email ou senha inválidos. Tente novamente.", "error");
+        addNotification(
+          "Sua conta ainda não foi verificada. Por favor, confirme seu e-mail antes de entrar.",
+          "error"
+        );
+      } else {
+        addNotification("Email/usuário ou senha inválidos. Tente novamente.", "error");
+      }
+
+      console.error(err);
+    } finally {
+      setIsLoading(false);
     }
-
-
-    console.error(err);
-  } finally {
-    setIsLoading(false);
-  }
-};
-
+  };
 
   return (
     <div>
@@ -111,9 +109,9 @@ export default function LoginPage() {
           </div>
           <Card
             className="rounded-2xl border border-[#017DB9]/70 bg-white shadow-lg
-                       focus:outline-none focus:ring-2 focus:border-transparent
-                       transition-all duration-300 placeholder-gray-400 text-sm
-                       hover:shadow-md"
+                      focus:outline-none focus:ring-2 focus:border-transparent
+                      transition-all duration-300 placeholder-gray-400 text-sm
+                      hover:shadow-md"
           >
             <CardHeader className="text-center">
               <CardTitle className="text-2xl">Efetue o Login</CardTitle>
@@ -133,13 +131,13 @@ export default function LoginPage() {
                     type="text"
                     placeholder="Insira seu email ou nome de usuário"
                     required
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
+                    value={emailOrUsername}
+                    onChange={(e) => setEmailOrUsername(e.target.value)}
                     disabled={isLoading}
                     className="w-full py-2
-                    rounded-2xl border border-gray-200 bg-white shadow-sm
-                    focus:ring-2 focus:border-[#22c362]/70 transition-all duration-300 placeholder:text-gray-400
-                    "
+                      rounded-2xl border border-gray-200 bg-white shadow-sm
+                      focus:ring-2 focus:border-[#22c362]/70 transition-all duration-300 placeholder:text-gray-400
+                      "
                   />
                 </div>
                 <div className="space-y-2">
