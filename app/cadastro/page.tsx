@@ -20,6 +20,7 @@ import { Notification, NotificationType } from "@/components/ui/notification";
 import { ArrowLeft, Loader2, Eye, EyeOff } from "lucide-react";
 import { AxiosError } from "axios";
 import { contemPalavrao } from "@/lib/profanityFilter";
+import { removeEmojis } from "@/lib/utils";
 
 export default function Cadastro() {
   const [email, setEmail] = useState("");
@@ -131,7 +132,7 @@ export default function Cadastro() {
                     placeholder="Digite seu nome de usuário"
                     required
                     value={username}
-                    onChange={(e) => setUsername(e.target.value)}
+                    onChange={(e) => setUsername(removeEmojis(e.target.value))}
                     disabled={isLoading}
                     className="w-full py-2 rounded-2xl placeholder:text-gray-400 border border-gray-200 bg-white shadow-sm focus:ring-2 focus:border-[#22c362]/70 transition-all duration-300"
                   />
@@ -144,7 +145,9 @@ export default function Cadastro() {
                     placeholder="Digite seu nome completo"
                     required
                     value={nome_completo_user}
-                    onChange={(e) => setNomeCompleto(e.target.value)}
+                    onChange={(e) =>
+                      setNomeCompleto(removeEmojis(e.target.value))
+                    }
                     disabled={isLoading}
                     className="w-full py-2 rounded-2xl placeholder:text-gray-400 border border-gray-200 bg-white shadow-sm focus:ring-2 focus:border-[#22c362]/70 transition-all duration-300"
                   />

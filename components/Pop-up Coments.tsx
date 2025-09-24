@@ -7,6 +7,7 @@ import { submitReview } from "@/lib/api";
 import { useAuth } from "@/context/AuthContext";
 import { toast } from "sonner";
 import { contemPalavrao } from "@/lib/profanityFilter";
+import { removeEmojis } from "@/lib/utils";
 
 const AvaliacaoModalButton = ({
   estabelecimentoId,
@@ -150,7 +151,7 @@ const SpringModal = ({
               <textarea
                 placeholder="Digite aqui seu comentário..."
                 value={comment}
-                onChange={(e) => setComment(e.target.value)}
+                onChange={(e) => setComment(removeEmojis(e.target.value))}
                 className="w-full h-24 p-3 rounded-xl bg-slate-800/50 text-white placeholder-white/40 focus:outline-none focus:ring-2 focus:ring-blue-400 transition-all"
               />
               <div className="flex gap-2 mt-4">
