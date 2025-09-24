@@ -36,7 +36,7 @@ import { Label } from "@/components/ui/label";
 import Image from "next/image";
 import { useState, useEffect } from "react";
 import { toast } from "sonner";
-import { Loader2 } from "lucide-react"; // Importando o ícone
+import { Loader2 } from "lucide-react";
 import {
   updateUserProfile,
   changeUserPassword,
@@ -44,6 +44,7 @@ import {
 } from "@/lib/api";
 import { cn } from "@/lib/utils";
 import { contemPalavrao } from "@/lib/profanityFilter";
+import { removeEmojis, containsEmoji } from "@/lib/utils";
 
 export default function PerfilPage() {
   const { user, logout, isLoading, updateUser: updateUserContext } = useAuth();
@@ -60,6 +61,19 @@ export default function PerfilPage() {
   const [confirmPassword, setConfirmPassword] = useState("");
   const [isPasswordDialogOpen, setIsPasswordDialogOpen] = useState(false);
   const [isChangingPassword, setIsChangingPassword] = useState(false); // Estado de carregamento
+
+  const handleUsernameChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const valueComEmoji = e.target.value;
+    const valueSemEmoji = removeEmojis(valueComEmoji);
+
+    if (valueComEmoji !== valueSemEmoji) {
+      toast.error("Não é possível adicionar emojis", {
+        id: "emoji-profile-toast", // ID único para evitar duplicatas
+      });
+    }
+
+    setUsername(valueSemEmoji);
+  };
 
   useEffect(() => {
     if (user) {
@@ -95,7 +109,8 @@ export default function PerfilPage() {
 
     const profileData = {
       username: username !== user.username ? username : undefined,
-      email: email.toLowerCase() !== user.email.toLowerCase() ? email : undefined,
+      email:
+        email.toLowerCase() !== user.email.toLowerCase() ? email : undefined,
     };
 
     if (!profileData.username && !profileData.email) {
@@ -111,7 +126,7 @@ export default function PerfilPage() {
 
       if (profileData.email) {
         toast.success(
-          "Dados atualizados! Um e-mail de confirmação foi enviado para o seu novo endereço.",
+          "Dados atualizados! Um e-mail de confirmação foi enviado para o seu novo endereço."
         );
       } else {
         toast.success("Nome de usuário atualizado com sucesso!");
@@ -253,8 +268,8 @@ export default function PerfilPage() {
                         <Input
                           id="usernameEdit"
                           value={username}
-                          onChange={(e) => setUsername(e.target.value)}
-                          className="mt-1 rounded-xl w-full py-2
+                          onChange={handleUsernameChange}
+                          className="mt-1  w-full py-2
                           rounded-2xl border border-gray-200 bg-white shadow-sm
                           focus:ring-2 focus:border-[#22c362]/70 transition-all duration-300 placeholder:text-gray-400"
                         />
@@ -265,7 +280,7 @@ export default function PerfilPage() {
                           id="emailEdit"
                           value={email}
                           onChange={(e) => setEmail(e.target.value)}
-                          className="mt-1 rounded-xl w-full py-2
+                          className="mt-1  w-full py-2
                           rounded-2xl border border-gray-200 bg-white shadow-sm
                           focus:ring-2 focus:border-[#22c362]/70 transition-all duration-300 placeholder:text-gray-400"
                         />
@@ -289,7 +304,9 @@ export default function PerfilPage() {
                         {isUpdatingProfile && (
                           <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                         )}
-                        {isUpdatingProfile ? "Salvando..." : "Salvar Alterações"}
+                        {isUpdatingProfile
+                          ? "Salvando..."
+                          : "Salvar Alterações"}
                       </Button>
                     </DialogFooter>
                   </DialogContent>
@@ -334,7 +351,7 @@ export default function PerfilPage() {
                           placeholder="Sua senha atual"
                           value={currentPassword}
                           onChange={(e) => setCurrentPassword(e.target.value)}
-                          className="mt-1 rounded-xl w-full py-2
+                          className="mt-1 w-full py-2
                           rounded-2xl border border-gray-200 bg-white shadow-sm
                           focus:ring-2 focus:border-[#22c362]/70 transition-all duration-300 placeholder:text-gray-400"
                         />
@@ -347,7 +364,7 @@ export default function PerfilPage() {
                           placeholder="Digite a nova senha"
                           value={newPassword}
                           onChange={(e) => setNewPassword(e.target.value)}
-                          className="mt-1 rounded-xl w-full py-2
+                          className="mt-1  w-full py-2
                           rounded-2xl border border-gray-200 bg-white shadow-sm
                           focus:ring-2 focus:border-[#22c362]/70 transition-all duration-300 placeholder:text-gray-400"
                         />
@@ -362,7 +379,7 @@ export default function PerfilPage() {
                           placeholder="Digite novamente sua nova senha"
                           value={confirmPassword}
                           onChange={(e) => setConfirmPassword(e.target.value)}
-                          className="mt-1 rounded-xl w-full py-2
+                          className="mt-1  w-full py-2
                           rounded-2xl border border-gray-200 bg-white shadow-sm
                           focus:ring-2 focus:border-[#22c362]/70 transition-all duration-300 placeholder:text-gray-400"
                         />
@@ -386,7 +403,9 @@ export default function PerfilPage() {
                         {isChangingPassword && (
                           <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                         )}
-                        {isChangingPassword ? "Alterando..." : "Salvar Nova Senha"}
+                        {isChangingPassword
+                          ? "Alterando..."
+                          : "Salvar Nova Senha"}
                       </Button>
                     </DialogFooter>
                   </DialogContent>
@@ -431,7 +450,7 @@ export default function PerfilPage() {
                         onClick={handleDeleteAccount}
                         className={cn(
                           buttonVariants({ variant: "destructive" }) +
-                            " w-fit rounded-full transition-all transform hover:scale-105 hover:bg-red-500 active:scale-95 border-2 border-transparent hover:border-red-700",
+                            " w-fit rounded-full transition-all transform hover:scale-105 hover:bg-red-500 active:scale-95 border-2 border-transparent hover:border-red-700"
                         )}
                       >
                         Continuar
