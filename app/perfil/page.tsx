@@ -49,13 +49,14 @@ import { removeEmojis, containsEmoji } from "@/lib/utils";
 export default function PerfilPage() {
   const { user, logout, isLoading, updateUser: updateUserContext } = useAuth();
 
-  // Estados para o formulário de perfil
   const [username, setUsername] = useState("");
   const [email, setEmail] = useState("");
+
   const [isProfileDialogOpen, setIsProfileDialogOpen] = useState(false);
+  const [editUsername, setEditUsername] = useState("");
+  const [editEmail, setEditEmail] = useState("");
   const [isUpdatingProfile, setIsUpdatingProfile] = useState(false); // Estado de carregamento
 
-  // Estados para o formulário de senha
   const [currentPassword, setCurrentPassword] = useState("");
   const [newPassword, setNewPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
@@ -73,6 +74,14 @@ export default function PerfilPage() {
     }
 
     setUsername(valueSemEmoji);
+  };
+  const handleProfileDialogOpenChange = (open: boolean) => {
+    setIsProfileDialogOpen(open);
+    if (open && user) {
+      // Quando o modal abre, preenche os campos de edição
+      setEditUsername(user.username || "");
+      setEditEmail(user.email || "");
+    }
   };
 
   useEffect(() => {
@@ -108,9 +117,11 @@ export default function PerfilPage() {
     }
 
     const profileData = {
-      username: username !== user.username ? username : undefined,
+      username: editUsername !== user.username ? editUsername : undefined,
       email:
-        email.toLowerCase() !== user.email.toLowerCase() ? email : undefined,
+        editEmail.toLowerCase() !== user.email.toLowerCase()
+          ? editEmail
+          : undefined,
     };
 
     if (!profileData.username && !profileData.email) {
@@ -247,7 +258,7 @@ export default function PerfilPage() {
               <CardFooter className="flex justify-center">
                 <Dialog
                   open={isProfileDialogOpen}
-                  onOpenChange={setIsProfileDialogOpen}
+                  onOpenChange={handleProfileDialogOpenChange}
                 >
                   <DialogTrigger asChild>
                     <Button className="w-fit rounded-full bg-gray-800 text-white transition-all transform hover:scale-105 hover:bg-gray-700 active:scale-95">
@@ -267,8 +278,8 @@ export default function PerfilPage() {
                         <Label htmlFor="usernameEdit">Nome de Usuário</Label>
                         <Input
                           id="usernameEdit"
-                          value={username}
-                          onChange={handleUsernameChange}
+                          value={editUsername}
+                          onChange={(e) => setEditUsername(e.target.value)}
                           className="mt-1  w-full py-2
                           rounded-2xl border border-gray-200 bg-white shadow-sm
                           focus:ring-2 focus:border-[#22c362]/70 transition-all duration-300 placeholder:text-gray-400"
@@ -278,8 +289,8 @@ export default function PerfilPage() {
                         <Label htmlFor="emailEdit">E-mail</Label>
                         <Input
                           id="emailEdit"
-                          value={email}
-                          onChange={(e) => setEmail(e.target.value)}
+                          value={editEmail}
+                          onChange={(e) => setEditEmail(e.target.value)}
                           className="mt-1  w-full py-2
                           rounded-2xl border border-gray-200 bg-white shadow-sm
                           focus:ring-2 focus:border-[#22c362]/70 transition-all duration-300 placeholder:text-gray-400"
