@@ -44,7 +44,7 @@ import {
 } from "@/lib/api";
 import { cn } from "@/lib/utils";
 import { contemPalavrao } from "@/lib/profanityFilter";
-import { removeEmojis, containsEmoji } from "@/lib/utils";
+import { removeEmojis, containsEmoji, isValidEmail } from "@/lib/utils";
 
 export default function PerfilPage() {
   const { user, logout, isLoading, updateUser: updateUserContext } = useAuth();
@@ -73,7 +73,7 @@ export default function PerfilPage() {
       });
     }
 
-    setUsername(valueSemEmoji);
+    setEditUsername(valueSemEmoji);
   };
   const handleProfileDialogOpenChange = (open: boolean) => {
     setIsProfileDialogOpen(open);
@@ -109,6 +109,13 @@ export default function PerfilPage() {
   const handleProfileUpdate = async () => {
     if (contemPalavrao(username)) {
       toast.error("Você utilizou palavras inapropriadas no nome de usuário.");
+      return;
+    }
+    if (
+      editEmail.toLowerCase() !== user.email.toLowerCase() &&
+      !isValidEmail(editEmail)
+    ) {
+      toast.error("Por favor, insira um e-mail válido.");
       return;
     }
     if (!user?.token) {
@@ -279,7 +286,7 @@ export default function PerfilPage() {
                         <Input
                           id="usernameEdit"
                           value={editUsername}
-                          onChange={(e) => setEditUsername(e.target.value)}
+                          onChange={handleUsernameChange}
                           className="mt-1  w-full py-2
                           rounded-2xl border border-gray-200 bg-white shadow-sm
                           focus:ring-2 focus:border-[#22c362]/70 transition-all duration-300 placeholder:text-gray-400"

@@ -15,12 +15,12 @@ import { Label } from "@/components/ui/label";
 import Link from "next/link";
 import Image from "next/image";
 import { registerUser } from "@/lib/api";
-import { AnimatePresence, motion } from "framer-motion";
+import { AnimatePresence } from "framer-motion";
 import { Notification, NotificationType } from "@/components/ui/notification";
 import { ArrowLeft, Loader2, Eye, EyeOff } from "lucide-react";
 import { AxiosError } from "axios";
 import { contemPalavrao } from "@/lib/profanityFilter";
-import { removeEmojis, containsEmoji } from "@/lib/utils";
+import { removeEmojis, isValidEmail } from "@/lib/utils";
 
 export default function Cadastro() {
   const [email, setEmail] = useState("");
@@ -43,16 +43,14 @@ export default function Cadastro() {
     const valueComEmoji = e.target.value;
     const valueSemEmoji = removeEmojis(valueComEmoji);
 
-    // Condição: Se o texto original for diferente do texto limpo...
     if (valueComEmoji !== valueSemEmoji) {
-      // ...e se uma notificação de emoji ainda não estiver na tela...
       if (
         !notifications.some((n) => n.text === "Não é possível adicionar emojis")
       ) {
-        // ...então, mostre a notificação.
         addNotification("Não é possível adicionar emojis", "error");
       }
     }
+
     setUsername(valueSemEmoji);
   };
 
@@ -74,6 +72,11 @@ export default function Cadastro() {
     e.preventDefault();
     if (contemPalavrao(username)) {
       addNotification("Você utilizou palavras inapropriadas.", "error");
+      return;
+    }
+
+    if (!isValidEmail(email)) {
+      addNotification("Por favor, insira um e-mail válido.", "error");
       return;
     }
     setIsLoading(true);

@@ -27,3 +27,14 @@ export const removeEmojis = (text: string): string => {
     ""
   );
 };
+
+/**
+ * Valida se uma string é um formato de e-mail válido.
+ * @param email A string a ser validada.
+ * @returns true se o e-mail for válido, false caso contrário.
+ */
+export const isValidEmail = (email: string): boolean => {
+  if (!email) return false;
+  const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+  return emailRegex.test(email);
+};
