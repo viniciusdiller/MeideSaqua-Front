@@ -152,9 +152,11 @@ export default function MeiDetailPage({
   const { user } = useAuth();
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [reviewToDelete, setReviewToDelete] = useState<number | null>(null);
+  const [portfolioImages, setPortfolioImages] = useState<any[]>([]);
 
   const fetchMeiData = async () => {
     const meiId = params.slug;
+
     if (!meiId) return;
 
     try {
@@ -164,6 +166,24 @@ export default function MeiDetailPage({
       setMeiDetails(detailsData);
       setReviews(reviewsData);
       setRating(detailsData.media || 0);
+      if (detailsData.produtosImgUrls) {
+        // 1. Separa a string de URLs em um array
+        const imageUrls = detailsData.produtosImgUrls.split(",");
+
+        // 2. Formata o array para o formato que o componente ImageGrid espera
+        const portfolioItems = imageUrls.map((url: string, index: number) => ({
+          id: `${detailsData.estabelecimentoId}-${index}`, // Cria um ID único
+          // Monta a URL completa para a imagem
+          img: `${process.env.NEXT_PUBLIC_API_URL}${url}`,
+        }));
+
+        // 3. Atualiza o estado com as imagens do portfólio
+        setPortfolioImages(portfolioItems);
+      } else {
+        // Caso não haja imagens, define o estado como um array vazio
+        setPortfolioImages([]);
+      }
+
       setAnimateReviews(true);
     } catch (error) {
       console.error("Falha ao buscar dados do MEI:", error);
@@ -405,7 +425,7 @@ export default function MeiDetailPage({
               </p>
             </div>
             <div className="bg-gray-50 p-4 sm:p-6 rounded-2xl shadow-md border border-gray-200">
-              <ImageGrid items={item} />
+              <ImageGrid items={portfolioImages} />
             </div>
           </motion.section>
 
