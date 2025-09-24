@@ -20,7 +20,7 @@ import { Notification, NotificationType } from "@/components/ui/notification";
 import { ArrowLeft, Loader2, Eye, EyeOff } from "lucide-react";
 import { AxiosError } from "axios";
 import { contemPalavrao } from "@/lib/profanityFilter";
-import { removeEmojis } from "@/lib/utils";
+import { removeEmojis, containsEmoji } from "@/lib/utils";
 
 export default function Cadastro() {
   const [email, setEmail] = useState("");
@@ -38,6 +38,36 @@ export default function Cadastro() {
 
   const removeNotif = (id: number) => {
     setNotifications((pv) => pv.filter((n) => n.id !== id));
+  };
+  const handleUsernameChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const valueComEmoji = e.target.value;
+    const valueSemEmoji = removeEmojis(valueComEmoji);
+
+    // Condição: Se o texto original for diferente do texto limpo...
+    if (valueComEmoji !== valueSemEmoji) {
+      // ...e se uma notificação de emoji ainda não estiver na tela...
+      if (
+        !notifications.some((n) => n.text === "Não é possível adicionar emojis")
+      ) {
+        // ...então, mostre a notificação.
+        addNotification("Não é possível adicionar emojis", "error");
+      }
+    }
+    setUsername(valueSemEmoji);
+  };
+
+  const handleNomeCompletoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const valueComEmoji = e.target.value;
+    const valueSemEmoji = removeEmojis(valueComEmoji);
+
+    if (valueComEmoji !== valueSemEmoji) {
+      if (
+        !notifications.some((n) => n.text === "Não é possível adicionar emojis")
+      ) {
+        addNotification("Não é possível adicionar emojis", "error");
+      }
+    }
+    setNomeCompleto(valueSemEmoji);
   };
 
   const handleRegister = async (e: React.FormEvent) => {
@@ -132,7 +162,7 @@ export default function Cadastro() {
                     placeholder="Digite seu nome de usuário"
                     required
                     value={username}
-                    onChange={(e) => setUsername(removeEmojis(e.target.value))}
+                    onChange={handleUsernameChange}
                     disabled={isLoading}
                     className="w-full py-2 rounded-2xl placeholder:text-gray-400 border border-gray-200 bg-white shadow-sm focus:ring-2 focus:border-[#22c362]/70 transition-all duration-300"
                   />
@@ -145,9 +175,7 @@ export default function Cadastro() {
                     placeholder="Digite seu nome completo"
                     required
                     value={nome_completo_user}
-                    onChange={(e) =>
-                      setNomeCompleto(removeEmojis(e.target.value))
-                    }
+                    onChange={handleNomeCompletoChange}
                     disabled={isLoading}
                     className="w-full py-2 rounded-2xl placeholder:text-gray-400 border border-gray-200 bg-white shadow-sm focus:ring-2 focus:border-[#22c362]/70 transition-all duration-300"
                   />

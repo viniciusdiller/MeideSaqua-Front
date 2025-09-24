@@ -7,7 +7,7 @@ import { submitReview } from "@/lib/api";
 import { useAuth } from "@/context/AuthContext";
 import { toast } from "sonner";
 import { contemPalavrao } from "@/lib/profanityFilter";
-import { removeEmojis } from "@/lib/utils";
+import { removeEmojis, containsEmoji } from "@/lib/utils";
 
 const AvaliacaoModalButton = ({
   estabelecimentoId,
@@ -64,6 +64,19 @@ const SpringModal = ({
   const [isSubmitting, setIsSubmitting] = useState(false);
   const { user } = useAuth();
 
+  const handleCommentChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
+    const valueComEmoji = e.target.value;
+    const valueSemEmoji = removeEmojis(valueComEmoji);
+
+    if (valueComEmoji !== valueSemEmoji) {
+      // ADICIONAMOS UM ID AO TOAST AQUI
+      toast.error("Não é possível adicionar emojis", {
+        id: "emoji-error-toast",
+      });
+    }
+
+    setComment(valueSemEmoji);
+  };
   const handleAvaliarClick = async () => {
     if (rating === 0) {
       toast.warning("Por favor, selecione uma nota de 1 a 5 estrelas.");
@@ -151,7 +164,7 @@ const SpringModal = ({
               <textarea
                 placeholder="Digite aqui seu comentário..."
                 value={comment}
-                onChange={(e) => setComment(removeEmojis(e.target.value))}
+                onChange={handleCommentChange}
                 className="w-full h-24 p-3 rounded-xl bg-slate-800/50 text-white placeholder-white/40 focus:outline-none focus:ring-2 focus:ring-blue-400 transition-all"
               />
               <div className="flex gap-2 mt-4">
