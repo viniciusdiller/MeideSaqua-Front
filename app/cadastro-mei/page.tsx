@@ -11,11 +11,13 @@ import {
   Spin,
   Row,
   Col,
+  Result,
+  Checkbox,
 } from "antd";
-import { UploadOutlined } from "@ant-design/icons";
+import { UploadOutlined, ArrowLeftOutlined } from "@ant-design/icons";
 import type { UploadFile } from "antd/es/upload/interface";
 
-// --- FUNÇÕES DE MÁSCARA ---
+// --- FUNÇÕES DE MÁSCARA (sem alterações) ---
 const maskCNAE = (value: string) => {
   return value
     .replace(/\D/g, "")
@@ -51,10 +53,11 @@ const maskPhone = (value: string) => {
     .replace(/(-\d{4})\d+?$/, "$1");
 };
 
-// --- API E LISTAS (sem alterações) ---
-const API_URL = "http://localhost:3306/api";
+// --- API E LISTAS (com novas funções mock) ---
+const API_URL = "http://localhost:3306/api"; // Mantenha sua URL real
 const api = {
   cadastrarEstabelecimento: async (data: any) => {
+    // Sua lógica de cadastro original
     const response = await fetch(`${API_URL}/estabelecimentos`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -66,7 +69,25 @@ const api = {
     }
     return response.json();
   },
+  // NOVA FUNÇÃO MOCK PARA ATUALIZAÇÃO
+  atualizarEstabelecimento: async (data: any) => {
+    console.log("Enviando dados para atualização:", data);
+    return new Promise((resolve) =>
+      setTimeout(() => resolve({ success: true, ...data }), 1000)
+    );
+  },
+  // NOVA FUNÇÃO MOCK PARA EXCLUSÃO
+  excluirEstabelecimento: async (data: any) => {
+    console.log("Enviando dados para exclusão:", data);
+    return new Promise((resolve) =>
+      setTimeout(
+        () => resolve({ success: true, message: "Exclusão processada." }),
+        1000
+      )
+    );
+  },
 };
+
 const areasAtuacao = [
   "Água Branca",
   "Alvorada",
@@ -131,37 +152,50 @@ const categorias = [
 const { Option } = Select;
 const { TextArea } = Input;
 
+type FlowStep = "initial" | "register" | "update" | "delete" | "submitted";
+
 const CadastroMEIPage: React.FC = () => {
   const [form] = Form.useForm();
   const [loading, setLoading] = useState(false);
   const [logoFileList, setLogoFileList] = useState<UploadFile[]>([]);
   const [portfolioFileList, setPortfolioFileList] = useState<UploadFile[]>([]);
+  const [flowStep, setFlowStep] = useState<FlowStep>("initial");
+  const [submittedMessage, setSubmittedMessage] = useState({
+    title: "",
+    subTitle: "",
+  });
 
+  // Handlers para upload de arquivos
   const handleLogoChange = ({ fileList }: { fileList: UploadFile[] }) =>
     setLogoFileList(fileList);
   const handlePortfolioChange = ({ fileList }: { fileList: UploadFile[] }) =>
     setPortfolioFileList(fileList);
 
-  // Handlers específicos para cada campo com máscara
-  const handleCnaeChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    form.setFieldsValue({ cnae: maskCNAE(e.target.value) });
-  };
-  const handleCpfChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    form.setFieldsValue({ cpf: maskCPF(e.target.value) });
-  };
-  const handleCnpjChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    form.setFieldsValue({ cnpj: maskCNPJ(e.target.value) });
-  };
-  const handlePhoneChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    form.setFieldsValue({ contatoEstabelecimento: maskPhone(e.target.value) });
+  // Handlers para máscaras
+  const handleMaskChange = (
+    e: React.ChangeEvent<HTMLInputElement>,
+    maskFn: (value: string) => string
+  ) => {
+    const { name, value } = e.target;
+    form.setFieldsValue({ [name]: maskFn(value) });
   };
 
-  const handleSubmit = async (values: any) => {
+  const resetAll = () => {
+    form.resetFields();
+    setLogoFileList([]);
+    setPortfolioFileList([]);
+    setFlowStep("initial");
+  };
+
+  // --- LÓGICA DE SUBMISSÃO ---
+  const handleRegisterSubmit = async (values: any) => {
     setLoading(true);
     try {
-      const logoData = logoFileList.map((file) => file.response || file);
+      const logoData = logoFileList.map(
+        (file) => file.response || file.originFileObj
+      );
       const portfolioData = portfolioFileList.map(
-        (file) => file.response || file
+        (file) => file.response || file.originFileObj
       );
 
       const payload = {
@@ -174,18 +208,18 @@ const CadastroMEIPage: React.FC = () => {
           ""
         ),
         locais: values.locais ? values.locais.join(", ") : "",
-        logoBase64: JSON.stringify(logoData),
-        produtosImgBase64: JSON.stringify(portfolioData),
+        logoBase64: JSON.stringify(logoData), // A conversão para Base64 real aconteceria aqui
+        produtosImgBase64: JSON.stringify(portfolioData), // ou no servidor
         ativo: true,
       };
 
       await api.cadastrarEstabelecimento(payload);
-      message.success(
-        "Cadastro realizado com sucesso! Em breve seu negócio estará na plataforma."
-      );
-      form.resetFields();
-      setLogoFileList([]);
-      setPortfolioFileList([]);
+      setSubmittedMessage({
+        title: "Cadastro realizado com sucesso!",
+        subTitle:
+          "Sua solicitação foi recebida. Em breve seu negócio estará visível na plataforma para toda Saquarema.",
+      });
+      setFlowStep("submitted");
     } catch (error: any) {
       message.error(
         error.message || "Ocorreu um erro. Por favor, tente novamente."
@@ -195,296 +229,555 @@ const CadastroMEIPage: React.FC = () => {
     }
   };
 
+  const handleUpdateSubmit = async (values: any) => {
+    setLoading(true);
+    try {
+      await api.atualizarEstabelecimento(values);
+      setSubmittedMessage({
+        title: "Atualização enviada com sucesso!",
+        subTitle:
+          "Recebemos suas alterações. Elas serão analisadas e aplicadas em seu perfil em breve.",
+      });
+      setFlowStep("submitted");
+    } catch (error: any) {
+      message.error(
+        error.message || "Ocorreu um erro ao enviar a atualização."
+      );
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleDeleteSubmit = async (values: any) => {
+    setLoading(true);
+    try {
+      await api.excluirEstabelecimento(values);
+      setSubmittedMessage({
+        title: "Solicitação de exclusão recebida!",
+        subTitle:
+          "Sua solicitação foi registrada. A remoção do seu perfil da plataforma será processada em breve. Sentiremos sua falta!",
+      });
+      setFlowStep("submitted");
+    } catch (error: any) {
+      message.error(
+        error.message || "Ocorreu um erro ao solicitar a exclusão."
+      );
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const customUploadAction = async (options: any) => {
     const { onSuccess, onError, file } = options;
+    // Simula upload para o Ant Design
     setTimeout(() => {
       try {
-        const mockUrl = `https://workflow-content.colab.re/mock_upload_${Date.now()}_${
-          file.name
-        }`;
-        onSuccess({
-          uid: file.uid,
-          name: file.name,
-          url: mockUrl,
-          status: "done",
-        });
+        onSuccess(file);
       } catch (err) {
         onError(new Error("Erro no upload simulado"));
       }
     }, 500);
   };
 
+  const commonTitle = (title: string) => (
+    <h2
+      className="relative text-2xl font-semibold text-gray-800 mb-6 pl-4 
+        before:content-[''] before:absolute before:left-0 before:top-0 before:h-full before:w-1 
+        before:bg-gradient-to-t from-[#017DB9] to-[#22c362]"
+    >
+      {title}
+    </h2>
+  );
+
+  const renderInitialChoice = () => (
+    <>
+      <h1 className="text-4xl font-extrabold mb-6 inline-block pb-2 bg-gradient-to-r from-[#017DB9] to-[#22c362] bg-no-repeat [background-position:0_100%] [background-size:100%_4px]">
+        <span className="bg-gradient-to-r from-[#017DB9] to-[#22c362] bg-clip-text text-transparent">
+          PORTAL DO MEI
+        </span>
+      </h1>
+      <p className="text-gray-700 leading-relaxed text-lg mt-4 mb-8">
+        Bem-vindo à Vitrine de Talentos Locais de Saquarema! Nossa missão é
+        valorizar quem faz a cidade acontecer. Cadastre, atualize ou remova seu
+        negócio quando precisar e faça parte dessa rede que conecta pessoas e
+        fortalece a economia local.
+      </p>
+      <section className="flex flex-col border-t pt-6">
+        <Form.Item
+          layout="vertical"
+          label={
+            <span className="text-lg font-semibold">
+              O que você deseja fazer?
+            </span>
+          }
+        >
+          <Select
+            placeholder="Selecione uma ação"
+            onChange={(value) => setFlowStep(value as FlowStep)}
+            size="large"
+          >
+            <Option value="register">Cadastrar meu MEI na plataforma</Option>
+            <Option value="update">Atualizar uma informação do meu MEI</Option>
+            <Option value="delete">Excluir meu MEI da plataforma</Option>
+          </Select>
+        </Form.Item>
+      </section>
+    </>
+  );
+
+  const renderRegisterForm = () => (
+    <Form
+      form={form}
+      layout="vertical"
+      onFinish={handleRegisterSubmit}
+      autoComplete="off"
+    >
+      {/* Todo o seu JSX do formulário de cadastro original vai aqui, sem alterações. */}
+      <section className="mb-8 border-t pt-4">
+        {commonTitle("Informações do Negócio e Responsável")}
+        <Row gutter={24}>
+          <Col xs={24} md={12}>
+            <Form.Item
+              name="nomeFantasia"
+              label="Nome Fantasia"
+              rules={[
+                { required: true, message: "Insira o nome do seu negócio!" },
+              ]}
+            >
+              <Input placeholder="Ex: Salão da Maria" />
+            </Form.Item>
+          </Col>
+          <Col xs={24} md={12}>
+            <Form.Item
+              name="cnae"
+              label="CNAE (Atividade Principal)"
+              rules={[
+                { required: true, message: "O CNAE é obrigatório!" },
+                {
+                  pattern: /^\d{4}-\d\/\d{2}$/,
+                  message: "CNAE incompleto ou inválido!",
+                },
+              ]}
+            >
+              <Input
+                placeholder="0000-0/00"
+                name="cnae"
+                onChange={(e) => handleMaskChange(e, maskCNAE)}
+              />
+            </Form.Item>
+          </Col>
+        </Row>
+        <Row gutter={24}>
+          <Col xs={24} md={12}>
+            <Form.Item
+              name="cpf"
+              label="CPF"
+              rules={[
+                { required: true, message: "O CPF é obrigatório!" },
+                {
+                  pattern: /^\d{3}\.\d{3}\.\d{3}-\d{2}$/,
+                  message: "CPF incompleto ou inválido!",
+                },
+              ]}
+            >
+              <Input
+                placeholder="000.000.000-00"
+                name="cpf"
+                onChange={(e) => handleMaskChange(e, maskCPF)}
+              />
+            </Form.Item>
+          </Col>
+          <Col xs={24} md={12}>
+            <Form.Item
+              name="cnpj"
+              label="CNPJ"
+              rules={[
+                { required: true, message: "O CNPJ é obrigatório!" },
+                {
+                  pattern: /^\d{2}\.\d{3}\.\d{3}\/\d{4}-\d{2}$/,
+                  message: "CNPJ incompleto ou inválido!",
+                },
+              ]}
+            >
+              <Input
+                placeholder="00.000.000/0001-00"
+                name="cnpj"
+                onChange={(e) => handleMaskChange(e, maskCNPJ)}
+              />
+            </Form.Item>
+          </Col>
+        </Row>
+        <Form.Item
+          name="categoria"
+          label="Categoria"
+          rules={[{ required: true, message: "Selecione uma categoria!" }]}
+        >
+          <Select placeholder="Selecione a categoria principal">
+            {categorias.map((cat) => (
+              <Option key={cat} value={cat}>
+                {cat}
+              </Option>
+            ))}
+          </Select>
+        </Form.Item>
+      </section>
+      <section className="mb-8 border-t pt-4">
+        {commonTitle("Contato e Localização")}
+        <Row gutter={24}>
+          <Col xs={24} md={12}>
+            <Form.Item
+              name="contatoEstabelecimento"
+              label="Telefone / WhatsApp"
+              rules={[
+                { required: true, message: "Insira um contato!" },
+                {
+                  pattern: /^\(\d{2}\) \d{5}-\d{4}$/,
+                  message: "Telefone incompleto ou inválido!",
+                },
+              ]}
+            >
+              <Input
+                placeholder="(22) 99999-9999"
+                name="contatoEstabelecimento"
+                onChange={(e) => handleMaskChange(e, maskPhone)}
+              />
+            </Form.Item>
+          </Col>
+          <Col xs={24} md={12}>
+            <Form.Item
+              name="emailEstabelecimento"
+              label="E-mail de Contato"
+              rules={[
+                { required: true, message: "O e-mail é obrigatório!" },
+                {
+                  pattern: /^[^\s@]+@[^\s@]+\.[^\s@]+$/,
+                  message: "Formato de e-mail inválido!",
+                },
+              ]}
+            >
+              <Input placeholder="contato@email.com" />
+            </Form.Item>
+          </Col>
+        </Row>
+        <Form.Item name="endereco" label="Endereço Físico (se houver)">
+          <Input placeholder="Rua, Bairro, Nº" />
+        </Form.Item>
+        <Form.Item
+          name="locais"
+          label="Áreas de Atuação"
+          rules={[
+            { required: true, message: "Selecione pelo menos uma área!" },
+          ]}
+        >
+          <Select
+            mode="multiple"
+            allowClear
+            placeholder="Selecione os bairros que você atende"
+          >
+            {areasAtuacao.map((area) => (
+              <Option key={area} value={area}>
+                {area}
+              </Option>
+            ))}
+          </Select>
+        </Form.Item>
+      </section>
+      <section className="mb-8 border-t pt-5">
+        {commonTitle("Detalhes e Mídia")}
+        <Form.Item name="descricao" label="Descrição do seu Serviço/Produto">
+          <TextArea
+            rows={4}
+            placeholder="Fale um pouco sobre o que você faz..."
+          />
+        </Form.Item>
+        <Form.Item name="descricaoDiferencial" label="Qual o seu diferencial?">
+          <TextArea rows={2} placeholder="Ex: Atendimento a domicílio, etc." />
+        </Form.Item>
+        <Row gutter={24}>
+          <Col xs={24} md={12}>
+            <Form.Item name="website" label="Website (Opcional)">
+              <Input placeholder="Cole o link da sua página" />
+            </Form.Item>
+          </Col>
+          <Col xs={24} md={12}>
+            <Form.Item name="instagram" label="Instagram (Opcional)">
+              <Input placeholder="Cole o link do seu perfil" />
+            </Form.Item>
+          </Col>
+        </Row>
+        <Row gutter={24}>
+          <Col xs={24} md={12}>
+            <Form.Item label="Sua Logo" help="Envie 1 imagem para o perfil.">
+              <Upload
+                customRequest={customUploadAction}
+                fileList={logoFileList}
+                onChange={handleLogoChange}
+                listType="picture"
+                maxCount={1}
+              >
+                <Button icon={<UploadOutlined />}>Carregar Logo</Button>
+              </Upload>
+            </Form.Item>
+          </Col>
+          <Col xs={24} md={12}>
+            <Form.Item label="Seu Portfólio" help="Envie até 5 imagens.">
+              <Upload
+                customRequest={customUploadAction}
+                fileList={portfolioFileList}
+                onChange={handlePortfolioChange}
+                listType="picture"
+                multiple
+                maxCount={5}
+              >
+                <Button icon={<UploadOutlined />}>Carregar Portfólio</Button>
+              </Upload>
+            </Form.Item>
+          </Col>
+        </Row>
+      </section>
+      <Form.Item>
+        <Button
+          type="primary"
+          htmlType="submit"
+          block
+          loading={loading}
+          style={{ height: 45, fontSize: "1rem" }}
+        >
+          Enviar Cadastro
+        </Button>
+      </Form.Item>
+    </Form>
+  );
+
+  const renderUpdateForm = () => (
+    <Form
+      form={form}
+      layout="vertical"
+      onFinish={handleUpdateSubmit}
+      autoComplete="off"
+    >
+      <section className="mb-8 border-t pt-4">
+        {commonTitle("Identificação do Negócio")}
+        <Form.Item
+          name="cnpj"
+          label="CNPJ do Negócio a ser atualizado"
+          rules={[
+            {
+              required: true,
+              message: "O CNPJ é obrigatório para identificação!",
+            },
+            {
+              pattern: /^\d{2}\.\d{3}\.\d{3}\/\d{4}-\d{2}$/,
+              message: "CNPJ inválido!",
+            },
+          ]}
+        >
+          <Input
+            placeholder="00.000.000/0001-00"
+            name="cnpj"
+            onChange={(e) => handleMaskChange(e, maskCNPJ)}
+          />
+        </Form.Item>
+      </section>
+      <section className="mb-8 border-t pt-4">
+        {commonTitle("Informações para Atualizar")}
+        <p className="text-gray-600 mb-6 -mt-4">
+          Preencha apenas os campos que deseja alterar. Os campos deixados em
+          branco não serão modificados.
+        </p>
+        <Row gutter={24}>
+          <Col xs={24} md={12}>
+            <Form.Item
+              name="contatoEstabelecimento"
+              label="Novo Telefone / WhatsApp"
+              rules={[
+                {
+                  pattern: /^\(\d{2}\) \d{5}-\d{4}$/,
+                  message: "Telefone inválido!",
+                },
+              ]}
+            >
+              <Input
+                placeholder="(22) 99999-9999"
+                name="contatoEstabelecimento"
+                onChange={(e) => handleMaskChange(e, maskPhone)}
+              />
+            </Form.Item>
+          </Col>
+          <Col xs={24} md={12}>
+            <Form.Item
+              name="emailEstabelecimento"
+              label="Novo E-mail de Contato"
+              rules={[
+                {
+                  pattern: /^[^\s@]+@[^\s@]+\.[^\s@]+$/,
+                  message: "E-mail inválido!",
+                },
+              ]}
+            >
+              <Input placeholder="contato@email.com" />
+            </Form.Item>
+          </Col>
+        </Row>
+        <Form.Item name="locais" label="Novas Áreas de Atuação">
+          <Select mode="multiple" allowClear placeholder="Selecione os bairros">
+            {areasAtuacao.map((area) => (
+              <Option key={area} value={area}>
+                {area}
+              </Option>
+            ))}
+          </Select>
+        </Form.Item>
+        <Form.Item name="descricao" label="Nova Descrição do Serviço/Produto">
+          <TextArea rows={4} />
+        </Form.Item>
+        <Form.Item
+          name="portfolio"
+          label="Novas Fotos do Portfólio (até 5)"
+          help="As imagens enviadas aqui irão substituir as atuais."
+        >
+          <Upload
+            customRequest={customUploadAction}
+            fileList={portfolioFileList}
+            onChange={handlePortfolioChange}
+            listType="picture"
+            multiple
+            maxCount={5}
+          >
+            <Button icon={<UploadOutlined />}>Carregar Novas Imagens</Button>
+          </Upload>
+        </Form.Item>
+      </section>
+      <Form.Item>
+        <Button
+          type="primary"
+          htmlType="submit"
+          block
+          loading={loading}
+          style={{ height: 45, fontSize: "1rem" }}
+        >
+          Enviar Atualização
+        </Button>
+      </Form.Item>
+    </Form>
+  );
+
+  const renderDeleteForm = () => (
+    <Form
+      form={form}
+      layout="vertical"
+      onFinish={handleDeleteSubmit}
+      autoComplete="off"
+    >
+      <section className="mb-8 border-t pt-4">
+        {commonTitle("Exclusão de Cadastro MEI")}
+        <p className="text-red-700 bg-red-50 p-4 rounded-md mb-6 -mt-2">
+          <b>Atenção:</b> Esta ação é permanente e removerá seu negócio da nossa
+          plataforma. Para voltar, será necessário um novo cadastro.
+        </p>
+        <Form.Item
+          name="cnpj"
+          label="Confirme o CNPJ do negócio a ser excluído"
+          rules={[
+            { required: true, message: "O CNPJ é obrigatório!" },
+            {
+              pattern: /^\d{2}\.\d{3}\.\d{3}\/\d{4}-\d{2}$/,
+              message: "CNPJ inválido!",
+            },
+          ]}
+        >
+          <Input
+            placeholder="00.000.000/0001-00"
+            name="cnpj"
+            onChange={(e) => handleMaskChange(e, maskCNPJ)}
+          />
+        </Form.Item>
+        <Form.Item name="motivo" label="Motivo da exclusão (Opcional)">
+          <TextArea
+            rows={3}
+            placeholder="Sua opinião é importante para nós. Se puder, nos diga por que está saindo."
+          />
+        </Form.Item>
+        <Form.Item
+          name="confirmacao"
+          valuePropName="checked"
+          rules={[
+            {
+              validator: (_, value) =>
+                value
+                  ? Promise.resolve()
+                  : Promise.reject(
+                      new Error("Você precisa confirmar a exclusão!")
+                    ),
+            },
+          ]}
+        >
+          <Checkbox>
+            Sim, eu entendo que esta ação é irreversível e desejo excluir meu
+            cadastro.
+          </Checkbox>
+        </Form.Item>
+      </section>
+      <Form.Item>
+        <Button
+          type="primary"
+          danger
+          htmlType="submit"
+          block
+          loading={loading}
+          style={{ height: 45, fontSize: "1rem" }}
+        >
+          Confirmar Exclusão MEI
+        </Button>
+      </Form.Item>
+    </Form>
+  );
+
+  const renderSuccess = () => (
+    <Result
+      status="success"
+      title={submittedMessage.title}
+      subTitle={submittedMessage.subTitle}
+      extra={[
+        <Button type="primary" key="console" onClick={resetAll}>
+          Voltar ao Início
+        </Button>,
+      ]}
+    />
+  );
+
+  const renderContent = () => {
+    switch (flowStep) {
+      case "register":
+        return renderRegisterForm();
+      case "update":
+        return renderUpdateForm();
+      case "delete":
+        return renderDeleteForm();
+      case "submitted":
+        return renderSuccess();
+      case "initial":
+      default:
+        return renderInitialChoice();
+    }
+  };
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-300 to-blue-800 py-20 px-6 sm:px-12">
       <div className="max-w-5xl mx-auto bg-white rounded-3xl shadow-lg p-10 sm:p-16">
-        <h1 className="text-4xl font-extrabold mb-10 inline-block pb-2 bg-gradient-to-r from-[#017DB9] to-[#22c362] bg-no-repeat [background-position:0_100%] [background-size:100%_4px]">
-          <span className="bg-gradient-to-r from-[#017DB9] to-[#22c362] bg-clip-text text-transparent">
-            CADASTRO DE MEI
-          </span>
-        </h1>
-        <p className="text-gray-700 leading-relaxed text-lg mt-4 mb-8">
-          Faça parte da nossa vitrine de talentos locais! Preencha o formulário
-          abaixo para divulgar o seu trabalho para toda a comunidade de
-          Saquarema.
-        </p>
-
-        <Spin spinning={loading} tip="A enviar dados...">
-          <Form
-            form={form}
-            layout="vertical"
-            onFinish={handleSubmit}
-            autoComplete="off"
-          >
-            <section className="mb-8 border-t pt-4">
-              <h2
-                className="relative text-2xl font-semibold text-gray-800 mb-6 pl-4 
-           before:content-[''] before:absolute before:left-0 before:top-0 before:h-full before:w-1 
-           before:bg-gradient-to-t from-[#017DB9] to-[#22c362]"
-              >
-                Informações do Negócio e Responsável
-              </h2>
-              <Row gutter={24}>
-                <Col xs={24} md={12}>
-                  <Form.Item
-                    name="nomeFantasia"
-                    label="Nome Fantasia"
-                    rules={[
-                      {
-                        required: true,
-                        message: "Insira o nome do seu negócio!",
-                      },
-                    ]}
-                  >
-                    <Input placeholder="Ex: Salão da Maria" />
-                  </Form.Item>
-                </Col>
-                <Col xs={24} md={12}>
-                  <Form.Item
-                    name="cnae"
-                    label="CNAE (Atividade Principal)"
-                    rules={[
-                      { required: true, message: "O CNAE é obrigatório!" },
-                      {
-                        pattern: /^\d{4}-\d\/\d{2}$/,
-                        message: "CNAE incompleto ou inválido!",
-                      },
-                    ]}
-                  >
-                    <Input
-                      placeholder="0000-0/00"
-                      onChange={handleCnaeChange}
-                    />
-                  </Form.Item>
-                </Col>
-              </Row>
-              <Row gutter={24}>
-                <Col xs={24} md={12}>
-                  <Form.Item
-                    name="cpf"
-                    label="CPF"
-                    rules={[
-                      { required: true, message: "O CPF é obrigatório!" },
-                      {
-                        pattern: /^\d{3}\.\d{3}\.\d{3}-\d{2}$/,
-                        message: "CPF incompleto ou inválido!",
-                      },
-                    ]}
-                  >
-                    <Input
-                      placeholder="000.000.000-00"
-                      onChange={handleCpfChange}
-                    />
-                  </Form.Item>
-                </Col>
-                <Col xs={24} md={12}>
-                  <Form.Item
-                    name="cnpj"
-                    label="CNPJ"
-                    rules={[
-                      { required: true, message: "O CNPJ é obrigatório!" },
-                      {
-                        pattern: /^\d{2}\.\d{3}\.\d{3}\/\d{4}-\d{2}$/,
-                        message: "CNPJ incompleto ou inválido!",
-                      },
-                    ]}
-                  >
-                    <Input
-                      placeholder="00.000.000/0001-00"
-                      onChange={handleCnpjChange}
-                    />
-                  </Form.Item>
-                </Col>
-              </Row>
-              <Form.Item
-                name="categoria"
-                label="Categoria"
-                rules={[
-                  { required: true, message: "Selecione uma categoria!" },
-                ]}
-              >
-                <Select placeholder="Selecione a categoria principal">
-                  {categorias.map((cat) => (
-                    <Option key={cat} value={cat}>
-                      {cat}
-                    </Option>
-                  ))}
-                </Select>
-              </Form.Item>
-            </section>
-
-            <section className="mb-8 border-t pt-4">
-              <h2
-                className="relative text-2xl font-semibold text-gray-800 mb-6 pl-4 
-           before:content-[''] before:absolute before:left-0 before:top-0 before:h-full before:w-1 
-           before:bg-gradient-to-t from-[#017DB9] to-[#22c362]"
-              >
-                Contato e Localização
-              </h2>
-              <Row gutter={24}>
-                <Col xs={24} md={12}>
-                  <Form.Item
-                    name="contatoEstabelecimento"
-                    label="Telefone / WhatsApp"
-                    rules={[
-                      { required: true, message: "Insira um contato!" },
-                      {
-                        pattern: /^\(\d{2}\) \d{5}-\d{4}$/,
-                        message: "Telefone incompleto ou inválido!",
-                      },
-                    ]}
-                  >
-                    <Input
-                      placeholder="(22) 99999-9999"
-                      onChange={handlePhoneChange}
-                    />
-                  </Form.Item>
-                </Col>
-                <Col xs={24} md={12}>
-                  <Form.Item
-                    name="emailEstabelecimento"
-                    label="E-mail de Contato"
-                    rules={[
-                      { required: true, message: "O e-mail é obrigatório!" },
-                      {
-                        pattern: /^[^\s@]+@[^\s@]+\.[^\s@]+$/,
-                        message: "Formato de e-mail inválido!",
-                      },
-                    ]}
-                  >
-                    <Input placeholder="contato@email.com" />
-                  </Form.Item>
-                </Col>
-              </Row>
-              <Form.Item name="endereco" label="Endereço Físico (se houver)">
-                <Input placeholder="Rua, Bairro, Nº" />
-              </Form.Item>
-              <Form.Item
-                name="locais"
-                label="Áreas de Atuação"
-                rules={[
-                  { required: true, message: "Selecione pelo menos uma área!" },
-                ]}
-              >
-                <Select
-                  mode="multiple"
-                  allowClear
-                  placeholder="Selecione os bairros que você atende"
-                >
-                  {areasAtuacao.map((area) => (
-                    <Option key={area} value={area}>
-                      {area}
-                    </Option>
-                  ))}
-                </Select>
-              </Form.Item>
-            </section>
-
-            <section className="mb-8 border-t pt-5">
-              <h2
-                className="relative text-2xl font-semibold text-gray-800 mb-6 pl-4 
-           before:content-[''] before:absolute before:left-0 before:top-0 before:h-full before:w-1 
-           before:bg-gradient-to-t from-[#017DB9] to-[#22c362]"
-              >
-                Detalhes e Mídia
-              </h2>
-              <Form.Item
-                name="descricao"
-                label="Descrição do seu Serviço/Produto"
-              >
-                <TextArea
-                  rows={4}
-                  placeholder="Fale um pouco sobre o que você faz, seus principais produtos ou serviços."
-                />
-              </Form.Item>
-              <Form.Item
-                name="descricaoDiferencial"
-                label="Qual o seu diferencial?"
-              >
-                <TextArea
-                  rows={2}
-                  placeholder="Ex: Atendimento a domicílio, produtos artesanais, etc."
-                />
-              </Form.Item>
-              <Row gutter={24}>
-                <Col xs={24} md={12}>
-                  <Form.Item name="website" label="Website (Opcional)">
-                    <Input placeholder="Cole o link da sua página" />
-                  </Form.Item>
-                </Col>
-                <Col xs={24} md={12}>
-                  <Form.Item name="instagram" label="Instagram (Opcional)">
-                    <Input placeholder="Cole o link do seu perfil" />
-                  </Form.Item>
-                </Col>
-              </Row>
-              <Row gutter={24}>
-                <Col xs={24} md={12}>
-                  <Form.Item
-                    label="Sua Logo"
-                    help="Envie 1 imagem para o perfil."
-                  >
-                    <Upload
-                      customRequest={customUploadAction}
-                      fileList={logoFileList}
-                      onChange={handleLogoChange}
-                      listType="picture"
-                      maxCount={1}
-                    >
-                      <Button icon={<UploadOutlined />}>Carregar Logo</Button>
-                    </Upload>
-                  </Form.Item>
-                </Col>
-                <Col xs={24} md={12}>
-                  <Form.Item label="Seu Portfólio" help="Envie até 5 imagens.">
-                    <Upload
-                      customRequest={customUploadAction}
-                      fileList={portfolioFileList}
-                      onChange={handlePortfolioChange}
-                      listType="picture"
-                      multiple
-                      maxCount={5}
-                    >
-                      <Button icon={<UploadOutlined />}>
-                        Carregar Portfólio
-                      </Button>
-                    </Upload>
-                  </Form.Item>
-                </Col>
-              </Row>
-            </section>
-
-            <Form.Item>
-              <Button
-                type="primary"
-                htmlType="submit"
-                block
-                loading={loading}
-                style={{ height: 45, fontSize: "1rem" }}
-              >
-                Enviar Cadastro
-              </Button>
-            </Form.Item>
-          </Form>
+        <Spin spinning={loading} tip="A processar...">
+          {/* Botão de Voltar, aparece em todas as etapas exceto a inicial e a de sucesso */}
+          {flowStep !== "initial" && flowStep !== "submitted" && (
+            <Button
+              type="text"
+              icon={<ArrowLeftOutlined />}
+              onClick={() => setFlowStep("initial")}
+              className="mb-6"
+            >
+              Voltar ao início
+            </Button>
+          )}
+          {renderContent()}
         </Spin>
       </div>
     </div>
