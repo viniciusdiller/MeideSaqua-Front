@@ -53,17 +53,11 @@ const maskPhone = (value: string) => {
     .replace(/(-\d{4})\d+?$/, "$1");
 };
 
-<<<<<<< HEAD
-const API_URL = "http://localhost:3301/api";
-const api = {
-  cadastrarEstabelecimento: async (data: any) => {
-=======
 const API_URL = "http://localhost:3001/api";
 
 const api = {
   cadastrarEstabelecimento: async (formData: FormData) => {
     // 1. Mude o parâmetro para receber FormData
->>>>>>> Formulário
     const response = await fetch(`${API_URL}/estabelecimentos`, {
       method: "POST",
       body: formData,
