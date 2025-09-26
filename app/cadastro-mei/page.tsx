@@ -53,13 +53,20 @@ const maskPhone = (value: string) => {
     .replace(/(-\d{4})\d+?$/, "$1");
 };
 
+<<<<<<< HEAD
 const API_URL = "http://localhost:3301/api";
 const api = {
   cadastrarEstabelecimento: async (data: any) => {
+=======
+const API_URL = "http://localhost:3001/api";
+
+const api = {
+  cadastrarEstabelecimento: async (formData: FormData) => {
+    // 1. Mude o parâmetro para receber FormData
+>>>>>>> Formulário
     const response = await fetch(`${API_URL}/estabelecimentos`, {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(data),
+      body: formData,
     });
     if (!response.ok) {
       const errorData = await response.json();
@@ -186,29 +193,38 @@ const CadastroMEIPage: React.FC = () => {
   const handleRegisterSubmit = async (values: any) => {
     setLoading(true);
     try {
-      const logoData = logoFileList.map(
-        (file) => file.response || file.originFileObj
-      );
-      const portfolioData = portfolioFileList.map(
-        (file) => file.response || file.originFileObj
-      );
+      const formData = new FormData();
 
-      const payload = {
-        ...values,
-        cnae: values.cnae.replace(/\D/g, ""),
-        cpf: values.cpf ? values.cpf.replace(/\D/g, "") : "",
-        cnpj: values.cnpj ? values.cnpj.replace(/\D/g, "") : "",
-        contatoEstabelecimento: values.contatoEstabelecimento.replace(
-          /\D/g,
-          ""
-        ),
-        locais: values.locais ? values.locais.join(", ") : "",
-        logoBase64: JSON.stringify(logoData), // A conversão para Base64 real aconteceria aqui
-        produtosImgBase64: JSON.stringify(portfolioData), // ou no servidor
-        ativo: true,
-      };
+      Object.entries(values).forEach(([key, value]) => {
+        if (value) {
+          if (key === "locais" && Array.isArray(value)) {
+            formData.append(key, value.join(", "));
+          } else {
+            let finalValue = value as string;
+            if (
+              ["cnae", "cpf", "cnpj", "contatoEstabelecimento"].includes(key)
+            ) {
+              finalValue = finalValue.replace(/\D/g, "");
+            }
+            formData.append(key, finalValue);
+          }
+        }
+      });
 
-      await api.cadastrarEstabelecimento(payload);
+      if (logoFileList.length > 0 && logoFileList[0].originFileObj) {
+        formData.append("logo", logoFileList[0].originFileObj);
+      }
+
+      portfolioFileList.forEach((file) => {
+        if (file.originFileObj) {
+          formData.append("produtos", file.originFileObj);
+        }
+      });
+
+      formData.append("ativo", "true");
+
+      await api.cadastrarEstabelecimento(formData);
+
       setSubmittedMessage({
         title: "Cadastro realizado com sucesso!",
         subTitle:
