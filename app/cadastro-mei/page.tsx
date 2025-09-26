@@ -57,7 +57,6 @@ const API_URL = "http://localhost:3001/api";
 
 const api = {
   cadastrarEstabelecimento: async (formData: FormData) => {
-    // 1. Mude o parâmetro para receber FormData
     const response = await fetch(`${API_URL}/estabelecimentos`, {
       method: "POST",
       body: formData,
@@ -189,34 +188,30 @@ const CadastroMEIPage: React.FC = () => {
     try {
       const formData = new FormData();
 
+      // Adiciona todos os campos de texto ao formData
       Object.entries(values).forEach(([key, value]) => {
         if (value) {
           if (key === "locais" && Array.isArray(value)) {
             formData.append(key, value.join(", "));
           } else {
-            let finalValue = value as string;
-            if (
-              ["cnae", "cpf", "cnpj", "contatoEstabelecimento"].includes(key)
-            ) {
-              finalValue = finalValue.replace(/\D/g, "");
-            }
-            formData.append(key, finalValue);
+            formData.append(key, value as string);
           }
         }
       });
 
+      // Adiciona a LOGO (se existir)
       if (logoFileList.length > 0 && logoFileList[0].originFileObj) {
         formData.append("logo", logoFileList[0].originFileObj);
       }
 
+      // Adiciona as imagens do PORTFÓLIO (se existirem)
       portfolioFileList.forEach((file) => {
         if (file.originFileObj) {
           formData.append("produtos", file.originFileObj);
         }
       });
 
-      formData.append("ativo", "true");
-
+      // Envia o FormData para a API
       await api.cadastrarEstabelecimento(formData);
 
       setSubmittedMessage({
