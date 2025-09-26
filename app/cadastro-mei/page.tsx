@@ -53,11 +53,9 @@ const maskPhone = (value: string) => {
     .replace(/(-\d{4})\d+?$/, "$1");
 };
 
-// --- API E LISTAS (com novas funções mock) ---
-const API_URL = "http://localhost:3306/api"; // Mantenha sua URL real
+const API_URL = "http://localhost:3301/api";
 const api = {
   cadastrarEstabelecimento: async (data: any) => {
-    // Sua lógica de cadastro original
     const response = await fetch(`${API_URL}/estabelecimentos`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -69,14 +67,14 @@ const api = {
     }
     return response.json();
   },
-  // NOVA FUNÇÃO MOCK PARA ATUALIZAÇÃO
+
   atualizarEstabelecimento: async (data: any) => {
     console.log("Enviando dados para atualização:", data);
     return new Promise((resolve) =>
       setTimeout(() => resolve({ success: true, ...data }), 1000)
     );
   },
-  // NOVA FUNÇÃO MOCK PARA EXCLUSÃO
+
   excluirEstabelecimento: async (data: any) => {
     console.log("Enviando dados para exclusão:", data);
     return new Promise((resolve) =>
@@ -165,13 +163,11 @@ const CadastroMEIPage: React.FC = () => {
     subTitle: "",
   });
 
-  // Handlers para upload de arquivos
   const handleLogoChange = ({ fileList }: { fileList: UploadFile[] }) =>
     setLogoFileList(fileList);
   const handlePortfolioChange = ({ fileList }: { fileList: UploadFile[] }) =>
     setPortfolioFileList(fileList);
 
-  // Handlers para máscaras
   const handleMaskChange = (
     e: React.ChangeEvent<HTMLInputElement>,
     maskFn: (value: string) => string
@@ -187,7 +183,6 @@ const CadastroMEIPage: React.FC = () => {
     setFlowStep("initial");
   };
 
-  // --- LÓGICA DE SUBMISSÃO ---
   const handleRegisterSubmit = async (values: any) => {
     setLoading(true);
     try {
@@ -289,6 +284,7 @@ const CadastroMEIPage: React.FC = () => {
     </h2>
   );
 
+  //PÁGINA INICIAL
   const renderInitialChoice = () => (
     <>
       <h1 className="text-4xl font-extrabold mb-6 inline-block pb-2 bg-gradient-to-r from-[#017DB9] to-[#22c362] bg-no-repeat [background-position:0_100%] [background-size:100%_4px]">
@@ -325,6 +321,7 @@ const CadastroMEIPage: React.FC = () => {
     </>
   );
 
+  //PÁGINA DE FORMULÁRIO DE CADASTRO
   const renderRegisterForm = () => (
     <Form
       form={form}
@@ -332,7 +329,6 @@ const CadastroMEIPage: React.FC = () => {
       onFinish={handleRegisterSubmit}
       autoComplete="off"
     >
-      {/* Todo o seu JSX do formulário de cadastro original vai aqui, sem alterações. */}
       <section className="mb-8 border-t pt-4">
         {commonTitle("Informações do Negócio e Responsável")}
         <Row gutter={24}>
@@ -484,13 +480,31 @@ const CadastroMEIPage: React.FC = () => {
       </section>
       <section className="mb-8 border-t pt-5">
         {commonTitle("Detalhes e Mídia")}
-        <Form.Item name="descricao" label="Descrição do seu Serviço/Produto">
+        <Form.Item
+          name="descricao"
+          label="Descrição do seu Serviço/Produto"
+          rules={[
+            {
+              required: true,
+              message: "Por favor, descreva seu produto ou serviço!",
+            },
+          ]}
+        >
           <TextArea
             rows={4}
             placeholder="Fale um pouco sobre o que você faz..."
           />
         </Form.Item>
-        <Form.Item name="descricaoDiferencial" label="Qual o seu diferencial?">
+        <Form.Item
+          name="descricaoDiferencial"
+          label="Qual o seu diferencial?"
+          rules={[
+            {
+              required: true,
+              message: "Por favor, informe o seu diferencial!",
+            },
+          ]}
+        >
           <TextArea rows={2} placeholder="Ex: Atendimento a domicílio, etc." />
         </Form.Item>
         <Row gutter={24}>
@@ -549,6 +563,7 @@ const CadastroMEIPage: React.FC = () => {
     </Form>
   );
 
+  //PÁGINA DE FORMULÁRIO DE ATUALIZAÇÃO
   const renderUpdateForm = () => (
     <Form
       form={form}
@@ -662,6 +677,7 @@ const CadastroMEIPage: React.FC = () => {
     </Form>
   );
 
+  //PÁGINA DE FORMULÁRIO DE EXCLUSÃO
   const renderDeleteForm = () => (
     <Form
       form={form}
