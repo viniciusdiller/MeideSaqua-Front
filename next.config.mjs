@@ -10,9 +10,15 @@ const nextConfig = {
     ignoreBuildErrors: true,
   },
   images: {
-    domains: ['placeholder.svg'],
-    unoptimized: true,
+    remotePatterns: [
+      {
+        protocol: "http",
+        hostname: "172.16.32.199",
+        port: "3001",
+        pathname: "/uploads/**",
+      },
+    ],
   },
-}
+};
 
-export default nextConfig
+export default nextConfig;

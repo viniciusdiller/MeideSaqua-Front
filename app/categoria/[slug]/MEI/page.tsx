@@ -64,37 +64,7 @@ const StarRating = ({ rating }: { rating: number }) => {
   );
 };
 
-const item = [
-  {
-    id: "1",
-    img: "/foto-4k.jpg",
-    src: "/foto-4k.jpg",
-    url: "/foto-4k.jpg",
-    alt: "Imagem 1",
-    height: 300,
-  },
-  {
-    id: "2",
-    img: "/teste.jpg",
-    url: "/teste.jpg",
-    alt: "Imagem 2",
-    height: 300,
-  },
-  {
-    id: "3",
-    img: "/gatinho.jpg",
-    url: "/gatinho.jpg",
-    alt: "Imagem 3",
-    height: 300,
-  },
-  {
-    id: "4",
-    img: "/gatooculos.jpg",
-    url: "/gatooculos.jpg",
-    alt: "Imagem 3",
-    height: 300,
-  },
-];
+const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://172.16.32.199:3001";
 
 const REVIEWS_PER_PAGE = 4;
 
@@ -174,7 +144,7 @@ export default function MeiDetailPage({
         const portfolioItems = imageUrls.map((url: string, index: number) => ({
           id: `${detailsData.estabelecimentoId}-${index}`, // Cria um ID único
           // Monta a URL completa para a imagem
-          img: `${process.env.NEXT_PUBLIC_API_URL}${url}`,
+          img: `${API_URL}/${url}`,
         }));
 
         // 3. Atualiza o estado com as imagens do portfólio
@@ -401,7 +371,7 @@ export default function MeiDetailPage({
               <div className="flex items-center justify-center md:col-span-1">
                 <div className="w-40 h-40 md:w-56 md:h-56 bg-gray-50 border border-gray-200 rounded-2xl shadow-sm flex items-center justify-center p-4">
                   <TiltImage
-                    src={meiDetails.logoUrl || "/placeholder-logo.png"}
+                    src={`${API_URL}/${meiDetails.logoUrl}`}
                     alt={`Logo de ${meiDetails.nomeFantasia}`}
                     width={500}
                     height={500}

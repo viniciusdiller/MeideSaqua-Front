@@ -4,7 +4,6 @@ import React, { useState, useEffect } from "react";
 import Image from "next/image";
 import { motion, AnimatePresence } from "framer-motion";
 
-
 interface Item {
   id: string;
   img: string;
@@ -13,10 +12,13 @@ interface Item {
 interface ImageGridProps {
   items: Item[];
 }
+const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://172.16.32.199:3001";
 
 const ImageGrid: React.FC<ImageGridProps> = ({ items }) => {
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
-  const displayedItems = items.slice(0, 4);
+  const displayedItems = Array.isArray(items)
+    ? items.filter((item) => item && item.img).slice(0, 4)
+    : [];
 
   return (
     <div className="w-full max-w-5xl mx-auto p-4">
@@ -28,7 +30,7 @@ const ImageGrid: React.FC<ImageGridProps> = ({ items }) => {
             onClick={() => setSelectedImage(item.img)}
             whileHover={{ scale: 1.05, y: -5 }}
             transition={{ type: "spring", stiffness: 300 }}
-            layoutId={`card-${item.id}`} // Animação suave para o modal
+            layoutId={`card-${item.id}`}
           >
             <Image
               src={item.img}
@@ -54,7 +56,6 @@ const ImageGrid: React.FC<ImageGridProps> = ({ items }) => {
   );
 };
 
-
 interface ImageModalProps {
   src: string;
   onClose: () => void;
@@ -62,7 +63,6 @@ interface ImageModalProps {
 }
 
 const ImageModal: React.FC<ImageModalProps> = ({ src, onClose, layoutId }) => {
-
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.key === "Escape") {
@@ -84,7 +84,7 @@ const ImageModal: React.FC<ImageModalProps> = ({ src, onClose, layoutId }) => {
       <motion.div
         className="relative p-4"
         onClick={(e) => e.stopPropagation()}
-        layoutId={layoutId} 
+        layoutId={layoutId}
       >
         <img
           src={src}
