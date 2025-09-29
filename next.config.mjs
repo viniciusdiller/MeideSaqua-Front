@@ -1,8 +1,5 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  experimental: {
-    appDir: true,
-  },
   eslint: {
     ignoreDuringBuilds: true,
   },
@@ -18,6 +15,9 @@ const nextConfig = {
         pathname: "/uploads/**",
       },
     ],
+  },
+  experimental: {
+    allowedDevOrigins: ["http://172.16.32.199:3000"],
   },
 };
 
