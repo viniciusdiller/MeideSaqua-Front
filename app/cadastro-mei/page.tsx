@@ -53,7 +53,7 @@ const maskPhone = (value: string) => {
     .replace(/(-\d{4})\d+?$/, "$1");
 };
 
-const API_URL = "http://localhost:3001/api";
+const API_URL = "http://172.16.32.199:3001/api";
 
 const api = {
   cadastrarEstabelecimento: async (formData: FormData) => {
