@@ -53,11 +53,11 @@ const maskPhone = (value: string) => {
     .replace(/(-\d{4})\d+?$/, "$1");
 };
 
-const API_URL = "http://172.16.32.199:3001/api";
+const API_URL = process.env.NEXT_PUBLIC_API_URL;
 
 const api = {
   cadastrarEstabelecimento: async (formData: FormData) => {
-    const response = await fetch(`${API_URL}/estabelecimentos`, {
+    const response = await fetch(`${API_URL}/api/estabelecimentos`, {
       method: "POST",
       body: formData,
     });
@@ -191,7 +191,7 @@ const CadastroMEIPage: React.FC = () => {
       // Adiciona todos os campos de texto ao formData
       Object.entries(values).forEach(([key, value]) => {
         if (value) {
-          if (key === "locais" && Array.isArray(value)) {
+          if (key === "areasAtuacao" && Array.isArray(value)) {
             formData.append(key, value.join(", "));
           } else {
             formData.append(key, value as string);
@@ -464,7 +464,7 @@ const CadastroMEIPage: React.FC = () => {
           <Input placeholder="Rua, Bairro, Nº" />
         </Form.Item>
         <Form.Item
-          name="locais"
+          name="areasAtuacao"
           label="Áreas de Atuação"
           rules={[
             { required: true, message: "Selecione pelo menos uma área!" },
@@ -539,14 +539,14 @@ const CadastroMEIPage: React.FC = () => {
             </Form.Item>
           </Col>
           <Col xs={24} md={12}>
-            <Form.Item label="Seu Portfólio" help="Envie até 5 imagens.">
+            <Form.Item label="Seu Portfólio" help="Envie até 4 imagens.">
               <Upload
                 customRequest={customUploadAction}
                 fileList={portfolioFileList}
                 onChange={handlePortfolioChange}
                 listType="picture"
                 multiple
-                maxCount={5}
+                maxCount={4}
               >
                 <Button icon={<UploadOutlined />}>Carregar Portfólio</Button>
               </Upload>

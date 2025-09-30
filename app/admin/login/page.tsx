@@ -6,7 +6,7 @@ import { LockOutlined, UserOutlined } from "@ant-design/icons";
 import { useRouter } from "next/navigation";
 
 // URL da sua API backend
-const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3001";
+const API_URL = process.env.NEXT_PUBLIC_API_URL;
 
 const AdminLoginPage: React.FC = () => {
   const [loading, setLoading] = useState(false);
@@ -16,9 +16,9 @@ const AdminLoginPage: React.FC = () => {
     setLoading(true);
     try {
       const response = await fetch(`${API_URL}/api/admin/login`, {
-        method: 'POST',
+        method: "POST",
         headers: {
-          'Content-Type': 'application/json',
+          "Content-Type": "application/json",
         },
         body: JSON.stringify(values),
       });

@@ -64,7 +64,7 @@ const StarRating = ({ rating }: { rating: number }) => {
   );
 };
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://172.16.32.199:3001";
+const API_URL = process.env.NEXT_PUBLIC_API_URL;
 
 const REVIEWS_PER_PAGE = 4;
 
@@ -245,39 +245,24 @@ export default function MeiDetailPage({
     }
   };
 
-  const locais = [
-    "Padaria Doce Pão",
-    "Restaurante Central",
-    "Padaria Doce Pão pao pao pao pao",
-    "Farmácia Vida",
-    "Lanchonete Express",
-    "Barra Nova",
-    "Vilatur",
-    "Porto da Roça II",
-    "Itaúna",
-    "Restaurante Central",
-    "Padaria Doce Pão",
-    "Padaria Doce Pão",
-    "Restaurante Central",
-    "Padaria Doce Pão pao pao pao pao",
-    "Farmácia Vida",
-    "Lanchonete Express",
-    "Barra Nova",
-    "Vilatur",
-    "Porto da Roça II",
-    "Itaúna",
-    "Restaurante Central",
-    "Padaria Doce Pão",
-  ];
-
   const linhasVisiveis = 3;
   const colunas = 4;
   const limite = linhasVisiveis * colunas;
 
-  let locaisVisiveis = locais;
-  if (!locaisExpandidos && locais.length > limite) {
-    locaisVisiveis = locais.slice(0, limite - 1);
-    locaisVisiveis.push("SHOW_MORE_BUTTON");
+  const areasAtuacaoString = meiDetails.areasAtuacao || "";
+
+  const areasAtuacaoList: string[] = areasAtuacaoString
+    ? (areasAtuacaoString as string)
+        .split(",")
+        .map((area) => area.trim())
+        .filter((area) => area.length > 0)
+    : [];
+
+  let areasVisiveis = areasAtuacaoList;
+
+  if (!locaisExpandidos && areasAtuacaoList.length > limite) {
+    areasVisiveis = areasAtuacaoList.slice(0, limite - 1);
+    areasVisiveis.push("SHOW_MORE_BUTTON");
   }
 
   return (
@@ -421,8 +406,8 @@ export default function MeiDetailPage({
               <div className="w-full h-fit bg-gray-50 rounded-3xl border border-gray-200 overflow-hidden milecem:col-span-3">
                 <div className="p-5 md:p-8 text-gray-700">
                   <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-                    {locaisVisiveis.map((local, index) =>
-                      local === "SHOW_MORE_BUTTON" ? (
+                    {areasVisiveis.map((area, index) =>
+                      area === "SHOW_MORE_BUTTON" ? (
                         <button
                           key={index}
                           onClick={() => setLocaisExpandidos(true)}
@@ -435,7 +420,7 @@ export default function MeiDetailPage({
                           key={index}
                           className="px-3 py-2 rounded-xl border border-gray-300 bg-white text-gray-700 shadow-sm flex items-center justify-center text-sm font-medium hover:cursor-default"
                         >
-                          {local}
+                          {area}
                         </div>
                       )
                     )}

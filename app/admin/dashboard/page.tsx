@@ -12,7 +12,7 @@ import {
   Descriptions,
   Spin,
   Empty,
-  Typography
+  Typography,
 } from "antd";
 import {
   UserAddOutlined,
@@ -26,14 +26,14 @@ import { useRouter } from "next/navigation";
 const { Text } = Typography;
 
 // URL da sua API backend
-const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3001";
+const API_URL = process.env.NEXT_PUBLIC_API_URL;
 
 interface Estabelecimento {
   estabelecimentoId: number;
   nomeFantasia: string;
   cnpj: string;
   // Adicione outros campos que você queira exibir
-  [key: string]: any; 
+  [key: string]: any;
 }
 
 interface PendingData {
@@ -44,9 +44,15 @@ interface PendingData {
 
 const AdminDashboard: React.FC = () => {
   const [loading, setLoading] = useState(true);
-  const [data, setData] = useState<PendingData>({ cadastros: [], atualizacoes: [], exclusoes: [] });
+  const [data, setData] = useState<PendingData>({
+    cadastros: [],
+    atualizacoes: [],
+    exclusoes: [],
+  });
   const [modalVisible, setModalVisible] = useState(false);
-  const [selectedItem, setSelectedItem] = useState<Estabelecimento | null>(null);
+  const [selectedItem, setSelectedItem] = useState<Estabelecimento | null>(
+    null
+  );
   const router = useRouter();
 
   const fetchData = useCallback(async () => {
@@ -89,24 +95,31 @@ const AdminDashboard: React.FC = () => {
     fetchData();
   }, [fetchData]);
 
-  const handleAction = async (action: 'approve' | 'reject') => {
+  const handleAction = async (action: "approve" | "reject") => {
     if (!selectedItem) return;
 
     const token = localStorage.getItem("admin_token");
     setLoading(true);
 
     try {
-      const response = await fetch(`${API_URL}/api/admin/${action}/${selectedItem.estabelecimentoId}`, {
-        method: 'POST',
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
+      const response = await fetch(
+        `${API_URL}/api/admin/${action}/${selectedItem.estabelecimentoId}`,
+        {
+          method: "POST",
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
 
       const result = await response.json();
       if (!response.ok) throw new Error(result.message);
 
-      message.success(`Solicitação ${action === 'approve' ? 'aprovada' : 'rejeitada'} com sucesso!`);
+      message.success(
+        `Solicitação ${
+          action === "approve" ? "aprovada" : "rejeitada"
+        } com sucesso!`
+      );
       setModalVisible(false);
       fetchData(); // Recarrega os dados para atualizar a lista
     } catch (error: any) {
@@ -115,7 +128,6 @@ const AdminDashboard: React.FC = () => {
       setLoading(false);
     }
   };
-
 
   const showModal = (item: Estabelecimento) => {
     setSelectedItem(item);
@@ -167,11 +179,7 @@ const AdminDashboard: React.FC = () => {
       <Spin spinning={loading} tip="Processando...">
         <h1 className="text-3xl font-bold mb-8">Painel de Administração</h1>
         <Row gutter={[24, 24]}>
-          {renderList(
-            "Novos Cadastros",
-            data.cadastros,
-            <UserAddOutlined />
-          )}
+          {renderList("Novos Cadastros", data.cadastros, <UserAddOutlined />)}
           {renderList(
             "Solicitações de Atualização",
             data.atualizacoes,
@@ -193,7 +201,7 @@ const AdminDashboard: React.FC = () => {
           footer={[
             <Button
               key="reject"
-              onClick={() => handleAction('reject')}
+              onClick={() => handleAction("reject")}
               icon={<CloseOutlined />}
               danger
             >
@@ -202,7 +210,7 @@ const AdminDashboard: React.FC = () => {
             <Button
               key="confirm"
               type="primary"
-              onClick={() => handleAction('approve')}
+              onClick={() => handleAction("approve")}
               icon={<CheckOutlined />}
             >
               Confirmar
@@ -210,21 +218,29 @@ const AdminDashboard: React.FC = () => {
           ]}
         >
           <Descriptions bordered column={1} size="small">
-             {/* Exibe todos os dados do MEI, incluindo os de atualização se existirem */}
-             {Object.entries(selectedItem)
-              .filter(([key]) => key !== 'dados_atualizacao')
+            {/* Exibe todos os dados do MEI, incluindo os de atualização se existirem */}
+            {Object.entries(selectedItem)
+              .filter(([key]) => key !== "dados_atualizacao")
               .map(([key, value]) => (
                 <Descriptions.Item key={key} label={key}>
                   {String(value)}
                 </Descriptions.Item>
-             ))}
-             {selectedItem.dados_atualizacao && Object.keys(selectedItem.dados_atualizacao).length > 0 && (
-                <Descriptions.Item label="Dados para Atualizar" style={{ backgroundColor: '#e6f7ff' }}>
-                    {Object.entries(selectedItem.dados_atualizacao).map(([key, value]) => (
-                       <div key={key}><Text strong>{key}:</Text> {String(value)}</div>
-                    ))}
+              ))}
+            {selectedItem.dados_atualizacao &&
+              Object.keys(selectedItem.dados_atualizacao).length > 0 && (
+                <Descriptions.Item
+                  label="Dados para Atualizar"
+                  style={{ backgroundColor: "#e6f7ff" }}
+                >
+                  {Object.entries(selectedItem.dados_atualizacao).map(
+                    ([key, value]) => (
+                      <div key={key}>
+                        <Text strong>{key}:</Text> {String(value)}
+                      </div>
+                    )
+                  )}
                 </Descriptions.Item>
-             )}
+              )}
           </Descriptions>
         </Modal>
       )}
