@@ -2,9 +2,15 @@
 
 import { motion } from "framer-motion";
 
-const tags = ["Churrasco", "Bolo", "Doces", "Lugar limpo"];
+interface TagsAnimadasProps {
+  tags: string[];
+}
 
-export default function TagsAnimadas() {
+export default function TagsAnimadas({ tags }: TagsAnimadasProps) {
+  if (!tags || tags.length === 0) {
+    return null;
+  }
+
   return (
     <div className="flex flex-wrap gap-2">
       {tags.map((tag, i) => (
@@ -15,7 +21,7 @@ export default function TagsAnimadas() {
           transition={{ duration: 0.7, delay: i * 0.3, type: "spring" }}
           className="px-3 py-1 text-xs font-semibold rounded-full text-gray-800 shadow-md hover:cursor-default"
           style={{
-            backgroundColor: ["#f9fafb"][Math.floor(Math.random() * 1)],
+            backgroundColor: "#f9fafb",
           }}
         >
           {tag}

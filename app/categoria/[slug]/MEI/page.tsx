@@ -265,6 +265,14 @@ export default function MeiDetailPage({
     areasVisiveis.push("SHOW_MORE_BUTTON");
   }
 
+  const tagsInvisiveisString = meiDetails.tagsInvisiveis || "";
+
+  const tagsList: string[] = tagsInvisiveisString
+    ? (tagsInvisiveisString as string)
+        .split(",")
+        .map((tag) => tag.trim())
+        .filter((tag) => tag.length > 0)
+    : [];
   return (
     <div className="min-h-screen bg-gradient-to-br from-[#017DB9] to-[#22c362]">
       <motion.header
@@ -349,7 +357,7 @@ export default function MeiDetailPage({
                     </a>
                   </div>
                   <div className="flex flex-wrap gap-2">
-                    <TagsAnimate />
+                    <TagsAnimate tags={tagsList} />
                   </div>
                 </div>
               </div>
@@ -397,7 +405,7 @@ export default function MeiDetailPage({
                   </a>
                 </div>
                 <div className="flex flex-wrap justify-center gap-2">
-                  <TagsAnimate />
+                  <TagsAnimate tags={tagsList} />
                 </div>
               </div>
             </div>
