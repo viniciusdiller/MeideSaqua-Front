@@ -301,7 +301,7 @@ export default function MeiDetailPage({
             className="bg-white p-6 rounded-3xl shadow-lg md:mx-auto md:max-w-[85%]"
             variants={itemVariants}
           >
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-8 items-center">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 items-center">
               <div className="md:col-span-2 flex flex-col">
                 <div className="mb-6 text-center md:text-left">
                   <h2 className="text-3xl font-bold text-gray-900 mb-2 border-l-4 border-[#017DB9] pl-3">
@@ -354,14 +354,50 @@ export default function MeiDetailPage({
                 </div>
               </div>
               <div className="flex items-center justify-center md:col-span-1">
-                <div className="w-40 h-40 md:w-56 md:h-56 bg-gray-50 border border-gray-200 rounded-2xl shadow-sm flex items-center justify-center p-4">
+                <div className="max-w-48 mas-h-48 md:max-w-56 md:max-h-56 desktop:max-h-72 desktop:max-w-72 bg-white rounded-2xl flex items-center justify-center p-4">
                   <TiltImage
-                    src={`${API_URL}/${meiDetails.logoUrl}`}
+                    src={
+                      (meiDetails.logoUrl &&
+                        `${API_URL}/${meiDetails.logoUrl}`) ||
+                      "/LogoExploraMonocromática.png"
+                    }
                     alt={`Logo de ${meiDetails.nomeFantasia}`}
                     width={500}
                     height={500}
                     className="w-full h-full object-contain"
                   />
+                </div>
+              </div>
+              <div className="quinhentos:hidden flex flex-col items-center justify-center gap-6 mt-6 col-span-full">
+                <div className="flex items-center gap-6">
+                  <a
+                    href={meiDetails.instagram}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="flex items-center gap-2 text-gray-600 hover:text-pink-600 transition-colors"
+                  >
+                    <div className="w-9 h-9 rounded-full bg-pink-100 flex items-center justify-center">
+                      <Instagram size={18} strokeWidth={2} />
+                    </div>
+                    <span className="text-sm font-medium">Instagram</span>
+                  </a>
+                  <a
+                    href={`https://wa.me/${meiDetails.contatoEstabelecimento.replace(
+                      /\D/g,
+                      ""
+                    )}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="flex items-center gap-2 text-gray-600 hover:text-[#22c362] transition-colors"
+                  >
+                    <div className="w-9 h-9 rounded-full bg-green-100 flex items-center justify-center">
+                      <PhoneForwarded size={18} strokeWidth={2} />
+                    </div>
+                    <span className="text-sm font-medium">WhatsApp</span>
+                  </a>
+                </div>
+                <div className="flex flex-wrap justify-center gap-2">
+                  <TagsAnimate />
                 </div>
               </div>
             </div>
