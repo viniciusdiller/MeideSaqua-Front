@@ -25,14 +25,12 @@ import { useRouter } from "next/navigation";
 
 const { Text } = Typography;
 
-// URL da sua API backend
 const API_URL = process.env.NEXT_PUBLIC_API_URL;
 
 interface Estabelecimento {
   estabelecimentoId: number;
   nomeFantasia: string;
   cnpj: string;
-  // Adicione outros campos que você queira exibir
   [key: string]: any;
 }
 
@@ -54,6 +52,56 @@ const AdminDashboard: React.FC = () => {
     null
   );
   const router = useRouter();
+  const renderValue = (key: string, value: any, nomeFantasia: string) => {
+    if (key === "logoUrl" && typeof value === "string" && value) {
+      const imageUrl =
+        value.startsWith("http") || value.startsWith("https")
+          ? value
+          : `${API_URL}${value.startsWith("/") ? value : "/" + value}`;
+
+      return (
+        <img
+          src={imageUrl}
+          alt={`Logo de ${nomeFantasia}`}
+          style={{
+            maxWidth: "150px",
+            maxHeight: "150px",
+            objectFit: "contain",
+            border: "1px solid #eee",
+          }}
+        />
+      );
+    }
+
+    if (Array.isArray(value) && value.length > 0) {
+      const imagesUrls = value
+        .map((item) => (typeof item === "string" ? item : item?.url))
+        .filter(Boolean);
+
+      if (imagesUrls.length > 0) {
+        return (
+          <Row gutter={[8, 8]}>
+            {imagesUrls.map((imageUrl, index) => (
+              <Col key={index}>
+                <img
+                  src={imageUrl}
+                  alt={`Imagem de ${nomeFantasia} ${index + 1}`}
+                  style={{
+                    width: "80px",
+                    height: "80px",
+                    objectFit: "cover",
+                    border: "1px solid #eee",
+                  }}
+                />
+              </Col>
+            ))}
+          </Row>
+        );
+      }
+    }
+
+    return String(value);
+  };
 
   const fetchData = useCallback(async () => {
     setLoading(true);
@@ -218,12 +266,11 @@ const AdminDashboard: React.FC = () => {
           ]}
         >
           <Descriptions bordered column={1} size="small">
-            {/* Exibe todos os dados do MEI, incluindo os de atualização se existirem */}
             {Object.entries(selectedItem)
               .filter(([key]) => key !== "dados_atualizacao")
               .map(([key, value]) => (
                 <Descriptions.Item key={key} label={key}>
-                  {String(value)}
+                  {renderValue(key, value, selectedItem.nomeFantasia)}
                 </Descriptions.Item>
               ))}
             {selectedItem.dados_atualizacao &&
@@ -235,7 +282,8 @@ const AdminDashboard: React.FC = () => {
                   {Object.entries(selectedItem.dados_atualizacao).map(
                     ([key, value]) => (
                       <div key={key}>
-                        <Text strong>{key}:</Text> {String(value)}
+                        <Text strong>{key}:</Text>{" "}
+                        {renderValue(key, value, selectedItem.nomeFantasia)}
                       </div>
                     )
                   )}
