@@ -354,7 +354,7 @@ export default function MeiDetailPage({
                 </div>
               </div>
               <div className="flex items-center justify-center md:col-span-1">
-                <div className="max-w-48 mas-h-48 md:max-w-56 md:max-h-56 desktop:max-h-72 desktop:max-w-72 bg-white rounded-2xl flex items-center justify-center p-4">
+                <div className="max-w-48 mas-h-48 md:max-w-56 md:max-h-56 desktop:max-h-64 desktop:max-w-64 bg-white rounded-2xl flex items-center justify-center p-4">
                   <TiltImage
                     src={
                       (meiDetails.logoUrl &&
