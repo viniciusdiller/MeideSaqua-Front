@@ -27,10 +27,17 @@ const { Text } = Typography;
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL;
 
+interface ImagemProduto {
+  url: string;
+}
+
 interface Estabelecimento {
   estabelecimentoId: number;
   nomeFantasia: string;
   cnpj: string;
+  logoUrl?: string;
+  imagensProduto?: ImagemProduto[];
+  dados_atualizacao?: any;
   [key: string]: any;
 }
 
@@ -52,13 +59,56 @@ const AdminDashboard: React.FC = () => {
     null
   );
   const router = useRouter();
-  const renderValue = (key: string, value: any, nomeFantasia: string) => {
-    if (key === "logoUrl" && typeof value === "string" && value) {
-      const imageUrl =
-        value.startsWith("http") || value.startsWith("https")
-          ? value
-          : `${API_URL}${value.startsWith("/") ? value : "/" + value}`;
 
+  const getFullImageUrl = (path: string): string => {
+    if (!path) return "";
+    return path.startsWith("http") || path.startsWith("https")
+      ? path
+      : `${API_URL}${path.startsWith("/") ? path : "/" + path}`;
+  };
+
+  const renderValue = (
+    key: string,
+    value: any,
+    nomeFantasia: string
+  ): React.ReactNode => {
+    if (key === "produtosImg" && Array.isArray(value)) {
+      const imagesUrls = (value as ImagemProduto[])
+        .map((item) => getFullImageUrl(item.url))
+        .filter(Boolean);
+
+      if (imagesUrls.length > 0) {
+        return (
+          <Row gutter={[8, 8]}>
+            {imagesUrls.map((imageUrl, index) => (
+              <Col key={index}>
+                <img
+                  src={imageUrl}
+                  alt={`Imagem de Produto ${index + 1} de ${nomeFantasia}`}
+                  style={{
+                    width: "80px",
+                    height: "80px",
+                    objectFit: "cover",
+                    border: "1px solid #ddd",
+                  }}
+                  onError={(e) => {
+                    (e.target as HTMLImageElement).style.display = "none";
+                    (e.target as HTMLImageElement).insertAdjacentHTML(
+                      "afterend",
+                      '<span style="color: red; font-size: 10px;">Erro ao carregar Imagem.</span>'
+                    );
+                  }}
+                />
+              </Col>
+            ))}
+          </Row>
+        );
+      }
+      return <Text type="secondary">Nenhuma imagem de portfólio.</Text>;
+    }
+
+    if (key === "logoUrl" && typeof value === "string" && value) {
+      const imageUrl = getFullImageUrl(value);
       return (
         <img
           src={imageUrl}
@@ -69,37 +119,27 @@ const AdminDashboard: React.FC = () => {
             objectFit: "contain",
             border: "1px solid #eee",
           }}
+          onError={(e) => {
+            (e.target as HTMLImageElement).style.display = "none";
+            (e.target as HTMLImageElement).insertAdjacentHTML(
+              "afterend",
+              '<span style="color: red; font-size: 10px;">Erro ao carregar Logo.</span>'
+            );
+          }}
         />
       );
     }
 
-    if (Array.isArray(value) && value.length > 0) {
-      const imagesUrls = value
-        .map((item) => (typeof item === "string" ? item : item?.url))
-        .filter(Boolean);
-
-      if (imagesUrls.length > 0) {
-        return (
-          <Row gutter={[8, 8]}>
-            {imagesUrls.map((imageUrl, index) => (
-              <Col key={index}>
-                <img
-                  src={imageUrl}
-                  alt={`Imagem de ${nomeFantasia} ${index + 1}`}
-                  style={{
-                    width: "80px",
-                    height: "80px",
-                    objectFit: "cover",
-                    border: "1px solid #eee",
-                  }}
-                />
-              </Col>
-            ))}
-          </Row>
-        );
-      }
+    // Se o valor for um objeto e não for dados_atualizacao (que é tratado separadamente no JSX)
+    if (
+      typeof value === "object" &&
+      value !== null &&
+      key !== "dados_atualizacao"
+    ) {
+      return JSON.stringify(value);
     }
 
+    // --- Caso padrão ---
     return String(value);
   };
 
@@ -268,7 +308,20 @@ const AdminDashboard: React.FC = () => {
           <Descriptions bordered column={1} size="small">
             {Object.entries(selectedItem)
               .filter(([key]) => key !== "dados_atualizacao")
-              .map(([key, value]) => (
+              .map(([key, value]) => ({ key, value }))
+              .sort((a, b) => {
+                const getScore = (key: string): number => {
+                  if (key === "logoUrl") return 98;
+                  if (key === "produtosImg") return 99;
+                  return 0;
+                };
+
+                const scoreA = getScore(a.key);
+                const scoreB = getScore(b.key);
+
+                return scoreA - scoreB;
+              })
+              .map(({ key, value }) => (
                 <Descriptions.Item key={key} label={key}>
                   {renderValue(key, value, selectedItem.nomeFantasia)}
                 </Descriptions.Item>
