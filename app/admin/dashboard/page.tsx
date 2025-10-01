@@ -171,6 +171,7 @@ const AdminDashboard: React.FC = () => {
       }
 
       const pendingData = await response.json();
+      console.log(pendingData.atualizacoes);
       setData(pendingData);
     } catch (error: any) {
       message.error(error.message || "Erro ao carregar os dados.");

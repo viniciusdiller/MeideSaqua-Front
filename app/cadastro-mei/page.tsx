@@ -69,20 +69,39 @@ const api = {
   },
 
   atualizarEstabelecimento: async (data: any) => {
-    console.log("Enviando dados para atualização:", data);
-    return new Promise((resolve) =>
-      setTimeout(() => resolve({ success: true, ...data }), 1000)
+    const response = await fetch(
+      `${API_URL}/api/estabelecimentos/solicitar-atualizacao`,
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(data),
+      }
     );
+    if (!response.ok) {
+      const errorData = await response.json();
+      throw new Error(errorData.message || "Falha ao solicitar a atualização.");
+    }
+    return response.json();
   },
 
   excluirEstabelecimento: async (data: any) => {
-    console.log("Enviando dados para exclusão:", data);
-    return new Promise((resolve) =>
-      setTimeout(
-        () => resolve({ success: true, message: "Exclusão processada." }),
-        1000
-      )
+    const response = await fetch(
+      `${API_URL}/api/estabelecimentos/solicitar-exclusao`,
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ cnpj: data.cnpj }), // A rota espera um objeto com a chave cnpj
+      }
     );
+    if (!response.ok) {
+      const errorData = await response.json();
+      throw new Error(errorData.message || "Falha ao solicitar a exclusão.");
+    }
+    return response.json();
   },
 };
 
