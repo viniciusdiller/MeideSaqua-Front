@@ -83,7 +83,7 @@ const api = {
     return response.json();
   },
 
-  excluirEstabelecimento: async (data: { cnpj: string }) => {
+  excluirEstabelecimento: async (data: { cnpj: string; motivo?: string }) => {
     const response = await fetch(
       `${API_URL}/api/estabelecimentos/solicitar-exclusao`,
       {
@@ -320,6 +320,7 @@ const CadastroMEIPage: React.FC = () => {
   const [loading, setLoading] = useState(false);
   const [logoFileList, setLogoFileList] = useState<UploadFile[]>([]);
   const [portfolioFileList, setPortfolioFileList] = useState<UploadFile[]>([]);
+  const [ccmeiFileList, setCcmeiFileList] = useState<UploadFile[]>([]); // NOVO ESTADO: CCMEI File List
   const [flowStep, setFlowStep] = useState<FlowStep>("initial");
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
   const [submittedMessage, setSubmittedMessage] = useState({
@@ -331,6 +332,9 @@ const CadastroMEIPage: React.FC = () => {
     setLogoFileList(fileList);
   const handlePortfolioChange = ({ fileList }: { fileList: UploadFile[] }) =>
     setPortfolioFileList(fileList);
+  const handleCCMEIChange = (
+    { fileList }: { fileList: UploadFile[] } // NOVO HANDLER
+  ) => setCcmeiFileList(fileList);
 
   const handleMaskChange = (
     e: React.ChangeEvent<HTMLInputElement>,
@@ -344,6 +348,7 @@ const CadastroMEIPage: React.FC = () => {
     form.resetFields();
     setLogoFileList([]);
     setPortfolioFileList([]);
+    setCcmeiFileList([]); // RESET DO CCMEI
     setFlowStep("initial");
   };
 
@@ -354,7 +359,8 @@ const CadastroMEIPage: React.FC = () => {
 
       // Adiciona todos os campos de texto ao formData
       Object.entries(values).forEach(([key, value]) => {
-        if (value) {
+        // Ignora o campo de validação de arquivo
+        if (value && key !== "ccmeiFile") {
           if (
             (key === "areasAtuacao" || key === "tagsInvisiveis") &&
             Array.isArray(value)
@@ -365,6 +371,11 @@ const CadastroMEIPage: React.FC = () => {
           }
         }
       });
+
+      // Adiciona o CCMEI (se existir)
+      if (ccmeiFileList.length > 0 && ccmeiFileList[0].originFileObj) {
+        formData.append("ccmei", ccmeiFileList[0].originFileObj);
+      }
 
       // Adiciona a LOGO (se existir)
       if (logoFileList.length > 0 && logoFileList[0].originFileObj) {
@@ -405,6 +416,8 @@ const CadastroMEIPage: React.FC = () => {
         if (value) {
           if (key === "locais" && Array.isArray(value)) {
             formData.append("areasAtuacao", value.join(", "));
+          } else if (key === "tagsInvisiveis" && Array.isArray(value)) {
+            formData.append(key, value.join(", "));
           } else {
             formData.append(key, value as string);
           }
@@ -437,7 +450,14 @@ const CadastroMEIPage: React.FC = () => {
   const handleDeleteSubmit = async (values: any) => {
     setLoading(true);
     try {
-      await api.excluirEstabelecimento(values);
+      const dataToSend: { cnpj: string; motivo?: string } = {
+        cnpj: values.cnpj,
+      };
+      if (values.motivo) {
+        dataToSend.motivo = values.motivo;
+      }
+
+      await api.excluirEstabelecimento(dataToSend);
       setSubmittedMessage({
         title: "Solicitação de exclusão recebida!",
         subTitle:
@@ -520,45 +540,25 @@ const CadastroMEIPage: React.FC = () => {
       onFinish={handleRegisterSubmit}
       autoComplete="off"
     >
+      {/* --------------------- Informações do Responsável --------------------- */}
       <section className="mb-8 border-t pt-4">
-        {commonTitle("Informações do Negócio e Responsável")}
+        {commonTitle("Informações do Responsável")}
         <Row gutter={24}>
           <Col xs={24} md={12}>
             <Form.Item
-              name="nomeFantasia"
-              label="Nome Fantasia"
+              name="nomeResponsavel"
+              label="Nome Completo do Responsável"
               rules={[
-                { required: true, message: "Insira o nome do seu negócio!" },
+                { required: true, message: "Insira o nome do responsável!" },
               ]}
             >
-              <Input placeholder="Ex: Salão da Maria" />
+              <Input placeholder="Ex: João da Silva" />
             </Form.Item>
           </Col>
-          <Col xs={24} md={12}>
-            <Form.Item
-              name="cnae"
-              label="CNAE (Atividade Principal)"
-              rules={[
-                { required: true, message: "O CNAE é obrigatório!" },
-                {
-                  pattern: /^\d{4}-\d\/\d{2}$/,
-                  message: "CNAE incompleto ou inválido!",
-                },
-              ]}
-            >
-              <Input
-                placeholder="0000-0/00"
-                name="cnae"
-                onChange={(e) => handleMaskChange(e, maskCNAE)}
-              />
-            </Form.Item>
-          </Col>
-        </Row>
-        <Row gutter={24}>
           <Col xs={24} md={12}>
             <Form.Item
               name="cpf"
-              label="CPF"
+              label="CPF do Responsável"
               rules={[
                 { required: true, message: "O CPF é obrigatório!" },
                 {
@@ -572,6 +572,37 @@ const CadastroMEIPage: React.FC = () => {
                 name="cpf"
                 onChange={(e) => handleMaskChange(e, maskCPF)}
               />
+            </Form.Item>
+          </Col>
+        </Row>
+        <Form.Item
+          name="emailEstabelecimento"
+          label="E-mail de Contato Principal"
+          rules={[
+            { required: true, message: "O e-mail é obrigatório!" },
+            {
+              pattern: /^[^\s@]+@[^\s@]+\.[^\s@]+$/,
+              message: "Formato de e-mail inválido!",
+            },
+          ]}
+        >
+          <Input placeholder="contato@email.com" />
+        </Form.Item>
+      </section>
+
+      {/* --------------------- Informações do Negócio --------------------- */}
+      <section className="mb-8 border-t pt-4">
+        {commonTitle("Informações do Negócio")}
+        <Row gutter={24}>
+          <Col xs={24} md={12}>
+            <Form.Item
+              name="nomeFantasia"
+              label="Nome Fantasia"
+              rules={[
+                { required: true, message: "Insira o nome do seu negócio!" },
+              ]}
+            >
+              <Input placeholder="Ex: Salão da Maria" />
             </Form.Item>
           </Col>
           <Col xs={24} md={12}>
@@ -594,23 +625,62 @@ const CadastroMEIPage: React.FC = () => {
             </Form.Item>
           </Col>
         </Row>
-        <Form.Item
-          name="categoria"
-          label="Categoria"
-          rules={[{ required: true, message: "Selecione uma categoria!" }]}
-        >
-          <Select
-            placeholder="Selecione a categoria principal"
-            onSelect={(value: string) => setSelectedCategory(value)}
-            onChange={() => form.setFieldsValue({ tagsInvisiveis: [] })}
-          >
-            {categorias.map((cat) => (
-              <Option key={cat} value={cat}>
-                {cat}
-              </Option>
-            ))}
-          </Select>
-        </Form.Item>
+        <Row gutter={24}>
+          <Col xs={24} md={12}>
+            <Form.Item
+              name="categoria"
+              label="Categoria Principal"
+              rules={[{ required: true, message: "Selecione uma categoria!" }]}
+            >
+              <Select
+                placeholder="Selecione a categoria principal"
+                onSelect={(value: string) => setSelectedCategory(value)}
+                onChange={() => form.setFieldsValue({ tagsInvisiveis: [] })}
+              >
+                {categorias.map((cat) => (
+                  <Option key={cat} value={cat}>
+                    {cat}
+                  </Option>
+                ))}
+              </Select>
+            </Form.Item>
+          </Col>
+          <Col xs={24} md={12}>
+            <Form.Item
+              name="ccmeiFile" // CAMPO CCMEI
+              label="Certificado CCMEI"
+              rules={[
+                {
+                  required: true,
+                  message: "O Certificado CCMEI é obrigatório!",
+                },
+                // Regra para verificar se há um arquivo carregado
+                () => ({
+                  validator(_, value) {
+                    if (ccmeiFileList.length > 0) {
+                      return Promise.resolve();
+                    }
+                    return Promise.reject(
+                      new Error("Envie o Certificado CCMEI (PDF ou Imagem)!")
+                    );
+                  },
+                }),
+              ]}
+              help="Anexe o Certificado de Condição de Microempreendedor Individual (PDF ou Imagem)."
+            >
+              <Upload
+                customRequest={customUploadAction}
+                fileList={ccmeiFileList}
+                onChange={handleCCMEIChange}
+                listType="text"
+                maxCount={1}
+                accept=".pdf,.jpg,.jpeg,.png"
+              >
+                <Button icon={<UploadOutlined />}>Carregar Arquivo</Button>
+              </Upload>
+            </Form.Item>
+          </Col>
+        </Row>
         {selectedCategory ? (
           <Form.Item
             name="tagsInvisiveis"
@@ -645,46 +715,45 @@ const CadastroMEIPage: React.FC = () => {
             as Tags sugeridas.*
           </p>
         )}
-        <Row gutter={24}></Row>
+        <Form.Item
+          name="cnae"
+          label="CNAE (Atividade Principal)"
+          rules={[
+            { required: true, message: "O CNAE é obrigatório!" },
+            {
+              pattern: /^\d{4}-\d\/\d{2}$/,
+              message: "CNAE incompleto ou inválido!",
+            },
+          ]}
+        >
+          <Input
+            placeholder="0000-0/00"
+            name="cnae"
+            onChange={(e) => handleMaskChange(e, maskCNAE)}
+          />
+        </Form.Item>
       </section>
+
+      {/* --------------------- Contato e Localização --------------------- */}
       <section className="mb-8 border-t pt-4">
         {commonTitle("Contato e Localização")}
-        <Row gutter={24}>
-          <Col xs={24} md={12}>
-            <Form.Item
-              name="contatoEstabelecimento"
-              label="Telefone / WhatsApp"
-              rules={[
-                { required: true, message: "Insira um contato!" },
-                {
-                  pattern: /^\(\d{2}\) \d{5}-\d{4}$/,
-                  message: "Telefone incompleto ou inválido!",
-                },
-              ]}
-            >
-              <Input
-                placeholder="(22) 99999-9999"
-                name="contatoEstabelecimento"
-                onChange={(e) => handleMaskChange(e, maskPhone)}
-              />
-            </Form.Item>
-          </Col>
-          <Col xs={24} md={12}>
-            <Form.Item
-              name="emailEstabelecimento"
-              label="E-mail de Contato"
-              rules={[
-                { required: true, message: "O e-mail é obrigatório!" },
-                {
-                  pattern: /^[^\s@]+@[^\s@]+\.[^\s@]+$/,
-                  message: "Formato de e-mail inválido!",
-                },
-              ]}
-            >
-              <Input placeholder="contato@email.com" />
-            </Form.Item>
-          </Col>
-        </Row>
+        <Form.Item
+          name="contatoEstabelecimento"
+          label="Telefone / WhatsApp do Estabelecimento"
+          rules={[
+            { required: true, message: "Insira um contato!" },
+            {
+              pattern: /^\(\d{2}\) \d{5}-\d{4}$/,
+              message: "Telefone incompleto ou inválido!",
+            },
+          ]}
+        >
+          <Input
+            placeholder="(22) 99999-9999"
+            name="contatoEstabelecimento"
+            onChange={(e) => handleMaskChange(e, maskPhone)}
+          />
+        </Form.Item>
         <Form.Item name="endereco" label="Endereço Físico (se houver)">
           <Input placeholder="Rua, Bairro, Nº" />
         </Form.Item>
@@ -708,6 +777,8 @@ const CadastroMEIPage: React.FC = () => {
           </Select>
         </Form.Item>
       </section>
+
+      {/* --------------------- Detalhes e Mídia --------------------- */}
       <section className="mb-8 border-t pt-5">
         {commonTitle("Detalhes e Mídia")}
         <Form.Item
@@ -893,12 +964,11 @@ const CadastroMEIPage: React.FC = () => {
           ]}
         >
           <Select
-            mode="multiple" // Alterado para 'multiple'
+            mode="multiple"
             allowClear
             placeholder="Selecione as tags"
             maxTagCount={5}
           >
-            {/* Como a categoria anterior não está em estado, listamos todas as tags populares */}
             {Object.values(tagsPorCategoria)
               .flat()
               .map((tag) => (
