@@ -69,10 +69,13 @@ const api = {
   },
 
   atualizarEstabelecimento: async (formData: FormData) => {
-    const response = await fetch(`${API_URL}/api/estabelecimentos/solicitar-atualizacao`, {
-      method: "PUT", 
-      body: formData,
-    });
+    const response = await fetch(
+      `${API_URL}/api/estabelecimentos/solicitar-atualizacao`,
+      {
+        method: "PUT",
+        body: formData,
+      }
+    );
     if (!response.ok) {
       const errorData = await response.json();
       throw new Error(errorData.message || "Falha ao enviar atualização.");
@@ -81,13 +84,16 @@ const api = {
   },
 
   excluirEstabelecimento: async (data: { cnpj: string }) => {
-    const response = await fetch(`${API_URL}/api/estabelecimentos/solicitar-exclusao`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(data),
-    });
+    const response = await fetch(
+      `${API_URL}/api/estabelecimentos/solicitar-exclusao`,
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(data),
+      }
+    );
     if (!response.ok) {
       const errorData = await response.json();
       throw new Error(errorData.message || "Falha ao solicitar exclusão.");
@@ -157,7 +163,6 @@ const categorias = [
   "Turismo, Cultura e Lazer",
   "Produtores Rurais e Atividades Agrícolas",
 ];
-
 
 const tagsPorCategoria: { [key: string]: string[] } = {
   "Artesanato e Criação Manual": [
@@ -391,7 +396,7 @@ const CadastroMEIPage: React.FC = () => {
     }
   };
 
- const handleUpdateSubmit = async (values: any) => {
+  const handleUpdateSubmit = async (values: any) => {
     setLoading(true);
     try {
       const formData = new FormData();
@@ -411,7 +416,7 @@ const CadastroMEIPage: React.FC = () => {
           formData.append("produtos", file.originFileObj);
         }
       });
-      
+
       await api.atualizarEstabelecimento(formData);
 
       setSubmittedMessage({
@@ -594,7 +599,7 @@ const CadastroMEIPage: React.FC = () => {
           label="Categoria"
           rules={[{ required: true, message: "Selecione uma categoria!" }]}
         >
-           <Select
+          <Select
             placeholder="Selecione a categoria principal"
             onSelect={(value: string) => setSelectedCategory(value)}
             onChange={() => form.setFieldsValue({ tagsInvisiveis: [] })}
@@ -606,7 +611,7 @@ const CadastroMEIPage: React.FC = () => {
             ))}
           </Select>
         </Form.Item>
-         {selectedCategory ? (
+        {selectedCategory ? (
           <Form.Item
             name="tagsInvisiveis"
             label={`Tags de Busca Sugeridas (${selectedCategory})`}
@@ -717,7 +722,7 @@ const CadastroMEIPage: React.FC = () => {
         >
           <TextArea
             rows={4}
-            placeholder="Fale um pouco sobre o que você faz..."
+            placeholder="Fale um pouco sobre o que você faz, quais produtos você vende ou tipo de serviço que realiza."
           />
         </Form.Item>
         <Form.Item
@@ -730,7 +735,10 @@ const CadastroMEIPage: React.FC = () => {
             },
           ]}
         >
-          <TextArea rows={2} placeholder="Ex: Atendimento a domicílio, etc." />
+          <TextArea
+            rows={2}
+            placeholder="Descreva brevemente qual é o atrativo do seu produto ou serviço."
+          />
         </Form.Item>
         <Row gutter={24}>
           <Col xs={24} md={12}>
@@ -871,7 +879,7 @@ const CadastroMEIPage: React.FC = () => {
         <Form.Item name="descricao" label="Nova Descrição do Serviço/Produto">
           <TextArea rows={4} />
         </Form.Item>
-         <Form.Item
+        <Form.Item
           name="tagsInvisiveis"
           label="Novas Tags de Busca (Até 5)"
           help="Selecione até 5 tags. As novas tags substituirão as atuais."

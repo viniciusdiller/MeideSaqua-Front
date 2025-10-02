@@ -3,7 +3,7 @@ import Link from "next/link";
 
 export default function SobrePage() {
   return (
-    <div className="min-h-screen bg-slate-50 py-20 px-6 sm:px-12">
+    <div className="min-h-screen bg-gradient-to-br from-blue-300 to-blue-800  py-20 px-6 sm:px-12">
       <div className="max-w-5xl mx-auto bg-white rounded-3xl shadow-lg p-10 sm:p-16">
         <h1
           className=" text-4xl font-extrabold mb-10 inline-block pb-2

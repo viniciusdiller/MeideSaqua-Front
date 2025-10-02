@@ -8,22 +8,6 @@ const Footer = () => {
     <footer className="bg-gray-100 border-t border-gray-200 w-full">
       <div className="container mx-auto px-6 py-12">
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-10 text-center md:text-left">
-          <div className=" text-center">
-            <Link href="/" className="inline-block mb-4">
-              <Image
-                src="/LogoExploraMonocromática.png"
-                alt="Logo MeideSaqua"
-                width={160}
-                height={57}
-                className="h-14 w-auto mx-auto md:mx-auto "
-              />
-            </Link>
-            <p className="text-gray-600 max-w-xs mx-auto ">
-              A vitrine digital que valoriza o empreendedor local e fortalece a
-              economia de Saquarema.
-            </p>
-          </div>
-
           <div className="text-center">
             <h3 className="font-bold uppercase text-gray-800 mb-4">
               Links Úteis
@@ -54,6 +38,21 @@ const Footer = () => {
                 </Link>
               </li>
             </ul>
+          </div>
+          <div className=" text-center">
+            <Link href="/" className="inline-block mb-4">
+              <Image
+                src="/LogoExploraMonocromática.png"
+                alt="Logo MeideSaqua"
+                width={160}
+                height={57}
+                className="h-14 w-auto mx-auto md:mx-auto "
+              />
+            </Link>
+            <p className="text-gray-600 max-w-xs mx-auto ">
+              A vitrine digital que valoriza o empreendedor local e fortalece a
+              economia de Saquarema.
+            </p>
           </div>
 
           <div className="text-center">
