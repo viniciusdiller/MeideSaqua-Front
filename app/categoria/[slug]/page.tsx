@@ -47,12 +47,21 @@ export default function CategoryPage({ params }: PageProps) {
 
   const category = categories.find((cat) => cat.id === params.slug);
 
-  const filteredLocations = locations.filter(
-    (location) =>
+  const filteredLocations = locations.filter((location) => {
+    const normalizedSearchTerm = searchTerm.toLowerCase();
+
+    const matchesName =
       location.nomeFantasia &&
       typeof location.nomeFantasia === "string" &&
-      location.nomeFantasia.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+      location.nomeFantasia.toLowerCase().includes(normalizedSearchTerm);
+
+    const tagsString = location.tagsInvisiveis || "";
+    const matchesTags =
+      typeof tagsString === "string" &&
+      tagsString.toLowerCase().includes(normalizedSearchTerm);
+
+    return matchesName || matchesTags;
+  });
 
   if (!category) {
     return (

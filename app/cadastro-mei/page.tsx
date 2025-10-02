@@ -68,21 +68,31 @@ const api = {
     return response.json();
   },
 
-  atualizarEstabelecimento: async (data: any) => {
-    console.log("Enviando dados para atualização:", data);
-    return new Promise((resolve) =>
-      setTimeout(() => resolve({ success: true, ...data }), 1000)
-    );
+  atualizarEstabelecimento: async (formData: FormData) => {
+    const response = await fetch(`${API_URL}/api/estabelecimentos/solicitar-atualizacao`, {
+      method: "PUT", 
+      body: formData,
+    });
+    if (!response.ok) {
+      const errorData = await response.json();
+      throw new Error(errorData.message || "Falha ao enviar atualização.");
+    }
+    return response.json();
   },
 
-  excluirEstabelecimento: async (data: any) => {
-    console.log("Enviando dados para exclusão:", data);
-    return new Promise((resolve) =>
-      setTimeout(
-        () => resolve({ success: true, message: "Exclusão processada." }),
-        1000
-      )
-    );
+  excluirEstabelecimento: async (data: { cnpj: string }) => {
+    const response = await fetch(`${API_URL}/api/estabelecimentos/solicitar-exclusao`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(data),
+    });
+    if (!response.ok) {
+      const errorData = await response.json();
+      throw new Error(errorData.message || "Falha ao solicitar exclusão.");
+    }
+    return response.json();
   },
 };
 
@@ -147,6 +157,154 @@ const categorias = [
   "Turismo, Cultura e Lazer",
   "Produtores Rurais e Atividades Agrícolas",
 ];
+
+
+const tagsPorCategoria: { [key: string]: string[] } = {
+  "Artesanato e Criação Manual": [
+    "Feito a Mão",
+    "Peça Única",
+    "Decoração",
+    "Personalizado",
+    "Presentes",
+    "Crochê",
+    "Biju",
+    "Cerâmica",
+    "Madeira",
+    "Sustentável",
+  ],
+  "Beleza, Moda e Estética": [
+    "Manicure",
+    "Cabelo",
+    "Maquiagem",
+    "Roupas",
+    "Acessórios",
+    "Depilação",
+    "Massagem",
+    "Estética Facial",
+    "Sobrancelha",
+    "Cosméticos Naturais",
+  ],
+  "Comércio Local e Vendas": [
+    "Entrega Rápida",
+    "Loja Online",
+    "Revendedor",
+    "Produtos Importados",
+    "Eletrônicos",
+    "Materiais",
+    "Varejo",
+    "Atacado",
+    "Promoção",
+    "Frete Grátis",
+  ],
+  "Construção, Reforma e Manutenção": [
+    "Eletricista",
+    "Encanador",
+    "Pintor",
+    "Pedreiro",
+    "Jardinagem",
+    "Montador de Móveis",
+    "Reparos",
+    "Orçamento Grátis",
+    "Piso",
+    "Reforma de Casa",
+  ],
+  "Festas e Eventos": [
+    "Decoração",
+    "Buffet",
+    "Fotografia",
+    "Aniversário",
+    "Casamento",
+    "Música ao Vivo",
+    "Aluguel de Mesas",
+    "Recreação Infantil",
+    "Eventos Corporativos",
+    "Churrasco",
+  ],
+  "Gastronomia e Alimentação": [
+    "Bolo",
+    "Doces",
+    "Comida Caseira",
+    "Marmitex",
+    "Delivery",
+    "Salgados",
+    "Vegetariano",
+    "Vegano",
+    "Cerveja Artesanal",
+    "Petiscos",
+  ],
+  "Saúde, Bem-estar e Fitness": [
+    "Personal Trainer",
+    "Yoga",
+    "Nutricionista",
+    "Psicólogo",
+    "Fisioterapia",
+    "Medicina Natural",
+    "Acupuntura",
+    "Suplementos",
+    "Aulas Online",
+    "Espaço Zen",
+  ],
+  "Serviços Administrativos e Apoio": [
+    "Contabilidade",
+    "Consultoria",
+    "Secretariado",
+    "Digitalização",
+    "Tradução",
+    "Assessoria",
+    "Finanças",
+    "Currículo",
+    "Escrita",
+    "Organização",
+  ],
+  "Serviços Automotivos e Reparos": [
+    "Mecânica",
+    "Elétrica",
+    "Borracharia",
+    "Lava Jato",
+    "Funilaria",
+    "Guincho",
+    "Revisão",
+    "Pneu",
+    "Motores",
+    "Acessórios Automotivos",
+  ],
+  "Tecnologia e Serviços Digitais": [
+    "Web Design",
+    "Marketing Digital",
+    "Redes Sociais",
+    "Programação",
+    "Manutenção PC",
+    "Hospedagem",
+    "Apps",
+    "Consultoria TI",
+    "SEO",
+    "Criação de Vídeos",
+  ],
+  "Turismo, Cultura e Lazer": [
+    "Guia Turístico",
+    "Passeios",
+    "Praia",
+    "Hospedagem",
+    "Aluguel de Bike",
+    "Artesanato Local",
+    "Aulas de Surf",
+    "Trilhas",
+    "Pousada",
+    "Viagens",
+  ],
+  "Produtores Rurais e Atividades Agrícolas": [
+    "Produtos Orgânicos",
+    "Horta",
+    "Feira Livre",
+    "Frutas",
+    "Vegetais",
+    "Mel",
+    "Gado",
+    "Plantas Ornamentais",
+    "Leite Fresco",
+    "Ovos Caipiras",
+  ],
+};
 const { Option } = Select;
 const { TextArea } = Input;
 
@@ -158,6 +316,7 @@ const CadastroMEIPage: React.FC = () => {
   const [logoFileList, setLogoFileList] = useState<UploadFile[]>([]);
   const [portfolioFileList, setPortfolioFileList] = useState<UploadFile[]>([]);
   const [flowStep, setFlowStep] = useState<FlowStep>("initial");
+  const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
   const [submittedMessage, setSubmittedMessage] = useState({
     title: "",
     subTitle: "",
@@ -191,7 +350,10 @@ const CadastroMEIPage: React.FC = () => {
       // Adiciona todos os campos de texto ao formData
       Object.entries(values).forEach(([key, value]) => {
         if (value) {
-          if (key === "areasAtuacao" && Array.isArray(value)) {
+          if (
+            (key === "areasAtuacao" || key === "tagsInvisiveis") &&
+            Array.isArray(value)
+          ) {
             formData.append(key, value.join(", "));
           } else {
             formData.append(key, value as string);
@@ -229,10 +391,29 @@ const CadastroMEIPage: React.FC = () => {
     }
   };
 
-  const handleUpdateSubmit = async (values: any) => {
+ const handleUpdateSubmit = async (values: any) => {
     setLoading(true);
     try {
-      await api.atualizarEstabelecimento(values);
+      const formData = new FormData();
+
+      Object.entries(values).forEach(([key, value]) => {
+        if (value) {
+          if (key === "locais" && Array.isArray(value)) {
+            formData.append("areasAtuacao", value.join(", "));
+          } else {
+            formData.append(key, value as string);
+          }
+        }
+      });
+
+      portfolioFileList.forEach((file) => {
+        if (file.originFileObj) {
+          formData.append("produtos", file.originFileObj);
+        }
+      });
+      
+      await api.atualizarEstabelecimento(formData);
+
       setSubmittedMessage({
         title: "Atualização enviada com sucesso!",
         subTitle:
@@ -413,7 +594,11 @@ const CadastroMEIPage: React.FC = () => {
           label="Categoria"
           rules={[{ required: true, message: "Selecione uma categoria!" }]}
         >
-          <Select placeholder="Selecione a categoria principal">
+           <Select
+            placeholder="Selecione a categoria principal"
+            onSelect={(value: string) => setSelectedCategory(value)}
+            onChange={() => form.setFieldsValue({ tagsInvisiveis: [] })}
+          >
             {categorias.map((cat) => (
               <Option key={cat} value={cat}>
                 {cat}
@@ -421,6 +606,41 @@ const CadastroMEIPage: React.FC = () => {
             ))}
           </Select>
         </Form.Item>
+         {selectedCategory ? (
+          <Form.Item
+            name="tagsInvisiveis"
+            label={`Tags de Busca Sugeridas (${selectedCategory})`}
+            help="Selecione no máximo 5 tags para facilitar a busca do seu negócio."
+            rules={[
+              { required: true, message: "Selecione pelo menos uma tag!" },
+              {
+                validator: (_, value) =>
+                  value && value.length > 5
+                    ? Promise.reject(new Error("Selecione no máximo 5 tags!"))
+                    : Promise.resolve(),
+              },
+            ]}
+          >
+            <Select
+              mode="multiple"
+              allowClear
+              placeholder="Selecione até 5 tags"
+              maxTagCount={5}
+            >
+              {tagsPorCategoria[selectedCategory]?.map((tag) => (
+                <Option key={tag} value={tag}>
+                  {tag}
+                </Option>
+              ))}
+            </Select>
+          </Form.Item>
+        ) : (
+          <p className="text-gray-600 mb-6 mt-2">
+            *Selecione uma Categoria na seção "Informações do Negócio" para ver
+            as Tags sugeridas.*
+          </p>
+        )}
+        <Row gutter={24}></Row>
       </section>
       <section className="mb-8 border-t pt-4">
         {commonTitle("Contato e Localização")}
@@ -651,9 +871,38 @@ const CadastroMEIPage: React.FC = () => {
         <Form.Item name="descricao" label="Nova Descrição do Serviço/Produto">
           <TextArea rows={4} />
         </Form.Item>
+         <Form.Item
+          name="tagsInvisiveis"
+          label="Novas Tags de Busca (Até 5)"
+          help="Selecione até 5 tags. As novas tags substituirão as atuais."
+          rules={[
+            {
+              validator: (_, value) =>
+                value && value.length > 5
+                  ? Promise.reject(new Error("Selecione no máximo 5 tags!"))
+                  : Promise.resolve(),
+            },
+          ]}
+        >
+          <Select
+            mode="multiple" // Alterado para 'multiple'
+            allowClear
+            placeholder="Selecione as tags"
+            maxTagCount={5}
+          >
+            {/* Como a categoria anterior não está em estado, listamos todas as tags populares */}
+            {Object.values(tagsPorCategoria)
+              .flat()
+              .map((tag) => (
+                <Option key={tag} value={tag}>
+                  {tag}
+                </Option>
+              ))}
+          </Select>
+        </Form.Item>
         <Form.Item
           name="portfolio"
-          label="Novas Fotos do Portfólio (até 5)"
+          label="Novas Fotos do Portfólio (até 4)"
           help="As imagens enviadas aqui irão substituir as atuais."
         >
           <Upload
@@ -662,7 +911,7 @@ const CadastroMEIPage: React.FC = () => {
             onChange={handlePortfolioChange}
             listType="picture"
             multiple
-            maxCount={5}
+            maxCount={4}
           >
             <Button icon={<UploadOutlined />}>Carregar Novas Imagens</Button>
           </Upload>
