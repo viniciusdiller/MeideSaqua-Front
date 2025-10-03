@@ -356,9 +356,7 @@ const CadastroMEIPage: React.FC = () => {
     try {
       const formData = new FormData();
 
-      // Adiciona todos os campos de texto ao formData
       Object.entries(values).forEach(([key, value]) => {
-        // Ignora o campo de validação de arquivo
         if (value && key !== "ccmeiFile") {
           if (
             (key === "areasAtuacao" || key === "tagsInvisiveis") &&
@@ -371,24 +369,20 @@ const CadastroMEIPage: React.FC = () => {
         }
       });
 
-      // Adiciona o CCMEI (se existir)
       if (ccmeiFileList.length > 0 && ccmeiFileList[0].originFileObj) {
         formData.append("ccmei", ccmeiFileList[0].originFileObj);
       }
 
-      // Adiciona a LOGO (se existir)
       if (logoFileList.length > 0 && logoFileList[0].originFileObj) {
         formData.append("logo", logoFileList[0].originFileObj);
       }
 
-      // Adiciona as imagens do PORTFÓLIO (se existirem)
       portfolioFileList.forEach((file) => {
         if (file.originFileObj) {
           formData.append("produtos", file.originFileObj);
         }
       });
 
-      // Envia o FormData para a API
       await api.cadastrarEstabelecimento(formData);
 
       setSubmittedMessage({
@@ -411,18 +405,16 @@ const CadastroMEIPage: React.FC = () => {
     try {
       const formData = new FormData();
 
-      // ADICIONADO: Lista dos campos de identificação obrigatórios para o backend.
+      // CORREÇÃO: Campos de identificação com snake_case
       const identificationFields = [
-        "nomeResponsavel",
-        "cpf",
+        "nome_responsavel",
+        "cpf_responsavel",
         "emailEstabelecimento",
         "cnpj",
       ];
 
       Object.entries(values).forEach(([key, value]) => {
-        // MUDANÇA NA CONDIÇÃO: Inclui campo se tiver valor OU se for um campo de identificação.
         if (value || identificationFields.includes(key)) {
-          // Ignora o campo de validação de arquivo
           if (key === "ccmeiFile") return;
 
           if (key === "locais" && Array.isArray(value)) {
@@ -430,23 +422,19 @@ const CadastroMEIPage: React.FC = () => {
           } else if (key === "tagsInvisiveis" && Array.isArray(value)) {
             formData.append(key, value.join(", "));
           } else {
-            // Garante que o campo de identificação (mesmo sem alteração) seja enviado
             formData.append(key, value as string);
           }
         }
       });
 
-      // NOVO: Adiciona CCMEI (obrigatório para identificação na atualização, se for carregado)
       if (ccmeiFileList.length > 0 && ccmeiFileList[0].originFileObj) {
         formData.append("ccmei", ccmeiFileList[0].originFileObj);
       }
 
-      // NOVO: Adiciona LOGO (opcional na atualização)
       if (logoFileList.length > 0 && logoFileList[0].originFileObj) {
         formData.append("logo", logoFileList[0].originFileObj);
       }
 
-      // Adiciona as imagens do PORTFÓLIO
       portfolioFileList.forEach((file) => {
         if (file.originFileObj) {
           formData.append("produtos", file.originFileObj);
@@ -473,16 +461,17 @@ const CadastroMEIPage: React.FC = () => {
   const handleDeleteSubmit = async (values: any) => {
     setLoading(true);
     try {
+      // CORREÇÃO: Campos do objeto com snake_case
       const dataToSend: {
         cnpj: string;
         motivo?: string;
-        nomeResponsavel: string;
-        cpf: string;
+        nome_responsavel: string;
+        cpf_responsavel: string;
         emailEstabelecimento: string;
       } = {
         cnpj: values.cnpj,
-        nomeResponsavel: values.nomeResponsavel,
-        cpf: values.cpf,
+        nome_responsavel: values.nome_responsavel,
+        cpf_responsavel: values.cpf_responsavel,
         emailEstabelecimento: values.emailEstabelecimento,
       };
       if (values.motivo) {
@@ -507,7 +496,6 @@ const CadastroMEIPage: React.FC = () => {
 
   const customUploadAction = async (options: any) => {
     const { onSuccess, onError, file } = options;
-    // Simula upload para o Ant Design
     setTimeout(() => {
       try {
         onSuccess(file);
@@ -527,7 +515,6 @@ const CadastroMEIPage: React.FC = () => {
     </h2>
   );
 
-  //PÁGINA INICIAL
   const renderInitialChoice = () => (
     <>
       <h1 className="text-4xl font-extrabold mb-6 inline-block pb-2 bg-gradient-to-r from-[#017DB9] to-[#22c362] bg-no-repeat [background-position:0_100%] [background-size:100%_4px]">
@@ -564,7 +551,6 @@ const CadastroMEIPage: React.FC = () => {
     </>
   );
 
-  //PÁGINA DE FORMULÁRIO DE CADASTRO
   const renderRegisterForm = () => (
     <Form
       form={form}
@@ -572,13 +558,13 @@ const CadastroMEIPage: React.FC = () => {
       onFinish={handleRegisterSubmit}
       autoComplete="off"
     >
-      {/* --------------------- Informações do Responsável --------------------- */}
       <section className="mb-8 border-t pt-4">
         {commonTitle("Informações do Responsável")}
         <Row gutter={24}>
           <Col xs={24} md={12}>
+            {/* CORREÇÃO: name="nome_responsavel" */}
             <Form.Item
-              name="nomeResponsavel"
+              name="nome_responsavel"
               label="Nome Completo do Responsável"
               rules={[
                 { required: true, message: "Insira o nome do responsável!" },
@@ -588,8 +574,9 @@ const CadastroMEIPage: React.FC = () => {
             </Form.Item>
           </Col>
           <Col xs={24} md={12}>
+            {/* CORREÇÃO: name="cpf_responsavel" */}
             <Form.Item
-              name="cpf"
+              name="cpf_responsavel"
               label="CPF do Responsável"
               rules={[
                 { required: true, message: "O CPF é obrigatório!" },
@@ -601,7 +588,7 @@ const CadastroMEIPage: React.FC = () => {
             >
               <Input
                 placeholder="000.000.000-00"
-                name="cpf"
+                name="cpf_responsavel"
                 onChange={(e) => handleMaskChange(e, maskCPF)}
               />
             </Form.Item>
@@ -621,6 +608,9 @@ const CadastroMEIPage: React.FC = () => {
           <Input placeholder="contato@email.com" />
         </Form.Item>
       </section>
+
+      {/* O RESTANTE DO FORMULÁRIO CONTINUA IGUAL */}
+      {/* ... (seções Informações do Negócio, Contato e Localização, Detalhes e Mídia) ... */}
 
       {/* --------------------- Informações do Negócio --------------------- */}
       <section className="mb-8 border-t pt-4">
@@ -686,7 +676,6 @@ const CadastroMEIPage: React.FC = () => {
                   required: true,
                   message: "O Certificado CCMEI é obrigatório!",
                 },
-                // Regra para verificar se há um arquivo carregado
                 () => ({
                   validator(_, value) {
                     if (ccmeiFileList.length > 0) {
@@ -885,6 +874,7 @@ const CadastroMEIPage: React.FC = () => {
           </Col>
         </Row>
       </section>
+
       <Form.Item>
         <Button
           type="primary"
@@ -899,7 +889,6 @@ const CadastroMEIPage: React.FC = () => {
     </Form>
   );
 
-  //PÁGINA DE FORMULÁRIO DE ATUALIZAÇÃO
   const renderUpdateForm = () => (
     <Form
       form={form}
@@ -916,8 +905,9 @@ const CadastroMEIPage: React.FC = () => {
 
         <Row gutter={24}>
           <Col xs={24} md={12}>
+            {/* CORREÇÃO: name="nome_responsavel" */}
             <Form.Item
-              name="nomeResponsavel"
+              name="nome_responsavel"
               label="Nome Completo do Responsável"
               rules={[
                 {
@@ -930,8 +920,9 @@ const CadastroMEIPage: React.FC = () => {
             </Form.Item>
           </Col>
           <Col xs={24} md={12}>
+            {/* CORREÇÃO: name="cpf_responsavel" */}
             <Form.Item
-              name="cpf"
+              name="cpf_responsavel"
               label="CPF do Responsável"
               rules={[
                 {
@@ -946,7 +937,7 @@ const CadastroMEIPage: React.FC = () => {
             >
               <Input
                 placeholder="000.000.000-00"
-                name="cpf"
+                name="cpf_responsavel"
                 onChange={(e) => handleMaskChange(e, maskCPF)}
               />
             </Form.Item>
@@ -1366,7 +1357,6 @@ const CadastroMEIPage: React.FC = () => {
     <div className="min-h-screen bg-gradient-to-br from-blue-300 to-blue-800 py-20 px-6 sm:px-12">
       <div className="max-w-5xl mx-auto bg-white rounded-3xl shadow-lg p-10 sm:p-16">
         <Spin spinning={loading} tip="A processar...">
-          {/* Botão de Voltar, aparece em todas as etapas exceto a inicial e a de sucesso */}
           {flowStep !== "initial" && flowStep !== "submitted" && (
             <Button
               type="text"
