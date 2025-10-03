@@ -320,7 +320,7 @@ const CadastroMEIPage: React.FC = () => {
   const [loading, setLoading] = useState(false);
   const [logoFileList, setLogoFileList] = useState<UploadFile[]>([]);
   const [portfolioFileList, setPortfolioFileList] = useState<UploadFile[]>([]);
-  const [ccmeiFileList, setCcmeiFileList] = useState<UploadFile[]>([]); // NOVO ESTADO: CCMEI File List
+  const [ccmeiFileList, setCcmeiFileList] = useState<UploadFile[]>([]);
   const [flowStep, setFlowStep] = useState<FlowStep>("initial");
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
   const [submittedMessage, setSubmittedMessage] = useState({
@@ -332,9 +332,8 @@ const CadastroMEIPage: React.FC = () => {
     setLogoFileList(fileList);
   const handlePortfolioChange = ({ fileList }: { fileList: UploadFile[] }) =>
     setPortfolioFileList(fileList);
-  const handleCCMEIChange = (
-    { fileList }: { fileList: UploadFile[] } // NOVO HANDLER
-  ) => setCcmeiFileList(fileList);
+  const handleCCMEIChange = ({ fileList }: { fileList: UploadFile[] }) =>
+    setCcmeiFileList(fileList);
 
   const handleMaskChange = (
     e: React.ChangeEvent<HTMLInputElement>,
@@ -348,7 +347,7 @@ const CadastroMEIPage: React.FC = () => {
     form.resetFields();
     setLogoFileList([]);
     setPortfolioFileList([]);
-    setCcmeiFileList([]); // RESET DO CCMEI
+    setCcmeiFileList([]);
     setFlowStep("initial");
   };
 
@@ -412,18 +411,42 @@ const CadastroMEIPage: React.FC = () => {
     try {
       const formData = new FormData();
 
+      // ADICIONADO: Lista dos campos de identificação obrigatórios para o backend.
+      const identificationFields = [
+        "nomeResponsavel",
+        "cpf",
+        "emailEstabelecimento",
+        "cnpj",
+      ];
+
       Object.entries(values).forEach(([key, value]) => {
-        if (value) {
+        // MUDANÇA NA CONDIÇÃO: Inclui campo se tiver valor OU se for um campo de identificação.
+        if (value || identificationFields.includes(key)) {
+          // Ignora o campo de validação de arquivo
+          if (key === "ccmeiFile") return;
+
           if (key === "locais" && Array.isArray(value)) {
             formData.append("areasAtuacao", value.join(", "));
           } else if (key === "tagsInvisiveis" && Array.isArray(value)) {
             formData.append(key, value.join(", "));
           } else {
+            // Garante que o campo de identificação (mesmo sem alteração) seja enviado
             formData.append(key, value as string);
           }
         }
       });
 
+      // NOVO: Adiciona CCMEI (obrigatório para identificação na atualização, se for carregado)
+      if (ccmeiFileList.length > 0 && ccmeiFileList[0].originFileObj) {
+        formData.append("ccmei", ccmeiFileList[0].originFileObj);
+      }
+
+      // NOVO: Adiciona LOGO (opcional na atualização)
+      if (logoFileList.length > 0 && logoFileList[0].originFileObj) {
+        formData.append("logo", logoFileList[0].originFileObj);
+      }
+
+      // Adiciona as imagens do PORTFÓLIO
       portfolioFileList.forEach((file) => {
         if (file.originFileObj) {
           formData.append("produtos", file.originFileObj);
@@ -450,8 +473,17 @@ const CadastroMEIPage: React.FC = () => {
   const handleDeleteSubmit = async (values: any) => {
     setLoading(true);
     try {
-      const dataToSend: { cnpj: string; motivo?: string } = {
+      const dataToSend: {
+        cnpj: string;
+        motivo?: string;
+        nomeResponsavel: string;
+        cpf: string;
+        emailEstabelecimento: string;
+      } = {
         cnpj: values.cnpj,
+        nomeResponsavel: values.nomeResponsavel,
+        cpf: values.cpf,
+        emailEstabelecimento: values.emailEstabelecimento,
       };
       if (values.motivo) {
         dataToSend.motivo = values.motivo;
@@ -647,7 +679,7 @@ const CadastroMEIPage: React.FC = () => {
           </Col>
           <Col xs={24} md={12}>
             <Form.Item
-              name="ccmeiFile" // CAMPO CCMEI
+              name="ccmeiFile"
               label="Certificado CCMEI"
               rules={[
                 {
@@ -877,25 +909,125 @@ const CadastroMEIPage: React.FC = () => {
     >
       <section className="mb-8 border-t pt-4">
         {commonTitle("Identificação do Negócio")}
+        <p className="text-gray-600 mb-6 -mt-4">
+          Para iniciar a atualização, confirme os dados de identificação do
+          negócio e do responsável.
+        </p>
+
+        <Row gutter={24}>
+          <Col xs={24} md={12}>
+            <Form.Item
+              name="nomeResponsavel"
+              label="Nome Completo do Responsável"
+              rules={[
+                {
+                  required: true,
+                  message: "O nome é obrigatório para identificação!",
+                },
+              ]}
+            >
+              <Input placeholder="Nome Completo" />
+            </Form.Item>
+          </Col>
+          <Col xs={24} md={12}>
+            <Form.Item
+              name="cpf"
+              label="CPF do Responsável"
+              rules={[
+                {
+                  required: true,
+                  message: "O CPF é obrigatório para identificação!",
+                },
+                {
+                  pattern: /^\d{3}\.\d{3}\.\d{3}-\d{2}$/,
+                  message: "CPF inválido!",
+                },
+              ]}
+            >
+              <Input
+                placeholder="000.000.000-00"
+                name="cpf"
+                onChange={(e) => handleMaskChange(e, maskCPF)}
+              />
+            </Form.Item>
+          </Col>
+        </Row>
+
+        <Row gutter={24}>
+          <Col xs={24} md={12}>
+            <Form.Item
+              name="cnpj"
+              label="CNPJ do Negócio"
+              rules={[
+                {
+                  required: true,
+                  message: "O CNPJ é obrigatório para identificação!",
+                },
+                {
+                  pattern: /^\d{2}\.\d{3}\.\d{3}\/\d{4}-\d{2}$/,
+                  message: "CNPJ inválido!",
+                },
+              ]}
+            >
+              <Input
+                placeholder="00.000.000/0001-00"
+                name="cnpj"
+                onChange={(e) => handleMaskChange(e, maskCNPJ)}
+              />
+            </Form.Item>
+          </Col>
+          <Col xs={24} md={12}>
+            <Form.Item
+              name="ccmeiFile"
+              label="Certificado CCMEI Atual"
+              rules={[
+                {
+                  required: true,
+                  message:
+                    "O Certificado CCMEI é obrigatório para identificação!",
+                },
+                // Regra para verificar se há um arquivo carregado
+                () => ({
+                  validator(_, value) {
+                    if (ccmeiFileList.length > 0) {
+                      return Promise.resolve();
+                    }
+                    return Promise.reject(
+                      new Error("Envie o Certificado CCMEI (PDF ou Imagem)!")
+                    );
+                  },
+                }),
+              ]}
+              help="Anexe a cópia mais recente do Certificado de Condição de Microempreendedor Individual (PDF/Imagem)."
+            >
+              <Upload
+                customRequest={customUploadAction}
+                fileList={ccmeiFileList}
+                onChange={handleCCMEIChange}
+                listType="text"
+                maxCount={1}
+                accept=".pdf,.jpg,.jpeg,.png"
+              >
+                <Button icon={<UploadOutlined />}>Carregar CCMEI</Button>
+              </Upload>
+            </Form.Item>
+          </Col>
+        </Row>
         <Form.Item
-          name="cnpj"
-          label="CNPJ do Negócio a ser atualizado"
+          name="emailEstabelecimento"
+          label="E-mail de Contato Principal"
           rules={[
             {
               required: true,
-              message: "O CNPJ é obrigatório para identificação!",
+              message: "O e-mail é obrigatório para identificação!",
             },
             {
-              pattern: /^\d{2}\.\d{3}\.\d{3}\/\d{4}-\d{2}$/,
-              message: "CNPJ inválido!",
+              pattern: /^[^\s@]+@[^\s@]+\.[^\s@]+$/,
+              message: "E-mail inválido!",
             },
           ]}
         >
-          <Input
-            placeholder="00.000.000/0001-00"
-            name="cnpj"
-            onChange={(e) => handleMaskChange(e, maskCNPJ)}
-          />
+          <Input placeholder="contato@email.com" />
         </Form.Item>
       </section>
       <section className="mb-8 border-t pt-4">
@@ -904,6 +1036,23 @@ const CadastroMEIPage: React.FC = () => {
           Preencha apenas os campos que deseja alterar. Os campos deixados em
           branco não serão modificados.
         </p>
+
+        {/* Adiciona upload de Logo como opcional na atualização */}
+        <Form.Item
+          label="Nova Logo (Opcional)"
+          help="Envie 1 nova imagem para substituir a logo atual."
+        >
+          <Upload
+            customRequest={customUploadAction}
+            fileList={logoFileList}
+            onChange={handleLogoChange}
+            listType="picture"
+            maxCount={1}
+          >
+            <Button icon={<UploadOutlined />}>Carregar Nova Logo</Button>
+          </Upload>
+        </Form.Item>
+
         <Row gutter={24}>
           <Col xs={24} md={12}>
             <Form.Item
@@ -1021,25 +1170,128 @@ const CadastroMEIPage: React.FC = () => {
         {commonTitle("Exclusão de Cadastro MEI")}
         <p className="text-red-700 bg-red-50 p-4 rounded-md mb-6 -mt-2">
           <b>Atenção:</b> Esta ação é permanente e removerá seu negócio da nossa
-          plataforma. Para voltar, será necessário um novo cadastro.
+          plataforma. Para voltar, será necessário um novo cadastro. Para
+          prosseguir, confirme sua identidade.
         </p>
+
+        {/* --------------------- IDENTIFICAÇÃO OBRIGATÓRIA --------------------- */}
+        <Row gutter={24}>
+          <Col xs={24} md={12}>
+            <Form.Item
+              name="nomeResponsavel"
+              label="Nome Completo do Responsável"
+              rules={[
+                {
+                  required: true,
+                  message: "O nome é obrigatório para identificação!",
+                },
+              ]}
+            >
+              <Input placeholder="Nome Completo" />
+            </Form.Item>
+          </Col>
+          <Col xs={24} md={12}>
+            <Form.Item
+              name="cpf"
+              label="CPF do Responsável"
+              rules={[
+                {
+                  required: true,
+                  message: "O CPF é obrigatório para identificação!",
+                },
+                {
+                  pattern: /^\d{3}\.\d{3}\.\d{3}-\d{2}$/,
+                  message: "CPF inválido!",
+                },
+              ]}
+            >
+              <Input
+                placeholder="000.000.000-00"
+                name="cpf"
+                onChange={(e) => handleMaskChange(e, maskCPF)}
+              />
+            </Form.Item>
+          </Col>
+        </Row>
+
+        <Row gutter={24}>
+          <Col xs={24} md={12}>
+            <Form.Item
+              name="cnpj"
+              label="CNPJ do Negócio"
+              rules={[
+                {
+                  required: true,
+                  message: "O CNPJ é obrigatório para identificação!",
+                },
+                {
+                  pattern: /^\d{2}\.\d{3}\.\d{3}\/\d{4}-\d{2}$/,
+                  message: "CNPJ inválido!",
+                },
+              ]}
+            >
+              <Input
+                placeholder="00.000.000/0001-00"
+                name="cnpj"
+                onChange={(e) => handleMaskChange(e, maskCNPJ)}
+              />
+            </Form.Item>
+          </Col>
+          <Col xs={24} md={12}>
+            <Form.Item
+              name="ccmeiFile"
+              label="Certificado CCMEI"
+              rules={[
+                {
+                  required: true,
+                  message:
+                    "O Certificado CCMEI é obrigatório para identificação!",
+                },
+                // Regra para verificar se há um arquivo carregado (mantido como obrigatório)
+                () => ({
+                  validator(_, value) {
+                    if (ccmeiFileList.length > 0) {
+                      return Promise.resolve();
+                    }
+                    return Promise.reject(
+                      new Error("Envie o Certificado CCMEI (PDF ou Imagem)!")
+                    );
+                  },
+                }),
+              ]}
+              help="Anexe a cópia mais recente do Certificado de Condição de Microempreendedor Individual (PDF/Imagem)."
+            >
+              <Upload
+                customRequest={customUploadAction}
+                fileList={ccmeiFileList}
+                onChange={handleCCMEIChange}
+                listType="text"
+                maxCount={1}
+                accept=".pdf,.jpg,.jpeg,.png"
+              >
+                <Button icon={<UploadOutlined />}>Carregar CCMEI</Button>
+              </Upload>
+            </Form.Item>
+          </Col>
+        </Row>
         <Form.Item
-          name="cnpj"
-          label="Confirme o CNPJ do negócio a ser excluído"
+          name="emailEstabelecimento"
+          label="E-mail de Contato Principal"
           rules={[
-            { required: true, message: "O CNPJ é obrigatório!" },
             {
-              pattern: /^\d{2}\.\d{3}\.\d{3}\/\d{4}-\d{2}$/,
-              message: "CNPJ inválido!",
+              required: true,
+              message: "O e-mail é obrigatório para identificação!",
+            },
+            {
+              pattern: /^[^\s@]+@[^\s@]+\.[^\s@]+$/,
+              message: "E-mail inválido!",
             },
           ]}
         >
-          <Input
-            placeholder="00.000.000/0001-00"
-            name="cnpj"
-            onChange={(e) => handleMaskChange(e, maskCNPJ)}
-          />
+          <Input placeholder="contato@email.com" />
         </Form.Item>
+        {/* --------------------- FIM DA IDENTIFICAÇÃO OBRIGATÓRIA --------------------- */}
+
         <Form.Item name="motivo" label="Motivo da exclusão (Opcional)">
           <TextArea
             rows={3}
