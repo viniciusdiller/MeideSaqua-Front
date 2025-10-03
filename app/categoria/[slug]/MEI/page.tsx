@@ -66,6 +66,22 @@ const StarRating = ({ rating }: { rating: number }) => {
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL;
 
+const normalizeImagePath = (filePath: string) => {
+  if (!filePath) return "";
+  let normalized = filePath.replace(/\\/g, "/");
+
+  const uploadsIndex = normalized.indexOf("uploads/");
+  if (uploadsIndex !== -1) {
+    normalized = normalized.substring(uploadsIndex);
+  }
+
+  if (normalized.startsWith("/")) {
+    normalized = normalized.substring(1);
+  }
+
+  return normalized;
+};
+
 const REVIEWS_PER_PAGE = 4;
 
 const containerVariants = {
@@ -137,20 +153,18 @@ export default function MeiDetailPage({
       setReviews(reviewsData);
       setRating(detailsData.media || 0);
       if (detailsData.produtosImgUrls) {
-        // 1. Separa a string de URLs em um array
         const imageUrls = detailsData.produtosImgUrls.split(",");
 
-        // 2. Formata o array para o formato que o componente ImageGrid espera
-        const portfolioItems = imageUrls.map((url: string, index: number) => ({
-          id: `${detailsData.estabelecimentoId}-${index}`, // Cria um ID único
-          // Monta a URL completa para a imagem
-          img: `${API_URL}/${url}`,
-        }));
+        const portfolioItems = imageUrls.map((url: string, index: number) => {
+          const normalizedUrl = normalizeImagePath(url);
+          return {
+            id: `${detailsData.estabelecimentoId}-${index}`,
+            img: `${API_URL}/${normalizedUrl}`,
+          };
+        });
 
-        // 3. Atualiza o estado com as imagens do portfólio
         setPortfolioImages(portfolioItems);
       } else {
-        // Caso não haja imagens, define o estado como um array vazio
         setPortfolioImages([]);
       }
 
@@ -366,7 +380,9 @@ export default function MeiDetailPage({
                   <TiltImage
                     src={
                       (meiDetails.logoUrl &&
-                        `${API_URL}/${meiDetails.logoUrl}`) ||
+                        `${API_URL}/${normalizeImagePath(
+                          meiDetails.logoUrl
+                        )}`) ||
                       "/LogoExploraMonocromática.png"
                     }
                     alt={`Logo de ${meiDetails.nomeFantasia}`}
