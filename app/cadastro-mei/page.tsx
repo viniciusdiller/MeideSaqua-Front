@@ -872,6 +872,27 @@ const CadastroMEIPage: React.FC = () => {
               </Upload>
             </Form.Item>
           </Col>
+          <Form.Item
+            name="confirmacao"
+            valuePropName="checked"
+            rules={[
+              {
+                validator: (_, value) =>
+                  value
+                    ? Promise.resolve()
+                    : Promise.reject(
+                        new Error("Você precisa confirmar esta caixa.")
+                      ),
+              },
+            ]}
+          >
+            <Checkbox>
+              Confirmo que as informações são verdadeiras e de minha
+              responsabilidade. Estou ciente de que poderão ser usadas pela
+              Prefeitura para divulgação e apoio ao empreendedorismo em
+              Saquarema, de acordo com a Lei Geral de Proteção de Dados.
+            </Checkbox>
+          </Form.Item>
         </Row>
       </section>
 
@@ -1133,6 +1154,27 @@ const CadastroMEIPage: React.FC = () => {
           >
             <Button icon={<UploadOutlined />}>Carregar Novas Imagens</Button>
           </Upload>
+        </Form.Item>
+        <Form.Item
+          name="confirmacao"
+          valuePropName="checked"
+          rules={[
+            {
+              validator: (_, value) =>
+                value
+                  ? Promise.resolve()
+                  : Promise.reject(
+                      new Error("Você precisa confirmar esta caixa.")
+                    ),
+            },
+          ]}
+        >
+          <Checkbox>
+            Confirmo que as informações são verdadeiras e de minha
+            responsabilidade. Estou ciente de que poderão ser usadas pela
+            Prefeitura para divulgação e apoio ao empreendedorismo em Saquarema,
+            de acordo com a Lei Geral de Proteção de Dados.
+          </Checkbox>
         </Form.Item>
       </section>
       <Form.Item>
