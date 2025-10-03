@@ -152,16 +152,16 @@ export default function MeiDetailPage({
       setMeiDetails(detailsData);
       setReviews(reviewsData);
       setRating(detailsData.media || 0);
-      if (detailsData.produtosImgUrls) {
-        const imageUrls = detailsData.produtosImgUrls.split(",");
-
-        const portfolioItems = imageUrls.map((url: string, index: number) => {
-          const normalizedUrl = normalizeImagePath(url);
-          return {
-            id: `${detailsData.estabelecimentoId}-${index}`,
-            img: `${API_URL}/${normalizedUrl}`,
-          };
-        });
+      if (detailsData.produtosImg && Array.isArray(detailsData.produtosImg)) {
+        const portfolioItems = detailsData.produtosImg.map(
+          (image: any, index: number) => {
+            const normalizedUrl = normalizeImagePath(image.url);
+            return {
+              id: `${detailsData.estabelecimentoId}-${index}`,
+              img: `${API_URL}/${normalizedUrl}`,
+            };
+          }
+        );
 
         setPortfolioImages(portfolioItems);
       } else {
