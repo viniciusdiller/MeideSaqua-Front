@@ -72,9 +72,16 @@ const AdminDashboard: React.FC = () => {
     value: any,
     nomeFantasia: string
   ): React.ReactNode => {
-    if (key === "produtosImg" && Array.isArray(value)) {
-      const imagesUrls = (value as ImagemProduto[])
-        .map((item) => getFullImageUrl(item.url))
+    // --- LÓGICA CORRIGIDA E UNIFICADA PARA IMAGENS ---
+
+    // Trata 'produtosImg' (de cadastros) e 'produtos' (de atualizações)
+    if ((key === "produtosImg" || key === "produtos") && Array.isArray(value)) {
+      // Se for 'produtosImg', o value é [{url: '...'}]. Se for 'produtos', é ['...']
+      const imagesUrls = value
+        .map((item) => {
+          const path = typeof item === "string" ? item : item.url;
+          return getFullImageUrl(path);
+        })
         .filter(Boolean);
 
       if (imagesUrls.length > 0) {
@@ -107,7 +114,12 @@ const AdminDashboard: React.FC = () => {
       return <Text type="secondary">Nenhuma imagem de portfólio.</Text>;
     }
 
-    if (key === "logoUrl" && typeof value === "string" && value) {
+    // Trata 'logoUrl' (de cadastros) e 'logo' (de atualizações)
+    if (
+      (key === "logoUrl" || key === "logo") &&
+      typeof value === "string" &&
+      value
+    ) {
       const imageUrl = getFullImageUrl(value);
       return (
         <img
@@ -171,7 +183,7 @@ const AdminDashboard: React.FC = () => {
       }
 
       const pendingData = await response.json();
-      console.log(pendingData.atualizacoes);
+      console.log("DADOS PENDENTES RECEBIDOS:", pendingData.cadastros);
       setData(pendingData);
     } catch (error: any) {
       message.error(error.message || "Erro ao carregar os dados.");
