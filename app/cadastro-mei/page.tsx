@@ -356,8 +356,16 @@ const CadastroMEIPage: React.FC = () => {
     try {
       const formData = new FormData();
 
+      // --- CORREÇÃO INÍCIO ---
+      // 1. ADICIONA TODOS OS CAMPOS DE TEXTO PRIMEIRO
       Object.entries(values).forEach(([key, value]) => {
-        if (value && key !== "ccmeiFile") {
+        // Garante que não estamos processando campos de arquivo aqui
+        if (
+          value &&
+          key !== "ccmeiFile" &&
+          key !== "logo" &&
+          key !== "produtos"
+        ) {
           if (
             (key === "areasAtuacao" || key === "tagsInvisiveis") &&
             Array.isArray(value)
@@ -369,10 +377,7 @@ const CadastroMEIPage: React.FC = () => {
         }
       });
 
-      if (ccmeiFileList.length > 0 && ccmeiFileList[0].originFileObj) {
-        formData.append("ccmei", ccmeiFileList[0].originFileObj);
-      }
-
+      // 2. DEPOIS, ADICIONA OS ARQUIVOS
       if (logoFileList.length > 0 && logoFileList[0].originFileObj) {
         formData.append("logo", logoFileList[0].originFileObj);
       }
@@ -382,6 +387,12 @@ const CadastroMEIPage: React.FC = () => {
           formData.append("produtos", file.originFileObj);
         }
       });
+
+      // O CCMEI é o último para garantir que todos os dados de texto já foram processados
+      if (ccmeiFileList.length > 0 && ccmeiFileList[0].originFileObj) {
+        formData.append("ccmei", ccmeiFileList[0].originFileObj);
+      }
+      // --- CORREÇÃO FIM ---
 
       await api.cadastrarEstabelecimento(formData);
 
@@ -405,18 +416,17 @@ const CadastroMEIPage: React.FC = () => {
     try {
       const formData = new FormData();
 
-      // CORREÇÃO: Campos de identificação com snake_case
-      const identificationFields = [
-        "nome_responsavel",
-        "cpf_responsavel",
-        "emailEstabelecimento",
-        "cnpj",
-      ];
-
+      // --- CORREÇÃO INÍCIO ---
+      // 1. ADICIONA TODOS OS CAMPOS DE TEXTO PRIMEIRO
       Object.entries(values).forEach(([key, value]) => {
-        if (value || identificationFields.includes(key)) {
-          if (key === "ccmeiFile") return;
-
+        // Garante que não estamos processando campos de arquivo aqui
+        if (
+          value &&
+          key !== "ccmeiFile" &&
+          key !== "portfolio" &&
+          key !== "logo"
+        ) {
+          // O campo 'locais' é renomeado para 'areasAtuacao' para o backend
           if (key === "locais" && Array.isArray(value)) {
             formData.append("areasAtuacao", value.join(", "));
           } else if (key === "tagsInvisiveis" && Array.isArray(value)) {
@@ -427,19 +437,22 @@ const CadastroMEIPage: React.FC = () => {
         }
       });
 
-      if (ccmeiFileList.length > 0 && ccmeiFileList[0].originFileObj) {
-        formData.append("ccmei", ccmeiFileList[0].originFileObj);
-      }
-
+      // 2. DEPOIS, ADICIONA OS ARQUIVOS
       if (logoFileList.length > 0 && logoFileList[0].originFileObj) {
         formData.append("logo", logoFileList[0].originFileObj);
       }
 
       portfolioFileList.forEach((file) => {
         if (file.originFileObj) {
-          formData.append("produtos", file.originFileObj);
+          formData.append("produtos", file.originFileObj); // O backend espera 'produtos'
         }
       });
+
+      // O CCMEI é o último para garantir que todos os dados de texto já foram processados
+      if (ccmeiFileList.length > 0 && ccmeiFileList[0].originFileObj) {
+        formData.append("ccmei", ccmeiFileList[0].originFileObj);
+      }
+      // --- CORREÇÃO FIM ---
 
       await api.atualizarEstabelecimento(formData);
 
@@ -1082,20 +1095,6 @@ const CadastroMEIPage: React.FC = () => {
                 name="contatoEstabelecimento"
                 onChange={(e) => handleMaskChange(e, maskPhone)}
               />
-            </Form.Item>
-          </Col>
-          <Col xs={24} md={12}>
-            <Form.Item
-              name="emailEstabelecimento"
-              label="Novo E-mail de Contato"
-              rules={[
-                {
-                  pattern: /^[^\s@]+@[^\s@]+\.[^\s@]+$/,
-                  message: "E-mail inválido!",
-                },
-              ]}
-            >
-              <Input placeholder="contato@email.com" />
             </Form.Item>
           </Col>
         </Row>
