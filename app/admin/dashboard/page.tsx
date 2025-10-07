@@ -13,6 +13,7 @@ import {
   Spin,
   Empty,
   Typography,
+  Image, // Importe o componente Image da antd
 } from "antd";
 import {
   UserAddOutlined,
@@ -36,6 +37,7 @@ interface Estabelecimento {
   nomeFantasia: string;
   cnpj: string;
   logoUrl?: string;
+  ccmeiUrl?: string; // <-- 1. ADICIONE ESTA LINHA
   imagensProduto?: ImagemProduto[];
   dados_atualizacao?: any;
   [key: string]: any;
@@ -72,11 +74,39 @@ const AdminDashboard: React.FC = () => {
     value: any,
     nomeFantasia: string
   ): React.ReactNode => {
-    // --- LÓGICA CORRIGIDA E UNIFICADA PARA IMAGENS ---
+    // --- 2. ADICIONE A LÓGICA DO CCMEI AQUI ---
+    if (key === "ccmeiUrl" && typeof value === "string" && value) {
+      const fileUrl = getFullImageUrl(value);
+      const isPdf = value.toLowerCase().endsWith(".pdf");
 
-    // Trata 'produtosImg' (de cadastros) e 'produtos' (de atualizações)
+      if (isPdf) {
+        return (
+          <a
+            href={fileUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-blue-600 hover:underline"
+          >
+            Ver Certificado (PDF)
+          </a>
+        );
+      }
+      return (
+        <Image
+          src={fileUrl}
+          alt={`CCMEI de ${nomeFantasia}`}
+          style={{
+            maxWidth: "150px",
+            maxHeight: "150px",
+            objectFit: "contain",
+            border: "1px solid #eee",
+          }}
+        />
+      );
+    }
+
+    // Trata 'produtosImg' e 'produtos'
     if ((key === "produtosImg" || key === "produtos") && Array.isArray(value)) {
-      // Se for 'produtosImg', o value é [{url: '...'}]. Se for 'produtos', é ['...']
       const imagesUrls = value
         .map((item) => {
           const path = typeof item === "string" ? item : item.url;
@@ -89,21 +119,14 @@ const AdminDashboard: React.FC = () => {
           <Row gutter={[8, 8]}>
             {imagesUrls.map((imageUrl, index) => (
               <Col key={index}>
-                <img
+                <Image
                   src={imageUrl}
                   alt={`Imagem de Produto ${index + 1} de ${nomeFantasia}`}
+                  width={80}
+                  height={80}
                   style={{
-                    width: "80px",
-                    height: "80px",
                     objectFit: "cover",
                     border: "1px solid #ddd",
-                  }}
-                  onError={(e) => {
-                    (e.target as HTMLImageElement).style.display = "none";
-                    (e.target as HTMLImageElement).insertAdjacentHTML(
-                      "afterend",
-                      '<span style="color: red; font-size: 10px;">Erro ao carregar Imagem.</span>'
-                    );
                   }}
                 />
               </Col>
@@ -114,7 +137,7 @@ const AdminDashboard: React.FC = () => {
       return <Text type="secondary">Nenhuma imagem de portfólio.</Text>;
     }
 
-    // Trata 'logoUrl' (de cadastros) e 'logo' (de atualizações)
+    // Trata 'logoUrl' e 'logo'
     if (
       (key === "logoUrl" || key === "logo") &&
       typeof value === "string" &&
@@ -122,7 +145,7 @@ const AdminDashboard: React.FC = () => {
     ) {
       const imageUrl = getFullImageUrl(value);
       return (
-        <img
+        <Image
           src={imageUrl}
           alt={`Logo de ${nomeFantasia}`}
           style={{
@@ -131,18 +154,10 @@ const AdminDashboard: React.FC = () => {
             objectFit: "contain",
             border: "1px solid #eee",
           }}
-          onError={(e) => {
-            (e.target as HTMLImageElement).style.display = "none";
-            (e.target as HTMLImageElement).insertAdjacentHTML(
-              "afterend",
-              '<span style="color: red; font-size: 10px;">Erro ao carregar Logo.</span>'
-            );
-          }}
         />
       );
     }
 
-    // Se o valor for um objeto e não for dados_atualizacao (que é tratado separadamente no JSX)
     if (
       typeof value === "object" &&
       value !== null &&
@@ -151,7 +166,6 @@ const AdminDashboard: React.FC = () => {
       return JSON.stringify(value);
     }
 
-    // --- Caso padrão ---
     return String(value);
   };
 
@@ -324,15 +338,13 @@ const AdminDashboard: React.FC = () => {
               .map(([key, value]) => ({ key, value }))
               .sort((a, b) => {
                 const getScore = (key: string): number => {
-                  if (key === "logoUrl") return 98;
-                  if (key === "produtosImg") return 99;
+                  if (key === "logoUrl") return 100;
+                  if (key === "ccmeiUrl") return 99;
+                  if (key === "produtosImg") return 98;
+                  if (key === "nomeFantasia") return 97;
                   return 0;
                 };
-
-                const scoreA = getScore(a.key);
-                const scoreB = getScore(b.key);
-
-                return scoreA - scoreB;
+                return getScore(b.key) - getScore(a.key);
               })
               .map(({ key, value }) => (
                 <Descriptions.Item key={key} label={key}>
