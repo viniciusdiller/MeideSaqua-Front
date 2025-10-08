@@ -75,7 +75,11 @@ const AdminDashboard: React.FC = () => {
     nomeFantasia: string
   ): React.ReactNode => {
     // --- 2. ADICIONE A LÓGICA DO CCMEI AQUI ---
-    if (key === "ccmeiUrl" && typeof value === "string" && value) {
+    if (
+      (key === "ccmeiUrl" || key === "ccmei") &&
+      typeof value === "string" &&
+      value
+    ) {
       const fileUrl = getFullImageUrl(value);
       const isPdf = value.toLowerCase().endsWith(".pdf");
 
@@ -338,8 +342,8 @@ const AdminDashboard: React.FC = () => {
               .map(([key, value]) => ({ key, value }))
               .sort((a, b) => {
                 const getScore = (key: string): number => {
-                  if (key === "logoUrl") return 100;
-                  if (key === "ccmeiUrl") return 99;
+                  if (key === "ccmeiUrl") return 100;
+                  if (key === "logoUrl") return 99;
                   if (key === "produtosImg") return 98;
                   if (key === "nomeFantasia") return 97;
                   return 0;
