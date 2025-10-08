@@ -103,6 +103,9 @@ const api = {
 };
 
 const areasAtuacao = [
+  "Entrega",
+  "Retirada",
+  "Entrega e Retirada",
   "Água Branca",
   "Alvorada",
   "Areal",
@@ -356,10 +359,7 @@ const CadastroMEIPage: React.FC = () => {
     try {
       const formData = new FormData();
 
-      // --- CORREÇÃO INÍCIO ---
-      // 1. ADICIONA TODOS OS CAMPOS DE TEXTO PRIMEIRO
       Object.entries(values).forEach(([key, value]) => {
-        // Garante que não estamos processando campos de arquivo aqui
         if (
           value &&
           key !== "ccmeiFile" &&
@@ -377,7 +377,6 @@ const CadastroMEIPage: React.FC = () => {
         }
       });
 
-      // 2. DEPOIS, ADICIONA OS ARQUIVOS
       if (logoFileList.length > 0 && logoFileList[0].originFileObj) {
         formData.append("logo", logoFileList[0].originFileObj);
       }
@@ -388,11 +387,9 @@ const CadastroMEIPage: React.FC = () => {
         }
       });
 
-      // O CCMEI é o último para garantir que todos os dados de texto já foram processados
       if (ccmeiFileList.length > 0 && ccmeiFileList[0].originFileObj) {
         formData.append("ccmei", ccmeiFileList[0].originFileObj);
       }
-      // --- CORREÇÃO FIM ---
 
       await api.cadastrarEstabelecimento(formData);
 
@@ -416,17 +413,13 @@ const CadastroMEIPage: React.FC = () => {
     try {
       const formData = new FormData();
 
-      // --- CORREÇÃO INÍCIO ---
-      // 1. ADICIONA TODOS OS CAMPOS DE TEXTO PRIMEIRO
       Object.entries(values).forEach(([key, value]) => {
-        // Garante que não estamos processando campos de arquivo aqui
         if (
           value &&
           key !== "ccmeiFile" &&
           key !== "portfolio" &&
           key !== "logo"
         ) {
-          // O campo 'locais' é renomeado para 'areasAtuacao' para o backend
           if (key === "locais" && Array.isArray(value)) {
             formData.append("areasAtuacao", value.join(", "));
           } else if (key === "tagsInvisiveis" && Array.isArray(value)) {
