@@ -820,7 +820,7 @@ const CadastroMEIPage: React.FC = () => {
         >
           <TextArea
             rows={4}
-            placeholder="Fale um pouco sobre o que você faz, quais produtos você vende ou tipo de serviço que realiza."
+            placeholder="Fale um pouco sobre o que você faz, quais produtos você vende ou tipo de serviço que realiza. Essa é a informação que os seus futuros clientes irão ver."
           />
         </Form.Item>
         <Form.Item
@@ -865,7 +865,10 @@ const CadastroMEIPage: React.FC = () => {
             </Form.Item>
           </Col>
           <Col xs={24} md={12}>
-            <Form.Item label="Seu Portfólio" help="Envie até 4 imagens.">
+            <Form.Item
+              label="Imagens do seu Produto ou Serviço"
+              help="Envie até 4 imagens."
+            >
               <Upload
                 customRequest={customUploadAction}
                 fileList={portfolioFileList}

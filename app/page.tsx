@@ -191,7 +191,7 @@ export default function HomePage() {
             </h2>
             <p className="text-xl font-bold text-gray-700 md:text-gray-600 max-w-2xl mx-auto">
               A vitrine digital de quem faz a economia local acontecer. Conheça
-              os{" "}
+              o{" "}
               <span className="bg-gradient-to-r from-[#017DB9] to-[#22c362] bg-clip-text text-transparent">
                 MEIdeSaquá!
               </span>{" "}
