@@ -342,10 +342,14 @@ const AdminDashboard: React.FC = () => {
               .map(([key, value]) => ({ key, value }))
               .sort((a, b) => {
                 const getScore = (key: string): number => {
-                  if (key === "ccmeiUrl") return 100;
+                  if (key === "ccmeiUrl") return 98;
                   if (key === "logoUrl") return 99;
-                  if (key === "produtosImg") return 98;
-                  if (key === "nomeFantasia") return 97;
+                  if (key === "produtosImg") return 97;
+                  if (key === "nomeFantasia") return 96;
+                  if (key === "cnpj") return 100;
+                  if (key === "nome_responsave") return 95;
+                  if (key === "cpf_responsavel") return 94;
+
                   return 0;
                 };
                 return getScore(b.key) - getScore(a.key);
