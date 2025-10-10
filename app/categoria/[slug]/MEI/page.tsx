@@ -42,6 +42,8 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
+import { Button } from "@/components/ui/button"; // Importe o componente de botão
+import { SearchX } from "lucide-react";
 
 const CustomStarIcon = ({
   fillPercentage = "100%",
@@ -238,11 +240,23 @@ export default function MeiDetailPage({
 
   if (!meiDetails) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-100">
-        <p>Estabelecimento não encontrado.</p>
-        <Link href="/" className="hidden md:block">
-          Voltar
-        </Link>
+      <div className="flex flex-col items-center justify-center min-h-[70vh] text-center p-4 bg-gray-50">
+        <div className="bg-white p-8 rounded-2xl shadow-md">
+          <SearchX className="w-16 h-16 text-gray-400 mx-auto mb-4" />
+          <h2 className="text-2xl font-bold text-gray-800 mb-2">
+            Estabelecimento Não Encontrado
+          </h2>
+          <p className="text-gray-600 mb-6 max-w-sm">
+            O MEI que você está procurando não existe, foi removido ou o link
+            está incorreto.
+          </p>
+          <Button
+            asChild
+            className="rounded-full px-6 hover:cursor-pointer hover:text-white bg-gradient-to-br from-[#017DB9] to-[#22c362] text-white font-semibold shadow-md hover:scale-105 hover:shadow-lg active:scale-95 transition-all"
+          >
+            <Link href="/">Voltar para a Página Inicial</Link>
+          </Button>
+        </div>
       </div>
     );
   }

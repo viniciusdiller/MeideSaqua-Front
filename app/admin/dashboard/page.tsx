@@ -13,7 +13,7 @@ import {
   Spin,
   Empty,
   Typography,
-  Image, // Importe o componente Image da antd
+  Image,
 } from "antd";
 import {
   UserAddOutlined,
@@ -28,6 +28,50 @@ const { Text } = Typography;
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL;
 
+// --- CORREÇÃO DEFINITIVA ---
+// Este objeto agora mapeia AMBOS os nomes de chaves (`nomeResponsavel` e `nome_responsavel`)
+// para a MESMA ordem e o MESMO nome de exibição.
+const fieldConfig: { [key: string]: { label: string; order: number } } = {
+  // Identificação Principal
+  estabelecimentoId: { label: "ID", order: 1 },
+  nomeFantasia: { label: "Nome Fantasia", order: 2 },
+  cnpj: { label: "CNPJ", order: 3 },
+  categoria: { label: "Categoria", order: 4 },
+  status: { label: "Status Atual", order: 5 },
+  cnae: { label: "CNAE", order: 6 },
+
+  // Dados do Responsável (trata as duas variações de nome)
+  nomeResponsavel: { label: "Nome do Responsável", order: 10 },
+  nome_responsavel: { label: "Nome do Responsável", order: 10 },
+  cpfResponsavel: { label: "CPF do Responsável", order: 11 },
+  cpf_responsavel: { label: "CPF do Responsável", order: 11 },
+
+  // Contato e Localização
+  emailEstabelecimento: { label: "Email", order: 20 },
+  contatoEstabelecimento: { label: "Contato", order: 21 },
+  endereco: { label: "Endereço", order: 22 },
+  areasAtuacao: { label: "Áreas de Atuação", order: 23 },
+
+  // Descrições
+  descricao: { label: "Descrição", order: 30 },
+  descricaoDiferencial: { label: "Diferencial", order: 31 },
+
+  // Mídia e Links (trata as duas variações de nome)
+  website: { label: "Website", order: 40 },
+  instagram: { label: "Instagram", order: 41 },
+  logoUrl: { label: "Logo Atual", order: 42 },
+  logo: { label: "Nova Logo", order: 42 },
+  ccmeiUrl: { label: "CCMEI Atual", order: 43 },
+  ccmei: { label: "Novo CCMEI", order: 43 },
+  produtosImg: { label: "Portfólio Atual", order: 44 },
+  produtos: { label: "Novo Portfólio", order: 44 },
+
+  // Outros
+  tagsInvisiveis: { label: "Tags", order: 50 },
+  createdAt: { label: "Data de Criação", order: 100 },
+  updatedAt: { label: "Última Atualização", order: 101 },
+};
+
 interface ImagemProduto {
   url: string;
 }
@@ -37,7 +81,7 @@ interface Estabelecimento {
   nomeFantasia: string;
   cnpj: string;
   logoUrl?: string;
-  ccmeiUrl?: string; // <-- 1. ADICIONE ESTA LINHA
+  ccmeiUrl?: string;
   imagensProduto?: ImagemProduto[];
   dados_atualizacao?: any;
   [key: string]: any;
@@ -74,7 +118,6 @@ const AdminDashboard: React.FC = () => {
     value: any,
     nomeFantasia: string
   ): React.ReactNode => {
-    // --- 2. ADICIONE A LÓGICA DO CCMEI AQUI ---
     if (
       (key === "ccmeiUrl" || key === "ccmei") &&
       typeof value === "string" &&
@@ -89,33 +132,21 @@ const AdminDashboard: React.FC = () => {
             href={fileUrl}
             target="_blank"
             rel="noopener noreferrer"
-            className="text-blue-600 hover:underline"
+            className="text-blue-700 font-semibold underline"
           >
             Ver Certificado (PDF)
           </a>
         );
       }
       return (
-        <Image
-          src={fileUrl}
-          alt={`CCMEI de ${nomeFantasia}`}
-          style={{
-            maxWidth: "150px",
-            maxHeight: "150px",
-            objectFit: "contain",
-            border: "1px solid #eee",
-          }}
-        />
+        <Image src={fileUrl} alt={`CCMEI de ${nomeFantasia}`} width={150} />
       );
     }
 
-    // Trata 'produtosImg' e 'produtos'
     if ((key === "produtosImg" || key === "produtos") && Array.isArray(value)) {
       const imagesUrls = value
-        .map((item) => {
-          const path = typeof item === "string" ? item : item.url;
-          return getFullImageUrl(path);
-        })
+        .map((item) => (typeof item === "string" ? item : item.url))
+        .map(getFullImageUrl)
         .filter(Boolean);
 
       if (imagesUrls.length > 0) {
@@ -123,50 +154,30 @@ const AdminDashboard: React.FC = () => {
           <Row gutter={[8, 8]}>
             {imagesUrls.map((imageUrl, index) => (
               <Col key={index}>
-                <Image
-                  src={imageUrl}
-                  alt={`Imagem de Produto ${index + 1} de ${nomeFantasia}`}
-                  width={80}
-                  height={80}
-                  style={{
-                    objectFit: "cover",
-                    border: "1px solid #ddd",
-                  }}
-                />
+                <Image src={imageUrl} alt={`Produto ${index + 1}`} width={80} />
               </Col>
             ))}
           </Row>
         );
       }
-      return <Text type="secondary">Nenhuma imagem de portfólio.</Text>;
+      return <Text type="secondary">Nenhuma imagem.</Text>;
     }
 
-    // Trata 'logoUrl' e 'logo'
     if (
       (key === "logoUrl" || key === "logo") &&
       typeof value === "string" &&
       value
     ) {
-      const imageUrl = getFullImageUrl(value);
       return (
         <Image
-          src={imageUrl}
+          src={getFullImageUrl(value)}
           alt={`Logo de ${nomeFantasia}`}
-          style={{
-            maxWidth: "150px",
-            maxHeight: "150px",
-            objectFit: "contain",
-            border: "1px solid #eee",
-          }}
+          width={150}
         />
       );
     }
 
-    if (
-      typeof value === "object" &&
-      value !== null &&
-      key !== "dados_atualizacao"
-    ) {
+    if (typeof value === "object" && value !== null) {
       return JSON.stringify(value);
     }
 
@@ -177,34 +188,19 @@ const AdminDashboard: React.FC = () => {
     setLoading(true);
     const token = localStorage.getItem("admin_token");
     if (!token) {
-      message.error("Acesso negado. Faça login primeiro.");
+      message.error("Acesso negado.");
       router.push("/admin/login");
       return;
     }
-
     try {
       const response = await fetch(`${API_URL}/api/admin/pending`, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
+        headers: { Authorization: `Bearer ${token}` },
       });
-
-      if (response.status === 401 || response.status === 403) {
-        localStorage.removeItem("admin_token");
-        message.error("Sessão expirada. Faça login novamente.");
-        router.push("/admin/login");
-        return;
-      }
-
-      if (!response.ok) {
-        throw new Error("Falha ao buscar os dados.");
-      }
-
+      if (!response.ok) throw new Error("Falha ao buscar dados.");
       const pendingData = await response.json();
-      console.log("DADOS PENDENTES RECEBIDOS:", pendingData.cadastros);
       setData(pendingData);
     } catch (error: any) {
-      message.error(error.message || "Erro ao carregar os dados.");
+      message.error(error.message);
     } finally {
       setLoading(false);
     }
@@ -216,33 +212,20 @@ const AdminDashboard: React.FC = () => {
 
   const handleAction = async (action: "approve" | "reject") => {
     if (!selectedItem) return;
-
-    const token = localStorage.getItem("admin_token");
     setLoading(true);
-
+    const token = localStorage.getItem("admin_token");
     try {
       const response = await fetch(
         `${API_URL}/api/admin/${action}/${selectedItem.estabelecimentoId}`,
-        {
-          method: "POST",
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        }
+        { method: "POST", headers: { Authorization: `Bearer ${token}` } }
       );
-
       const result = await response.json();
       if (!response.ok) throw new Error(result.message);
-
-      message.success(
-        `Solicitação ${
-          action === "approve" ? "aprovada" : "rejeitada"
-        } com sucesso!`
-      );
+      message.success(`Ação executada com sucesso!`);
       setModalVisible(false);
-      fetchData(); // Recarrega os dados para atualizar a lista
+      fetchData();
     } catch (error: any) {
-      message.error(error.message || `Erro ao processar a solicitação.`);
+      message.error(error.message);
     } finally {
       setLoading(false);
     }
@@ -259,23 +242,15 @@ const AdminDashboard: React.FC = () => {
     icon: React.ReactNode
   ) => (
     <Col xs={24} md={12} lg={8}>
-      <Card
-        title={
-          <span className="font-semibold text-lg">
-            {icon} {title} ({listData.length})
-          </span>
-        }
-        className="shadow-lg rounded-lg h-full"
-      >
+      <Card title={`${title} (${listData.length})`}>
         {listData.length > 0 ? (
           <List
-            itemLayout="horizontal"
             dataSource={listData}
             renderItem={(item) => (
               <List.Item
                 actions={[
                   <Button type="link" onClick={() => showModal(item)}>
-                    Ver Detalhes
+                    Detalhes
                   </Button>,
                 ]}
               >
@@ -287,36 +262,29 @@ const AdminDashboard: React.FC = () => {
             )}
           />
         ) : (
-          <Empty description="Nenhuma solicitação pendente" />
+          <Empty description="Nenhuma solicitação" />
         )}
       </Card>
     </Col>
   );
 
   return (
-    <div className="min-h-screen bg-gray-50 p-8">
-      <Spin spinning={loading} tip="Processando...">
-        <h1 className="text-3xl font-bold mb-8">Painel de Administração</h1>
-        <Row gutter={[24, 24]}>
+    <div className="p-8">
+      <Spin spinning={loading}>
+        <h1 className="text-2xl font-bold mb-6">Painel de Administração</h1>
+        <Row gutter={[16, 16]}>
           {renderList("Novos Cadastros", data.cadastros, <UserAddOutlined />)}
-          {renderList(
-            "Solicitações de Atualização",
-            data.atualizacoes,
-            <EditOutlined />
-          )}
-          {renderList(
-            "Solicitações de Exclusão",
-            data.exclusoes,
-            <DeleteOutlined />
-          )}
+          {renderList("Atualizações", data.atualizacoes, <EditOutlined />)}
+          {renderList("Exclusões", data.exclusoes, <DeleteOutlined />)}
         </Row>
       </Spin>
 
       {selectedItem && (
         <Modal
-          title={`Detalhes da Solicitação - ${selectedItem.nomeFantasia}`}
+          title={`Detalhes de ${selectedItem.nomeFantasia}`}
           visible={modalVisible}
           onCancel={() => setModalVisible(false)}
+          width={800}
           footer={[
             <Button
               key="reject"
@@ -338,41 +306,49 @@ const AdminDashboard: React.FC = () => {
         >
           <Descriptions bordered column={1} size="small">
             {Object.entries(selectedItem)
-              .filter(([key]) => key !== "dados_atualizacao")
-              .map(([key, value]) => ({ key, value }))
-              .sort((a, b) => {
-                const getScore = (key: string): number => {
-                  if (key === "ccmeiUrl") return 98;
-                  if (key === "logoUrl") return 99;
-                  if (key === "produtosImg") return 97;
-                  if (key === "nomeFantasia") return 96;
-                  if (key === "cnpj") return 100;
-                  if (key === "nome_responsave") return 95;
-                  if (key === "cpf_responsavel") return 94;
-
-                  return 0;
-                };
-                return getScore(b.key) - getScore(a.key);
-              })
-              .map(({ key, value }) => (
-                <Descriptions.Item key={key} label={key}>
+              .filter(
+                ([key, value]) =>
+                  key !== "dados_atualizacao" &&
+                  value !== null &&
+                  value !== "" &&
+                  value !== undefined
+              )
+              .sort(
+                ([keyA], [keyB]) =>
+                  (fieldConfig[keyA]?.order ?? 999) -
+                  (fieldConfig[keyB]?.order ?? 999)
+              )
+              .map(([key, value]) => (
+                <Descriptions.Item
+                  key={key}
+                  label={fieldConfig[key]?.label ?? key}
+                >
                   {renderValue(key, value, selectedItem.nomeFantasia)}
                 </Descriptions.Item>
               ))}
+
             {selectedItem.dados_atualizacao &&
               Object.keys(selectedItem.dados_atualizacao).length > 0 && (
                 <Descriptions.Item
-                  label="Dados para Atualizar"
+                  label={<Text strong>Dados para Atualizar</Text>}
                   style={{ backgroundColor: "#e6f7ff" }}
                 >
-                  {Object.entries(selectedItem.dados_atualizacao).map(
-                    ([key, value]) => (
-                      <div key={key}>
-                        <Text strong>{key}:</Text>{" "}
-                        {renderValue(key, value, selectedItem.nomeFantasia)}
-                      </div>
-                    )
-                  )}
+                  <div className="space-y-3 p-2">
+                    {Object.entries(selectedItem.dados_atualizacao)
+                      .sort(
+                        ([keyA], [keyB]) =>
+                          (fieldConfig[keyA]?.order ?? 999) -
+                          (fieldConfig[keyB]?.order ?? 999)
+                      )
+                      .map(([key, value]) => (
+                        <div key={key}>
+                          <Text strong>{fieldConfig[key]?.label ?? key}:</Text>
+                          <div className="pl-4 mt-1">
+                            {renderValue(key, value, selectedItem.nomeFantasia)}
+                          </div>
+                        </div>
+                      ))}
+                  </div>
                 </Descriptions.Item>
               )}
           </Descriptions>
