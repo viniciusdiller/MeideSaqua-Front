@@ -16,8 +16,12 @@ import {
 } from "antd";
 import { UploadOutlined, ArrowLeftOutlined } from "@ant-design/icons";
 import type { UploadFile } from "antd/es/upload/interface";
+import { useAuth } from "@/context/AuthContext";
+import { useEffect } from "react";
+import { useRouter } from "next/navigation";
+import { toast } from "sonner";
 
-// --- FUNÇÕES DE MÁSCARA (sem alterações) ---
+// --- FUNÇÕES DE MÁSCARA ---
 const maskCNAE = (value: string) => {
   return value
     .replace(/\D/g, "")
@@ -330,6 +334,8 @@ const CadastroMEIPage: React.FC = () => {
     title: "",
     subTitle: "",
   });
+  const { user, isLoading } = useAuth();
+  const router = useRouter();
 
   const handleLogoChange = ({ fileList }: { fileList: UploadFile[] }) =>
     setLogoFileList(fileList);
@@ -337,6 +343,29 @@ const CadastroMEIPage: React.FC = () => {
     setPortfolioFileList(fileList);
   const handleCCMEIChange = ({ fileList }: { fileList: UploadFile[] }) =>
     setCcmeiFileList(fileList);
+
+  useEffect(() => {
+    // Se ainda estiver a verificar o estado de login, não faz nada
+    if (isLoading) {
+      return;
+    }
+
+    // Se a verificação terminou e não há utilizador, redireciona
+    if (!user) {
+      toast.error("Você precisa estar logado para cadastrar um MEI.");
+      router.push("/login");
+    }
+  }, [user, isLoading, router]);
+
+  // 5. Adicionar um estado de carregamento para a página
+  // Isto impede que o formulário apareça rapidamente antes do redirecionamento
+  if (isLoading || !user) {
+    return (
+      <div className="flex justify-center items-center min-h-screen">
+        <p>Verificando autenticação...</p>
+      </div>
+    );
+  }
 
   const handleMaskChange = (
     e: React.ChangeEvent<HTMLInputElement>,
