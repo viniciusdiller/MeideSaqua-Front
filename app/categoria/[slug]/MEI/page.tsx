@@ -406,7 +406,7 @@ export default function MeiDetailPage({
                       <span className="text-sm font-medium">Instagram</span>
                     </a>
                     <a
-                      href={`https://wa.me/${meiDetails.contatoEstabelecimento.replace(
+                      href={`https://wa.me/55${meiDetails.contatoEstabelecimento.replace(
                         /\D/g,
                         ""
                       )}`}
