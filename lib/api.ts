@@ -135,3 +135,21 @@ export const removeEmojis = (text: string): string => {
     ""
   );
 };
+
+/**
+ * Formata uma data para o formato "Mês de Ano" em português.
+ * Exemplo: "outubro de 2025"
+ * @param dateString A data em formato de string (ex: "2025-10-15T...")
+ * @returns A data formatada.
+ */
+export function formatarDataParaMesAno(dateString: string): string {
+  if (!dateString) {
+    return "";
+  }
+  const data = new Date(dateString);
+  // Intl.DateTimeFormat é nativo do JavaScript e não precisa de imports problemáticos
+  return new Intl.DateTimeFormat("pt-BR", {
+    month: "long",
+    year: "numeric",
+  }).format(data);
+}

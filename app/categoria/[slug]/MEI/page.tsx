@@ -19,6 +19,7 @@ import {
   getEstablishmentById,
   getReviewsByEstablishment,
   deleteReview,
+  formatarDataParaMesAno,
 } from "@/lib/api";
 import AvaliacaoModalButton from "@/components/Pop-up Coments";
 import {
@@ -395,7 +396,25 @@ export default function MeiDetailPage({
                     <span className="text-gray-500 text-sm">
                       ({reviews.length} avaliações)
                     </span>
+                    {meiDetails.createdAt && (
+                      <div className="hidden sm:flex items-center text-sm text-gray-500 border-l-2 border-gray-300 pl-4">
+                        <CalendarDays className="h-4 w-4 mr-2" />
+                        <span>
+                          Membro desde {/* <<< 2. USE A NOVA FUNÇÃO AQUI */}
+                          {formatarDataParaMesAno(meiDetails.createdAt)}
+                        </span>
+                      </div>
+                    )}
                   </div>
+                  {meiDetails.createdAt && (
+                    <div className="flex items-center text-sm text-gray-500 border-l-2 border-gray-300 pl-4 mt-4 sm:hidden">
+                      <CalendarDays className="h-4 w-4 mr-2" />
+                      <span>
+                        Membro desde {/* <<< 2. USE A NOVA FUNÇÃO AQUI */}
+                        {formatarDataParaMesAno(meiDetails.createdAt)}
+                      </span>
+                    </div>
+                  )}
                 </div>
                 <p className="text-gray-700 leading-relaxed md:pl-2">
                   {meiDetails.descricao}
