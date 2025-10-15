@@ -87,15 +87,12 @@ const api = {
     return response.json();
   },
 
-  excluirEstabelecimento: async (data: { cnpj: string; motivo?: string }) => {
+  excluirEstabelecimento: async (formData: FormData) => {
     const response = await fetch(
       `${API_URL}/api/estabelecimentos/solicitar-exclusao`,
       {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(data),
+        body: formData, // Enviar como FormData para suportar o anexo
       }
     );
     if (!response.ok) {
@@ -496,24 +493,24 @@ const CadastroMEIPage: React.FC = () => {
   const handleDeleteSubmit = async (values: any) => {
     setLoading(true);
     try {
-      // CORREÇÃO: Campos do objeto com snake_case
-      const dataToSend: {
-        cnpj: string;
-        motivo?: string;
-        nome_responsavel: string;
-        cpf_responsavel: string;
-        emailEstabelecimento: string;
-      } = {
-        cnpj: values.cnpj,
-        nome_responsavel: values.nome_responsavel,
-        cpf_responsavel: values.cpf_responsavel,
-        emailEstabelecimento: values.emailEstabelecimento,
-      };
-      if (values.motivo) {
-        dataToSend.motivo = values.motivo;
+      const formData = new FormData();
+
+      // Adiciona os campos de texto ao FormData
+      Object.entries(values).forEach(([key, value]) => {
+        // Garante que não vamos adicionar o campo de confirmação ou o campo de ficheiro aqui
+        if (value && key !== "confirmacao" && key !== "ccmeiFile") {
+          formData.append(key, value as string);
+        }
+      });
+
+      // Adiciona o ficheiro CCMEI ao FormData
+      if (ccmeiFileList.length > 0 && ccmeiFileList[0].originFileObj) {
+        formData.append("ccmei", ccmeiFileList[0].originFileObj);
       }
 
-      await api.excluirEstabelecimento(dataToSend);
+      // Chama a API com o FormData
+      await api.excluirEstabelecimento(formData);
+
       setSubmittedMessage({
         title: "Solicitação de exclusão recebida!",
         subTitle:
@@ -1235,7 +1232,7 @@ const CadastroMEIPage: React.FC = () => {
         <Row gutter={24}>
           <Col xs={24} md={12}>
             <Form.Item
-              name="nomeResponsavel"
+              name="nome_responsavel"
               label="Nome Completo do Responsável"
               rules={[
                 {
@@ -1249,7 +1246,7 @@ const CadastroMEIPage: React.FC = () => {
           </Col>
           <Col xs={24} md={12}>
             <Form.Item
-              name="cpf"
+              name="cpf_responsavel"
               label="CPF do Responsável"
               rules={[
                 {
@@ -1261,10 +1258,11 @@ const CadastroMEIPage: React.FC = () => {
                   message: "CPF inválido!",
                 },
               ]}
+              help="Apenas aceitaremos a exclusão caso o CPF seja correspondente ao do cadastro."
             >
               <Input
                 placeholder="000.000.000-00"
-                name="cpf"
+                name="cpf_responsavel"
                 onChange={(e) => handleMaskChange(e, maskCPF)}
               />
             </Form.Item>

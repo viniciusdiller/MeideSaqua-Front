@@ -4,7 +4,11 @@ import { useState, useEffect, useRef } from "react";
 import Image from "next/image";
 import { ChevronLeft, ChevronRight } from "lucide-react"; // Using icons for a cleaner look
 
-const slides = [{ src: "/saquarema.png", alt: "Vista de Saquarema" }];
+const slides = [
+  { src: "/foto-praia.jpg", alt: "Imagem 1" },
+  { src: "/igreja-beach.jpg", alt: "Imagem 2" },
+  { src: "/igreja-barrinha.jpg", alt: "Imagem 3", position: "center 35%" },
+];
 
 export default function ImageCarousel() {
   const [current, setCurrent] = useState(0);
@@ -50,7 +54,10 @@ export default function ImageCarousel() {
             src={slide.src}
             alt={slide.alt}
             fill
-            style={{ objectFit: "cover" }}
+            style={{
+              objectFit: "cover",
+              objectPosition: slide.position || "center",
+            }}
             className={`transition-opacity duration-700 ease-in-out ${
               i === current ? "opacity-100" : "opacity-0"
             }`}
