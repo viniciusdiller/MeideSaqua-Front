@@ -105,6 +105,7 @@ const AdminDashboard: React.FC = () => {
     null
   );
   const router = useRouter();
+  const [isActionLoading, setIsActionLoading] = useState(false);
 
   const getFullImageUrl = (path: string): string => {
     if (!path) return "";
@@ -212,8 +213,10 @@ const AdminDashboard: React.FC = () => {
 
   const handleAction = async (action: "approve" | "reject") => {
     if (!selectedItem) return;
-    setLoading(true);
+
+    setIsActionLoading(true);
     const token = localStorage.getItem("admin_token");
+
     try {
       const response = await fetch(
         `${API_URL}/api/admin/${action}/${selectedItem.estabelecimentoId}`,
@@ -221,13 +224,27 @@ const AdminDashboard: React.FC = () => {
       );
       const result = await response.json();
       if (!response.ok) throw new Error(result.message);
+
       message.success(`Ação executada com sucesso!`);
-      setModalVisible(false);
-      fetchData();
+
+      // Atualização Otimista da UI
+      setData((prevData) => {
+        const newData = { ...prevData };
+        // Itera sobre as chaves (cadastros, atualizacoes, exclusoes)
+        (Object.keys(newData) as Array<keyof PendingData>).forEach((key) => {
+          newData[key] = newData[key].filter(
+            (item) => item.estabelecimentoId !== selectedItem.estabelecimentoId
+          );
+        });
+        return newData;
+      });
+
+      setModalVisible(false); // Fecha o modal
+      setSelectedItem(null); // Limpa o item selecionado
     } catch (error: any) {
       message.error(error.message);
     } finally {
-      setLoading(false);
+      setIsActionLoading(false); // Desativa o loading dos botões
     }
   };
 
@@ -291,6 +308,7 @@ const AdminDashboard: React.FC = () => {
               onClick={() => handleAction("reject")}
               icon={<CloseOutlined />}
               danger
+              loading={isActionLoading}
             >
               Recusar
             </Button>,
@@ -299,6 +317,7 @@ const AdminDashboard: React.FC = () => {
               type="primary"
               onClick={() => handleAction("approve")}
               icon={<CheckOutlined />}
+              loading={isActionLoading}
             >
               Confirmar
             </Button>,

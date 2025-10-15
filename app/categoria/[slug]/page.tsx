@@ -2,11 +2,22 @@
 import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import Link from "next/link";
-import { ArrowLeft, Clock, MapPin, Phone, Globe, Search } from "lucide-react";
+import {
+  ArrowLeft,
+  Clock,
+  MapPin,
+  Phone,
+  Globe,
+  Search,
+  SearchX,
+  PackageOpen,
+  Loader2,
+} from "lucide-react";
 import Image from "next/image";
 import { categories } from "../../page";
 import ModernCarousel from "@/components/ModernCarousel";
 import { getAllEstablishments } from "@/lib/api";
+import { Button } from "@/components/ui/button";
 
 interface PageProps {
   params: {
@@ -65,45 +76,60 @@ export default function CategoryPage({ params }: PageProps) {
 
   if (!category) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="text-center">
-          <h1 className="text-2xl font-bold text-gray-800 mb-4">
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4">
+        <div className="text-center p-8 bg-white rounded-2xl shadow-lg max-w-md w-full">
+          <SearchX className="mx-auto h-16 w-16 text-red-500 mb-4" />
+          <h1 className="text-2xl font-bold text-gray-800 mb-2">
             Categoria não encontrada
           </h1>
-          <Link href="/" className="text-blue-600 hover:text-blue-800">
-            Voltar ao início
-          </Link>
+          <p className="text-gray-600 mb-6">
+            A página que você está procurando não existe ou foi movida.
+          </p>
+          <Button asChild>
+            <Link href="/">Voltar ao Início</Link>
+          </Button>
         </div>
       </div>
     );
   }
 
+  // Estado: Carregando
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
-          <p className="text-gray-600">A carregar locais...</p>
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4">
+        <div className="text-center p-8 bg-white rounded-2xl shadow-lg max-w-md w-full">
+          <Loader2 className="mx-auto h-16 w-16 text-blue-600 animate-spin mb-4" />
+          <h1 className="text-2xl font-bold text-gray-800 mb-2">
+            A carregar locais...
+          </h1>
+          <p className="text-gray-600">
+            Estamos a procurar os melhores MEIs para si. Por favor, aguarde.
+          </p>
         </div>
       </div>
     );
   }
 
+  // Estado: Nenhum Local Encontrado
   if (!locations || locations.length === 0) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="text-center">
-          <h1 className="text-2xl font-bold text-gray-800 mb-4">
-            Nenhum local encontrado para esta categoria.
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4">
+        <div className="text-center p-8 bg-white rounded-2xl shadow-lg max-w-md w-full">
+          <PackageOpen className="mx-auto h-16 w-16 text-gray-400 mb-4" />
+          <h1 className="text-2xl font-bold text-gray-800 mb-2">
+            Nenhum MEI encontrado
           </h1>
-          <Link href="/" className="text-blue-600 hover:text-blue-800">
-            Voltar ao início
-          </Link>
+          <p className="text-gray-600 mb-6">
+            Ainda não há locais cadastrados nesta categoria. Tente outra ou
+            volte mais tarde!
+          </p>
+          <Button asChild>
+            <Link href="/">Voltar ao Início</Link>
+          </Button>
         </div>
       </div>
     );
   }
-
   return (
     <div className="min-h-screen bg-slate-50">
       <header className="relative h-48 md:h-32 w-full flex items-center justify-center text-white overflow-hidden shadow-lg">

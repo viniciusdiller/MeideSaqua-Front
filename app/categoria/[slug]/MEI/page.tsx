@@ -3,7 +3,7 @@
 import Link from "next/link";
 import {
   ArrowLeft,
-  Star,
+  Loader2,
   MapPin,
   Phone,
   PhoneForwarded,
@@ -43,7 +43,7 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import { Button } from "@/components/ui/button"; // Importe o componente de botão
-import { SearchX } from "lucide-react";
+import { SearchX, CalendarDays } from "lucide-react";
 
 const CustomStarIcon = ({
   fillPercentage = "100%",
@@ -232,8 +232,16 @@ export default function MeiDetailPage({
 
   if (isLoading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-100">
-        <p>Carregando...</p>
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4">
+        <div className="text-center p-8 bg-white rounded-2xl shadow-lg max-w-md w-full">
+          <Loader2 className="mx-auto h-16 w-16 text-blue-600 animate-spin mb-4" />
+          <h1 className="text-2xl font-bold text-gray-800 mb-2">
+            A carregar dados do MEI...
+          </h1>
+          <p className="text-gray-600">
+            A preparar os detalhes para si. Por favor, aguarde um momento.
+          </p>
+        </div>
       </div>
     );
   }
