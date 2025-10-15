@@ -43,7 +43,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-import { Button } from "@/components/ui/button"; // Importe o componente de botão
+import { Button } from "@/components/ui/button";
 import { SearchX, CalendarDays } from "lucide-react";
 
 const CustomStarIcon = ({
@@ -299,7 +299,6 @@ export default function MeiDetailPage({
   // Função que executa a exclusão após a confirmação
   const handleConfirmDelete = async () => {
     if (!reviewToDelete || !user?.token) {
-      // Se não houver ID ou token, apenas fecha o diálogo
       setIsDeleteDialogOpen(false);
       return;
     }
@@ -312,7 +311,6 @@ export default function MeiDetailPage({
       console.error("Erro ao excluir avaliação:", error);
       toast.error(error.message || "Não foi possível excluir o comentário.");
     } finally {
-      // Garante que o diálogo feche após a operação
       setIsDeleteDialogOpen(false);
       setReviewToDelete(null);
     }
@@ -400,7 +398,7 @@ export default function MeiDetailPage({
                       <div className="hidden sm:flex items-center text-sm text-gray-500 border-l-2 border-gray-300 pl-4">
                         <CalendarDays className="h-4 w-4 mr-2" />
                         <span>
-                          Membro desde {/* <<< 2. USE A NOVA FUNÇÃO AQUI */}
+                          Membro desde
                           {formatarDataParaMesAno(meiDetails.createdAt)}
                         </span>
                       </div>
@@ -410,7 +408,7 @@ export default function MeiDetailPage({
                     <div className="flex items-center text-sm text-gray-500 border-l-2 border-gray-300 pl-4 mt-4 sm:hidden">
                       <CalendarDays className="h-4 w-4 mr-2" />
                       <span>
-                        Membro desde {/* <<< 2. USE A NOVA FUNÇÃO AQUI */}
+                        Membro desde
                         {formatarDataParaMesAno(meiDetails.createdAt)}
                       </span>
                     </div>
