@@ -399,7 +399,7 @@ export default function MeiDetailPage({
                       <div className="hidden sm:flex items-center text-sm text-gray-500 border-l-2 border-gray-300 pl-4">
                         <CalendarDays className="h-4 w-4 mr-2" />
                         <span>
-                          Membro desde
+                          Membro desde{" "}
                           {formatarDataParaMesAno(meiDetails.createdAt)}
                         </span>
                       </div>
@@ -419,12 +419,12 @@ export default function MeiDetailPage({
                   <FormattedDescription text={meiDetails.descricao} />
                 </p>
                 <div className="hidden quinhentos:flex flex-col md:flex-row md:items-center md:justify-between gap-6 mt-6">
-                  <div className="flex items-center gap-6">
+                  <div className="flex items-center gap-6 ">
                     <a
                       href={meiDetails.instagram}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="flex items-center gap-2 text-gray-600 hover:text-pink-600 transition-colors"
+                      className="flex items-center gap-2 text-gray-600 hover:text-pink-600 transition-colors hover:cursor-pointer"
                     >
                       <div className="w-9 h-9 rounded-full bg-pink-100 flex items-center justify-center">
                         <Instagram size={18} strokeWidth={2} />
