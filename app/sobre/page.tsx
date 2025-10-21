@@ -24,7 +24,7 @@ export default function SobrePage() {
             <span className=" bg-gradient-to-r from-[#017DB9] to-[#22c362] bg-clip-text text-transparent">
               MEIdeSaquá
             </span>{" "}
-            uma plataforma inovadora pensada para os microempreendedores
+            ,uma plataforma inovadora pensada para os microempreendedores
             individuais (MEI’s) desta cidade. Mais que um site de catálogo, o{" "}
             <span className=" bg-gradient-to-r from-[#017DB9] to-[#22c362] bg-clip-text text-transparent">
               MEIdeSaquá
@@ -35,13 +35,14 @@ export default function SobrePage() {
           <p className="text-gray-700 leading-relaxed text-lg mt-4">
             Este espaço foi criado com o objetivo de{" "}
             <strong>incentivar um ambiente de negócios favorável</strong> aos
-            microempreendedores: seja para quem está começando, para quem está
-            iniciando ou para quem já atua como MEI e deseja se fortalecer, se
-            capacitar e atingir um maior potencial de clientes. Ele promove o{" "}
-            <strong>fomento ao empreendedorismo</strong>, a valorização dos
-            microempreendedores que muitas vezes enfrentam dificuldade em
-            divulgar seus produtos ou serviços ou encontrar para quem vender,
-            contribuindo para o aumento da longevidade dos pequenos negócios.
+            microempreendedores: seja para quem quer começar, para quem está
+            iniciando ou para quem já atua como MEI há mais tempo e deseja se
+            fortalecer, se capacitar e atingir um maior potencial de clientes.
+            Ele promove o <strong>fomento ao empreendedorismo</strong>, a
+            valorização dos microempreendedores que muitas vezes enfrentam
+            dificuldade em divulgar seus produtos ou serviços ou encontrar para
+            quem vender, contribuindo para o aumento da longevidade dos pequenos
+            negócios.
           </p>
           <p className="text-gray-700 leading-relaxed text-lg mt-4">
             Além disso, o{" "}
@@ -99,13 +100,13 @@ export default function SobrePage() {
             </span>
           </h2>
           <p className="text-gray-700 leading-relaxed text-lg">
-            Conforme o regulamento municipal, a Secretaria de Governança e
-            Sustentabilidade tem como competência formular políticas e ações
-            para o desenvolvimento sustentável, integrando aspectos sociais,
-            econômicos e de governança na gestão pública. Ao fomentar o
-            empreendedorismo local, essa secretaria atua justamente na promoção
-            da participação social, inovação, integração interinstitucional e
-            sustentabilidade econômica da cidade, o que torna o{" "}
+            A Secretaria de Governança e Sustentabilidade tem como competência
+            formular políticas e ações para o desenvolvimento sustentável,
+            integrando aspectos sociais, econômicos e de governança na gestão
+            pública. Ao fomentar o empreendedorismo local, essa secretaria atua
+            justamente na promoção da participação social, inovação, integração
+            interinstitucional e sustentabilidade econômica da cidade, o que
+            torna o{" "}
             <span className=" bg-gradient-to-r from-[#017DB9] to-[#22c362] bg-clip-text text-transparent">
               MEIdeSaquá
             </span>{" "}

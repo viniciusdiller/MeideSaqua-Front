@@ -18,6 +18,8 @@ import { categories } from "../../page";
 import ModernCarousel from "@/components/ModernCarousel";
 import { getAllEstablishments } from "@/lib/api";
 import { Button } from "@/components/ui/button";
+import FormattedDescription from "@/components/FormattedDescription";
+import MeiDetailPage from "./MEI/page";
 
 interface PageProps {
   params: {
@@ -231,7 +233,9 @@ export default function CategoryPage({ params }: PageProps) {
                       )}
                     </div>
                     <p className="text-gray-600 mb-4 text-sm break-words">
-                      {location.descricaoDiferencial}
+                      <FormattedDescription
+                        text={location.descricaoDiferencial}
+                      />
                     </p>
                     <div className="space-y-2 text-sm text-gray-500 mt-auto">
                       <div className="flex items-start gap-2">

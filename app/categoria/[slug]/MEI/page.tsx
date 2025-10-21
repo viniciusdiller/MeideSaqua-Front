@@ -45,6 +45,7 @@ import {
 } from "@/components/ui/alert-dialog";
 import { Button } from "@/components/ui/button";
 import { SearchX, CalendarDays } from "lucide-react";
+import FormattedDescription from "@/components/FormattedDescription";
 
 const CustomStarIcon = ({
   fillPercentage = "100%",
@@ -415,7 +416,7 @@ export default function MeiDetailPage({
                   )}
                 </div>
                 <p className="text-gray-700 leading-relaxed md:pl-2">
-                  {meiDetails.descricao}
+                  <FormattedDescription text={meiDetails.descricao} />
                 </p>
                 <div className="hidden quinhentos:flex flex-col md:flex-row md:items-center md:justify-between gap-6 mt-6">
                   <div className="flex items-center gap-6">
