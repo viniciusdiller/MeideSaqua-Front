@@ -30,9 +30,14 @@ const Footer = () => {
           <div className="text-center">
             <h3 className="font-bold uppercase text-gray-800 mb-4">Contato</h3>
             <ul className="space-y-3 text-gray-600">
-              <li className="flex items-center justify-center gap-3">
+              <li className="flex items-center justify-center gap-3 hover:text-blue-600 transition-colors">
                 <Mail size={16} />
-                <span>meidesaqua@gmail.com</span>
+                <a
+                  href="mailto:saladoempreendedor@saquarema.rj.gov.br"
+                  className="text-gray-700 hover:underline hover:text-blue-600"
+                >
+                  <span>meidesaqua@gmail.com</span>
+                </a>
               </li>
               <li className="flex items-center justify-center gap-3 hover:underline hover:text-blue-600 transition-colors">
                 <Phone size={16} />
