@@ -1133,7 +1133,10 @@ const CadastroMEIPage: React.FC = () => {
           </Select>
         </Form.Item>
         <Form.Item name="descricao" label="Nova Descrição do Serviço/Produto">
-          <TextArea rows={4} />
+          <TextArea
+            rows={4}
+            placeholder="Fale um pouco sobre o que você faz, quais produtos você vende ou tipo de serviço que realiza. Essa é a informação que os seus futuros clientes irão ver."
+          />
         </Form.Item>
         <Form.Item
           name="tagsInvisiveis"
