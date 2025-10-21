@@ -19,59 +19,105 @@ export default function SobrePage() {
 
         <section className="mb-8">
           <p className="text-gray-700 leading-relaxed text-lg">
-            O{" "}
+            A Prefeitura Municipal de Saquarema, por meio da Secretaria
+            Municipal de Governança e Sustentabilidade, apresenta o{" "}
             <span className=" bg-gradient-to-r from-[#017DB9] to-[#22c362] bg-clip-text text-transparent">
               MEIdeSaquá
             </span>{" "}
-            é a vitrine digital dos Microempreendedores Individuais de
-            Saquarema. Mais do que um site de produtos e serviços, é um espaço
-            de valorização do talento local, da criatividade e da dedicação de
-            quem empreende na nossa cidade.
-          </p>
-          <p className="text-gray-700 leading-relaxed text-lg mt-4">
-            Aqui, cada artesão, comerciante, prestador de serviço ou criador
-            encontra um canal direto para apresentar seu trabalho à comunidade e
-            aos visitantes. Assim, fortalecemos não apenas a economia local, mas
-            também a perpetuação dos saberes, tradições e expressões culturais
-            que tornam Saquarema única.
-          </p>
-          <p className="text-gray-700 leading-relaxed text-lg mt-4">
-            A Prefeitura Municipal de Saquarema acredita no poder do
-            empreendedorismo como motor de desenvolvimento econômico e social.
-            Por isso, apoia e cuida dos MEI’s, oferecendo suporte, capacitação e
-            oportunidades de crescimento. O{" "}
+            uma plataforma inovadora pensada para os microempreendedores
+            individuais (MEI’s) desta cidade. Mais que um site de catálogo, o{" "}
             <span className=" bg-gradient-to-r from-[#017DB9] to-[#22c362] bg-clip-text text-transparent">
               MEIdeSaquá
             </span>{" "}
-            é parte desse compromisso: um projeto que une inovação digital,
-            identidade cultural e o fortalecimento dos negócios locais.
+            é um ambiente de valorização do talento local, da criatividade e da
+            dedicação de quem empreende em Saquarema.
+          </p>
+          <p className="text-gray-700 leading-relaxed text-lg mt-4">
+            Este espaço foi criado com o objetivo de{" "}
+            <strong>incentivar um ambiente de negócios favorável</strong> aos
+            microempreendedores: seja para quem está começando, para quem está
+            iniciando ou para quem já atua como MEI e deseja se fortalecer, se
+            capacitar e atingir um maior potencial de clientes. Ele promove o{" "}
+            <strong>fomento ao empreendedorismo</strong>, a valorização dos
+            microempreendedores que muitas vezes enfrentam dificuldade em
+            divulgar seus produtos ou serviços ou encontrar para quem vender,
+            contribuindo para o aumento da longevidade dos pequenos negócios.
+          </p>
+          <p className="text-gray-700 leading-relaxed text-lg mt-4">
+            Além disso, o{" "}
+            <span className=" bg-gradient-to-r from-[#017DB9] to-[#22c362] bg-clip-text text-transparent">
+              MEIdeSaquá
+            </span>{" "}
+            oferece um{" "}
+            <strong>tratamento diferenciado aos MEI’s de Saquarema</strong>,
+            garantindo condições especiais de apoio e visibilidade na economia
+            local. A plataforma funciona como uma ponte direta entre os
+            microempreendedores da cidade e os potenciais consumidores —
+            fortalecendo tanto a economia criativa quanto o comércio e serviços
+            de proximidade.
           </p>
         </section>
 
         <section className="mb-8">
           <h2 className="text-2xl font-semibold text-[#007a73] mb-3">
             <span className=" bg-gradient-to-r from-[#017DB9] to-[#22c362] bg-clip-text text-transparent">
-              Quais são os principais recursos do MEIdeSaquá?
+              Quais são os principais objetivos do MEIdeSaquá?
             </span>
           </h2>
           <ul className="list-disc list-inside text-gray-700 leading-relaxed text-lg space-y-2">
             <li>
-              Divulgação de microempreendedores e pequenos negócios da cidade.
-            </li>
-            <li>Informações sobre produtos, serviços e contatos.</li>
-            <li>Interface moderna e intuitiva aos usuários.</li>
-            <li>
-              Conexão direta entre Microempreendedores de Saquarema e potenciais
-              consumidores.
+              Divulgar e promover microempreendedores de Saquarema, fortalecendo
+              o eixo local de negócios.{" "}
             </li>
             <li>
-              Plataforma gratuita que incentiva a economia criativa e
-              sustentável de Saquarema.
+              Oferecer informações sobre produtos, serviços, contatos e canais
+              de conexão com clientes.
+            </li>
+            <li>
+              {" "}
+              Estimular a formalização dos pequenos negócios, uma vez que a
+              plataforma é exclusiva para MEI’s{" "}
+              <strong>
+                cadastrados e regularizados no município de Saquarema
+              </strong>
+              .
+            </li>
+            <li>
+              Criar novas oportunidades de crescimento para os MEI’s ao
+              apresentar um canal moderno, intuitivo e gratuito de visibilidade.
+            </li>
+            <li>
+              Fortalecer a economia local sustentando saberes, tradições e
+              expressões culturais que fazem de Saquarema um lugar singular para
+              empreender.
             </li>
           </ul>
+          <h2 className="text-2xl font-semibold text-[#007a73] mb-3 mt-10">
+            <span className=" bg-gradient-to-r from-[#017DB9] to-[#22c362] bg-clip-text text-transparent">
+              Por que a Secretaria de Governança e Sustentabilidade apoia esse
+              projeto?
+            </span>
+          </h2>
+          <p className="text-gray-700 leading-relaxed text-lg">
+            Conforme o regulamento municipal, a Secretaria de Governança e
+            Sustentabilidade tem como competência formular políticas e ações
+            para o desenvolvimento sustentável, integrando aspectos sociais,
+            econômicos e de governança na gestão pública. Ao fomentar o
+            empreendedorismo local, essa secretaria atua justamente na promoção
+            da participação social, inovação, integração interinstitucional e
+            sustentabilidade econômica da cidade, o que torna o{" "}
+            <span className=" bg-gradient-to-r from-[#017DB9] to-[#22c362] bg-clip-text text-transparent">
+              MEIdeSaquá
+            </span>{" "}
+            uma iniciativa alinhada com sua missão institucional. Além disso, o
+            município de Saquarema tem investido em programas de apoio ao MEI e
+            ao empreendedorismo local, reconhecendo que fortalecer pequenos
+            negócios impacta diretamente no desenvolvimento econômico, na
+            geração de emprego e renda no território.
+          </p>
         </section>
 
-        <section className="mb-8">
+        <section className="mb-8 border-t pt-8">
           <h2 className="text-2xl font-semibold text-[#007a73] mb-3">
             <span className=" bg-gradient-to-r from-[#017DB9] to-[#22c362] bg-clip-text text-transparent">
               Sou um Microempreendedor Individual (MEI) cadastrado em Saquarema,
@@ -82,7 +128,9 @@ export default function SobrePage() {
             Se você possui o seu registro como MEI cadastrado e atualizado,
             basta acessar a página “
             <Link href="/cadastro-mei" legacyBehavior>
-              <a className="text-blue-600 hover:underline">Cadastro MEI</a>
+              <a className="text-blue-600 hover:underline">
+                Cadastro MEIdeSaquá
+              </a>
             </Link>
             ”, lá você terá acesso ao formulário para incluir suas informações
             que posteriormente serão validadas pela equipe e disponibilizadas
@@ -121,7 +169,9 @@ export default function SobrePage() {
           <p className="text-gray-700 leading-relaxed text-lg">
             Na aba de “
             <Link href="/cadastro-mei" legacyBehavior>
-              <a className="text-blue-600 hover:underline">Cadastro MEI</a>
+              <a className="text-blue-600 hover:underline">
+                Cadastro MEIdeSaquá
+              </a>
             </Link>
             ”, haverá também a opção de atualizar ou excluir cadastro, basta que
             preencha com suas informações necessárias que faremos as
