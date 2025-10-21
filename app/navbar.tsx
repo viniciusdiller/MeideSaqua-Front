@@ -16,21 +16,26 @@ import { useAuth } from "@/context/AuthContext";
 
 const AnimatedLogo = () => {
   const logos = [
-    { 
-      src: "/LogoMeideSaqua.png", 
-      alt: "Logo MeideSaqua", 
-      className: "h-10 w-auto" 
+    {
+      src: "/LogoMeideSaqua.png",
+      alt: "Logo MeideSaqua",
+      className: "h-10 w-auto",
     },
-    { 
-      src: "/logo2sq.png", 
-      alt: "Logo Prefeitura de Saquarema", 
-      className: "h-12 w-auto" 
+    {
+      src: "/Sala-do-Empreendedor.jpg",
+      alt: "Logo Sala do Empreendedor",
+      className: "h-12 w-auto",
+    },
+    {
+      src: "/logo2sq.png",
+      alt: "Logo Prefeitura de Saquarema",
+      className: "h-12 w-auto",
     },
     {
       src: "/logoSMGS.png",
-      alt:"Logo Secretaria Municipal de Governança e Sustentabilidade",
-      className: "h-12 w-auto"
-    }
+      alt: "Logo Secretaria Municipal de Governança e Sustentabilidade",
+      className: "h-12 w-auto",
+    },
   ];
 
   const [index, setIndex] = useState(0);
@@ -142,11 +147,7 @@ export function Navbar() {
     <header className="bg-white/90 backdrop-blur-sm border-b border-blue-100 sticky top-0 z-50 shadow-md">
       <div className="relative container mx-auto px-4 py-1 sm:py-1 md:py-1 flex items-center justify-between">
         <div className="hidden teste:flex items-center gap-10">
-          
-          <Link
-            href="/"
-            aria-label="Página Inicial"
-          >
+          <Link href="/" aria-label="Página Inicial">
             <AnimatedLogo />
           </Link>
 
@@ -179,8 +180,12 @@ export function Navbar() {
         </div>
 
         <div className="teste:hidden w-full">
-          <Link href="/" aria-label="Página Inicial" className="flex justify-center">
-             <AnimatedLogo />
+          <Link
+            href="/"
+            aria-label="Página Inicial"
+            className="flex justify-center"
+          >
+            <AnimatedLogo />
           </Link>
         </div>
 

@@ -32,7 +32,7 @@ const Footer = () => {
             <ul className="space-y-3 text-gray-600">
               <li className="flex items-center justify-center gap-3">
                 <Mail size={16} />
-                <span>meidesaqua@saquarema.rj.gov.br</span>
+                <span>meidesaqua@gmail.com</span>
               </li>
               <li className="flex items-center justify-center gap-3 hover:underline hover:text-blue-600 transition-colors">
                 <Phone size={16} />
