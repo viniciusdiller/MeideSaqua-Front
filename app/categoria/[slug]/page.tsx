@@ -105,7 +105,7 @@ export default function CategoryPage({ params }: PageProps) {
             A carregar locais...
           </h1>
           <p className="text-gray-600">
-            Estamos a procurar os melhores MEIs para si. Por favor, aguarde.
+            Estamos a procurar os melhores MEI's para si. Por favor, aguarde.
           </p>
         </div>
       </div>
@@ -170,7 +170,7 @@ export default function CategoryPage({ params }: PageProps) {
             className="text-white/90 mt-2 text-sm md:text-base max-w-2xl mx-auto"
             style={{ textShadow: "1px 1px 4px rgba(0,0,0,0.7)" }}
           >
-            Explore os melhores MEIs de Saquarema em{" "}
+            Explore os melhores MEI's de Saquarema em{" "}
             {category.title.toLowerCase()}.
           </motion.p>
         </div>

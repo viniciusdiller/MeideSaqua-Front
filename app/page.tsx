@@ -185,7 +185,7 @@ export default function HomePage() {
             <h2 className="text-4xl md:text-6xl font-bold text-gray-800 mb-6">
               Vitrine de{" "}
               <span className="bg-gradient-to-r from-blue-900 to-blue-500 bg-clip-text text-transparent">
-                MEIs
+                MEI's
               </span>{" "}
               de Saquarema
             </h2>
