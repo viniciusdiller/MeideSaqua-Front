@@ -1,11 +1,20 @@
 const API_URL = process.env.NEXT_PUBLIC_API_URL;
 
+/**
+ * Função principal para chamadas de API.
+ * Lida com headers, FormData, e tratamento de erros.
+ */
 async function fetchApi(path: string, options: RequestInit = {}) {
   const headers: Record<string, string> = {
-    "Content-Type": "application/json",
     ...(options.headers as Record<string, string>),
   };
 
+  // Adiciona Content-Type: application/json se o body existir e NÃO for FormData
+  if (options.body && !(options.body instanceof FormData)) {
+    headers["Content-Type"] = "application/json";
+  }
+
+  // Adiciona o header de Autorização se ele foi passado nas opções
   if (options.headers && "Authorization" in options.headers) {
     headers["Authorization"] = (options.headers as Record<string, string>)[
       "Authorization"
@@ -18,7 +27,14 @@ async function fetchApi(path: string, options: RequestInit = {}) {
   });
 
   const text = await response.text();
-  const data = text ? JSON.parse(text) : {};
+  let data: any;
+
+  try {
+    // Tenta parsear o JSON, se falhar, usa um objeto de erro com o texto
+    data = text ? JSON.parse(text) : {};
+  } catch (error) {
+    data = { message: text || "Resposta inválida da API" };
+  }
 
   if (!response.ok) {
     const errorMessage =
@@ -30,6 +46,10 @@ async function fetchApi(path: string, options: RequestInit = {}) {
 
   return data;
 }
+
+// ==================================================================
+// --- Funções de Autenticação e Usuário ---
+// ==================================================================
 
 export const registerUser = (data: any) =>
   fetchApi("/api/auth/cadastro", {
@@ -86,23 +106,6 @@ export const deleteUserAccount = (token: string) =>
     },
   });
 
-export const getAllEstablishments = () => fetchApi("/api/estabelecimentos");
-
-export const getEstablishmentById = (id: string) =>
-  fetchApi(`/api/estabelecimentos/${id}`);
-
-export const getReviewsByEstablishment = (id: string) =>
-  fetchApi(`/api/avaliacoes/estabelecimento/${id}`);
-
-export const submitReview = (data: any, token: string) =>
-  fetchApi("/api/avaliacoes", {
-    method: "POST",
-    headers: {
-      Authorization: `Bearer ${token}`,
-    },
-    body: JSON.stringify(data),
-  });
-
 export const confirmEmailChange = (token: string) =>
   fetchApi(`/api/auth/confirm-email-change?token=${token}`, {
     method: "GET",
@@ -114,6 +117,41 @@ export const resetPassword = (data: { token: string; newPassword: string }) =>
     body: JSON.stringify(data),
   });
 
+// ==================================================================
+// --- Funções Específicas de ESTABELECIMENTO (MeideSaqua) ---
+// ==================================================================
+
+/**
+ * Busca todos os estabelecimentos ATIVOS (o backend já faz esse filtro)
+ */
+export const getAllEstablishments = () => fetchApi("/api/estabelecimentos");
+
+/**
+ * Busca um estabelecimento ATIVO específico pelo ID.
+ */
+export const getEstablishmentById = (id: string) =>
+  fetchApi(`/api/estabelecimentos/${id}`);
+
+/**
+ * Busca avaliações de um ESTABELECIMENTO.
+ * O nome está correto (getReviewsByEstablishment) para bater com a página MEI.
+ */
+export const getReviewsByEstablishment = (id: string) =>
+  fetchApi(`/api/avaliacoes/estabelecimento/${id}`);
+
+// ==================================================================
+// --- Funções de Avaliação (MeideSaqua) ---
+// ==================================================================
+
+export const submitReview = (data: any, token: string) =>
+  fetchApi("/api/avaliacoes", {
+    method: "POST",
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+    body: JSON.stringify(data),
+  });
+
 export const deleteReview = (id: number, token: string) =>
   fetchApi(`/api/avaliacoes/${id}`, {
     method: "DELETE",
@@ -122,34 +160,83 @@ export const deleteReview = (id: number, token: string) =>
     },
   });
 
+// ==================================================================
+// --- Funções de ADMIN (MeideSaqua) ---
+// ==================================================================
+
 /**
- * Remove emojis de uma string.
- * @param text A string de entrada.
- * @returns A string sem emojis.
+ * [ADMIN] Busca todas as solicitações pendentes.
  */
+export const getPendingAdminRequests = (token: string) =>
+  fetchApi("/api/admin/pending", {
+    method: "GET",
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  });
+
+/**
+ * [ADMIN] Busca todos os estabelecimentos ativos (aprovados).
+ * CORREÇÃO: Esta função agora chama a rota pública, que já retorna apenas os ativos.
+ */
+export const getAllActiveEstablishments = (token: string) =>
+  fetchApi("/api/estabelecimentos", {
+    method: "GET",
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  });
+
+/**
+ * [ADMIN] Deleta (desativa) um estabelecimento.
+ * CORREÇÃO: Aponta para a rota de alterar status para 'ativo: false'.
+ */
+export const adminDeleteEstablishment = (id: number, token: string) =>
+  fetchApi(`/api/estabelecimentos/${id}/status`, {
+    method: "POST", // Método POST como no seu backend (estabelecimento.routes.ts)
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+    body: JSON.stringify({ ativo: false }), // Soft delete
+  });
+
+/**
+ * [ADMIN] Atualiza um estabelecimento (usa FormData para arquivos).
+ * CORREÇÃO: Aponta para a rota de solicitar atualização.
+ */
+export const adminUpdateEstablishment = (
+  id: number, // O ID não é usado na URL, mas é mantido por consistência
+  data: FormData,
+  token: string
+) =>
+  fetchApi(`/api/estabelecimentos/solicitar-atualizacao`, {
+    method: "PUT",
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+    body: data,
+  });
+
+// ==================================================================
+// --- Funções Utilitárias (Comuns) ---
+// ==================================================================
+
 export const removeEmojis = (text: string): string => {
   if (!text) return "";
-  // Regex que corresponde aos emojis para substituí-los por uma string vazia
   return text.replace(
     /[\u{1F600}-\u{1F64F}\u{1F300}-\u{1F5FF}\u{1F680}-\u{1F6FF}\u{1F700}-\u{1F77F}\u{1F780}-\u{1F7FF}\u{1F800}-\u{1F8FF}\u{1F900}-\u{1F9FF}\u{1FA00}-\u{1FA6F}\u{1FA70}-\u{1FAFF}\u{2600}-\u{26FF}\u{2700}-\u{27BF}]/gu,
     ""
   );
 };
 
-/**
- * Formata uma data para o formato "Mês de Ano" em português.
- * Exemplo: "outubro de 2025"
- * @param dateString A data em formato de string (ex: "2025-10-15T...")
- * @returns A data formatada.
- */
 export function formatarDataParaMesAno(dateString: string): string {
   if (!dateString) {
     return "";
   }
   const data = new Date(dateString);
-  // Intl.DateTimeFormat é nativo do JavaScript e não precisa de imports problemáticos
   return new Intl.DateTimeFormat("pt-BR", {
     month: "long",
     year: "numeric",
   }).format(data);
 }
+

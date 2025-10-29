@@ -5,7 +5,7 @@ import "./globals.css";
 import { Navbar } from "./navbar";
 import { AuthProvider } from "@/context/AuthContext";
 import { Toaster } from "@/components/ui/sonner";
-import Footer from "@/components/footer";
+import {ConditionalFooter} from "@/components/ConditionalFooter";
 import AccessibilityFeatures from "@/components/AccessibilityFeatures";
 import AccessibilityStyles from "@/components/AccessibilityStyles"; // 1. IMPORTE O NOVO COMPONENTE
 
@@ -54,7 +54,7 @@ export default function RootLayout({
         <AuthProvider>
           <Navbar />
           <main className="flex-grow">{children}</main>
-          <Footer />
+          <ConditionalFooter />
           <Toaster richColors />
           <AccessibilityFeatures />
         </AuthProvider>
