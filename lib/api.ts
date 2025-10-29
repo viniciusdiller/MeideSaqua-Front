@@ -192,12 +192,12 @@ export const getAllActiveEstablishments = (token: string) =>
  * CORREÇÃO: Aponta para a rota de alterar status para 'ativo: false'.
  */
 export const adminDeleteEstablishment = (id: number, token: string) =>
-  fetchApi(`/api/estabelecimentos/${id}/status`, {
-    method: "POST", // Método POST como no seu backend (estabelecimento.routes.ts)
+  fetchApi(`/api/admin/estabelecimento/${id}`, { // Rota correta (a sua rota)
+    method: "DELETE", // Método correto
     headers: {
       Authorization: `Bearer ${token}`,
     },
-    body: JSON.stringify({ ativo: false }), // Soft delete
+    // O body não é necessário para um DELETE
   });
 
 /**

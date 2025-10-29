@@ -30,7 +30,7 @@ import {
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { getPendingAdminRequests } from "@/lib/api"; // Esta função é genérica, o que é ótimo
-// import AdminEstabelecimentoModal from "@/components/AdminEstabelecimentoModal"; // Você precisará criar este componente
+import AdminEstabelecimentoModal from "@/components/AdminEstabelecimentoModal";
 import { Estabelecimento, ImagemProduto } from "@/types/Interface-Estabelecimento"; // Usando o Tipo que definimos
 
 const { Text, Title } = Typography;
@@ -586,7 +586,7 @@ const AdminDashboard: React.FC = () => {
       )}
 
       {/* --- NOVO MODAL DE EDIÇÃO (ADAPTADO) --- */}
-      {/*
+      {
       <AdminEstabelecimentoModal
         estabelecimento={selectedItem}
         visible={isEditModalVisible}
@@ -601,7 +601,7 @@ const AdminDashboard: React.FC = () => {
         mode="edit-and-approve"
         onEditAndApprove={handleEditAndApproveSubmit}
       />
-      */}
+      }
     </div>
   );
 };

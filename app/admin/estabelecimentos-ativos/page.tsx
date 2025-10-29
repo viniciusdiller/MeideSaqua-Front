@@ -27,7 +27,7 @@ import {
   getAllActiveEstablishments, // NOVA função da API
   adminDeleteEstablishment, // NOVA função da API
 } from "@/lib/api";
-// import AdminEstabelecimentoModal from "@/components/AdminEstabelecimentoModal"; // Assumindo que você criará este modal
+import AdminEstabelecimentoModal from "@/components/AdminEstabelecimentoModal"; 
 import { Estabelecimento } from "@/types/Interface-Estabelecimento"; // NOVO tipo
 
 const { Title, Text } = Typography;
@@ -242,17 +242,12 @@ const EstabelecimentosAtivosPage: React.FC = () => {
         )}
       </Spin>
 
-      {/* NOTA: Você precisará criar o componente AdminEstabelecimentoModal,
-        assim como você tinha o AdminProjetoModal.
-      */}
-      {/* {selectedItem && (
         <AdminEstabelecimentoModal
           estabelecimento={selectedItem}
           visible={isEditModalVisible}
           onClose={handleModalClose}
           mode="edit-only"
         />
-      )} */}
     </div>
   );
 };
