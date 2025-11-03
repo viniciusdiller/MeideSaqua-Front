@@ -15,6 +15,8 @@ import {
   Tabs,
   Input,
   Popconfirm,
+  Grid, // 1. IMPORTADO
+  Pagination, // 2. IMPORTADO
 } from "antd";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
@@ -24,17 +26,19 @@ import {
   DeleteOutlined,
 } from "@ant-design/icons";
 import {
-  getAllActiveEstablishments, // NOVA função da API
-  adminDeleteEstablishment, // NOVA função da API
+  getAllActiveEstablishments,
+  adminDeleteEstablishment,
 } from "@/lib/api";
-import AdminEstabelecimentoModal from "@/components/AdminEstabelecimentoModal"; 
-import { Estabelecimento } from "@/types/Interface-Estabelecimento"; // NOVO tipo
+import AdminEstabelecimentoModal from "@/components/AdminEstabelecimentoModal";
+import { Estabelecimento } from "@/types/Interface-Estabelecimento";
 
 const { Title, Text } = Typography;
 const { Search } = Input;
 const { TabPane } = Tabs;
+const { useBreakpoint } = Grid; // 3. IMPORTADO
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL;
+const PAGE_SIZE = 6; // 4. ADICIONADO (você pode ajustar este número)
 
 // Helper para obter URL completa da imagem
 const getFullImageUrl = (path: string): string => {
@@ -57,7 +61,9 @@ const EstabelecimentosAtivosPage: React.FC = () => {
     null
   );
   const [isEditModalVisible, setIsEditModalVisible] = useState(false);
+  const [currentPage, setCurrentPage] = useState(1); // 5. ADICIONADO ESTADO
   const router = useRouter();
+  const screens = useBreakpoint(); // 6. ADICIONADO
 
   // Busca os dados (similar ao de projetos)
   const fetchData = useCallback(async () => {
@@ -69,7 +75,6 @@ const EstabelecimentosAtivosPage: React.FC = () => {
       return;
     }
     try {
-      // Usa a nova função da API
       const data = await getAllActiveEstablishments(token);
       setEstabelecimentos(data);
       setFilteredEstabelecimentos(data);
@@ -91,10 +96,10 @@ const EstabelecimentosAtivosPage: React.FC = () => {
       (e) =>
         e.nomeFantasia.toLowerCase().includes(lowerCaseValue) ||
         e.cnpj.toLowerCase().includes(lowerCaseValue) ||
-        (e.categoria &&
-          e.categoria.toLowerCase().includes(lowerCaseValue))
+        (e.categoria && e.categoria.toLowerCase().includes(lowerCaseValue))
     );
     setFilteredEstabelecimentos(filtered);
+    setCurrentPage(1); // 7. ADICIONADO (reseta a página na busca)
   };
 
   const openEditModal = (estabelecimento: Estabelecimento) => {
@@ -120,7 +125,6 @@ const EstabelecimentosAtivosPage: React.FC = () => {
 
     setLoading(true);
     try {
-      // Usa a nova função da API
       await adminDeleteEstablishment(estabelecimentoId, token);
       message.success("Estabelecimento excluído com sucesso!");
       fetchData(); // Recarrega a lista
@@ -128,6 +132,11 @@ const EstabelecimentosAtivosPage: React.FC = () => {
       message.error(error.message || "Falha ao excluir o estabelecimento.");
       setLoading(false);
     }
+  };
+
+  // 8. ADICIONADO (reseta a página ao trocar de aba)
+  const handleTabChange = () => {
+    setCurrentPage(1);
   };
 
   // Agrupa os estabelecimentos por CATEGORIA (em vez de ODS)
@@ -147,8 +156,11 @@ const EstabelecimentosAtivosPage: React.FC = () => {
     a.localeCompare(b)
   );
 
+  // 9. ADICIONADO (para responsividade das abas)
+  const tabPosition = screens.md ? "left" : "top";
+
   return (
-    <div className="p-8">
+    <div className="p-4 md:p-8"> {/* Padding responsivo */}
       <Link href="/admin/dashboard" passHref>
         <Button icon={<ArrowLeftOutlined />} type="text" className="mb-4">
           Voltar ao Dashboard
@@ -172,82 +184,112 @@ const EstabelecimentosAtivosPage: React.FC = () => {
         {filteredEstabelecimentos.length === 0 && !loading ? (
           <Empty description="Nenhum estabelecimento ativo encontrado." />
         ) : (
-          <Tabs defaultActiveKey={sortedCategories[0]} tabPosition="left">
-            {sortedCategories.map((categoria) => (
-              <TabPane
-                tab={`${categoria} (${groupedEstabelecimentos[categoria].length})`}
-                key={categoria}
-              >
-                <Row gutter={[16, 16]}>
-                  {groupedEstabelecimentos[categoria].map((estabelecimento) => (
-                    <Col
-                      xs={24}
-                      md={12}
-                      lg={8}
-                      key={estabelecimento.estabelecimentoId}
-                    >
-                      <Card
-                        hoverable
-                        actions={[
-                          <Button
-                            type="link"
-                            icon={<EditOutlined />}
-                            onClick={() => openEditModal(estabelecimento)}
-                          >
-                            Editar
-                          </Button>,
-                          <Popconfirm
-                            key="delete"
-                            title="Excluir Estabelecimento"
-                            description="Tem certeza que deseja excluir este estabelecimento? Esta ação não pode ser desfeita."
-                            onConfirm={() =>
-                              handleDelete(estabelecimento.estabelecimentoId)
-                            }
-                            okText="Sim, Excluir"
-                            cancelText="Não"
-                            okButtonProps={{ danger: true }}
-                          >
-                            <Button type="link" danger icon={<DeleteOutlined />}>
-                              Excluir
-                            </Button>
-                          </Popconfirm>,
-                        ]}
+          <Tabs
+            defaultActiveKey={sortedCategories[0]}
+            tabPosition={tabPosition} // 10. ATUALIZADO
+            onChange={handleTabChange} // 11. ADICIONADO
+          >
+            {sortedCategories.map((categoria) => {
+              // 12. LÓGICA DE PAGINAÇÃO POR ABA
+              const allEstabelecimentosForCategoria =
+                groupedEstabelecimentos[categoria];
+              const totalCount = allEstabelecimentosForCategoria.length;
+              const estabelecimentosToShow =
+                allEstabelecimentosForCategoria.slice(
+                  (currentPage - 1) * PAGE_SIZE,
+                  currentPage * PAGE_SIZE
+                );
+
+              return (
+                <TabPane
+                  tab={`${categoria} (${totalCount})`} // Mostra o total
+                  key={categoria}
+                >
+                  <Row gutter={[16, 16]}>
+                    {/* 13. MAPEIA APENAS OS ITENS DA PÁGINA */}
+                    {estabelecimentosToShow.map((estabelecimento) => (
+                      <Col
+                        xs={24}
+                        md={12}
+                        lg={8}
+                        key={estabelecimento.estabelecimentoId}
                       >
-                        <Card.Meta
-                          avatar={
-                            <Avatar
-                              src={getFullImageUrl(
-                                estabelecimento.logoUrl || ""
-                              )}
-                            />
-                          }
-                          title={estabelecimento.nomeFantasia}
-                          description={
-                            <>
-                              <Text>CNPJ: {estabelecimento.cnpj}</Text>
-                              <br />
-                              <Text type="secondary">
-                                {estabelecimento.status}
-                              </Text>
-                            </>
-                          }
-                        />
-                      </Card>
-                    </Col>
-                  ))}
-                </Row>
-              </TabPane>
-            ))}
+                        <Card
+                          hoverable
+                          actions={[
+                            <Button
+                              type="link"
+                              icon={<EditOutlined />}
+                              onClick={() => openEditModal(estabelecimento)}
+                            >
+                              Editar
+                            </Button>,
+                            <Popconfirm
+                              key="delete"
+                              title="Excluir Estabelecimento"
+                              description="Tem certeza que deseja excluir este estabelecimento? Esta ação não pode ser desfeita."
+                              onConfirm={() =>
+                                handleDelete(estabelecimento.estabelecimentoId)
+                              }
+                              okText="Sim, Excluir"
+                              cancelText="Não"
+                              okButtonProps={{ danger: true }}
+                            >
+                              <Button type="link" danger icon={<DeleteOutlined />}>
+                                Excluir
+                              </Button>
+                            </Popconfirm>,
+                          ]}
+                        >
+                          <Card.Meta
+                            avatar={
+                              <Avatar
+                                src={getFullImageUrl(
+                                  estabelecimento.logoUrl || ""
+                                )}
+                              />
+                            }
+                            title={estabelecimento.nomeFantasia}
+                            description={
+                              <>
+                                <Text>CNPJ: {estabelecimento.cnpj}</Text>
+                                <br />
+                                <Text type="secondary">
+                                  {estabelecimento.status}
+                                </Text>
+                              </>
+                            }
+                          />
+                        </Card>
+                      </Col>
+                    ))}
+                  </Row>
+
+                  {/* 14. RENDERIZA O COMPONENTE DE PAGINAÇÃO */}
+                  {totalCount > PAGE_SIZE && (
+                    <div className="mt-6 text-center">
+                      <Pagination
+                        current={currentPage}
+                        pageSize={PAGE_SIZE}
+                        total={totalCount}
+                        onChange={(page) => setCurrentPage(page)}
+                        showSizeChanger={false}
+                      />
+                    </div>
+                  )}
+                </TabPane>
+              );
+            })}
           </Tabs>
         )}
       </Spin>
 
-        <AdminEstabelecimentoModal
-          estabelecimento={selectedItem}
-          visible={isEditModalVisible}
-          onClose={handleModalClose}
-          mode="edit-only"
-        />
+      <AdminEstabelecimentoModal
+        estabelecimento={selectedItem}
+        visible={isEditModalVisible}
+        onClose={handleModalClose}
+        mode="edit-only" // Modo correto para esta página
+      />
     </div>
   );
 };

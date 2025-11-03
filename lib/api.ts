@@ -205,14 +205,15 @@ export const adminDeleteEstablishment = (id: number, token: string) =>
  * CORREÇÃO: Aponta para a rota de solicitar atualização.
  */
 export const adminUpdateEstablishment = (
-  id: number, // O ID não é usado na URL, mas é mantido por consistência
+  id: number, // O ID agora é usado corretamente na URL
   data: FormData,
   token: string
 ) =>
-  fetchApi(`/api/estabelecimentos/solicitar-atualizacao`, {
-    method: "PUT",
+  fetchApi(`/api/admin/edit-and-approve/${id}`, {
+    method: "POST", // Baseado no seu dashboard, este endpoint espera POST
     headers: {
       Authorization: `Bearer ${token}`,
+      // Não defina 'Content-Type', o fetchApi fará isso por ser FormData
     },
     body: data,
   });

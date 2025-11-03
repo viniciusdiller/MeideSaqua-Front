@@ -1,3 +1,4 @@
+// app/cadastro-mei/page.tsx
 "use client";
 
 import React, { useState } from "react";
@@ -21,7 +22,7 @@ import { useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 
-// --- FUNÇÕES DE MÁSCARA ---
+// --- FUNÇÕES DE MÁSCARA (Mantidas) ---
 const maskCNAE = (value: string) => {
   return value
     .replace(/\D/g, "")
@@ -59,6 +60,7 @@ const maskPhone = (value: string) => {
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL;
 
+// --- API (Mantida do original MeideSaquá) ---
 const api = {
   cadastrarEstabelecimento: async (formData: FormData) => {
     const response = await fetch(`${API_URL}/api/estabelecimentos`, {
@@ -103,6 +105,7 @@ const api = {
   },
 };
 
+// --- DADOS (Mantidos do original MeideSaquá) ---
 const areasAtuacao = [
   "Entrega",
   "Retirada",
@@ -314,6 +317,8 @@ const tagsPorCategoria: { [key: string]: string[] } = {
     "Ovos Caipiras",
   ],
 };
+// --- FIM DOS DADOS ---
+
 const { Option } = Select;
 const { TextArea } = Input;
 
@@ -324,7 +329,7 @@ const CadastroMEIPage: React.FC = () => {
   const [loading, setLoading] = useState(false);
   const [logoFileList, setLogoFileList] = useState<UploadFile[]>([]);
   const [portfolioFileList, setPortfolioFileList] = useState<UploadFile[]>([]);
-  const [ccmeiFileList, setCcmeiFileList] = useState<UploadFile[]>([]);
+  const [ccmeiFileList, setCcmeiFileList] = useState<UploadFile[]>([]); // Específico do MEI
   const [flowStep, setFlowStep] = useState<FlowStep>("initial");
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
   const [submittedMessage, setSubmittedMessage] = useState({
@@ -339,23 +344,18 @@ const CadastroMEIPage: React.FC = () => {
   const handlePortfolioChange = ({ fileList }: { fileList: UploadFile[] }) =>
     setPortfolioFileList(fileList);
   const handleCCMEIChange = ({ fileList }: { fileList: UploadFile[] }) =>
-    setCcmeiFileList(fileList);
+    setCcmeiFileList(fileList); // Específico do MEI
 
   useEffect(() => {
-    // Se ainda estiver a verificar o estado de login, não faz nada
     if (isLoading) {
       return;
     }
-
-    // Se a verificação terminou e não há utilizador, redireciona
     if (!user) {
       toast.error("Você precisa estar logado para cadastrar um MEI.");
       router.push("/login");
     }
   }, [user, isLoading, router]);
 
-  // 5. Adicionar um estado de carregamento para a página
-  // Isto impede que o formulário apareça rapidamente antes do redirecionamento
   if (isLoading || !user) {
     return (
       <div className="flex justify-center items-center min-h-screen">
@@ -376,9 +376,11 @@ const CadastroMEIPage: React.FC = () => {
     form.resetFields();
     setLogoFileList([]);
     setPortfolioFileList([]);
-    setCcmeiFileList([]);
+    setCcmeiFileList([]); // Específico do MEI
     setFlowStep("initial");
   };
+
+  // --- Funções de Submissão (Mantidas do original MeideSaquá) ---
 
   const handleRegisterSubmit = async (values: any) => {
     setLoading(true);
@@ -388,7 +390,7 @@ const CadastroMEIPage: React.FC = () => {
       Object.entries(values).forEach(([key, value]) => {
         if (
           value &&
-          key !== "ccmeiFile" &&
+          key !== "ccmeiFile" && // Específico do MEI
           key !== "logo" &&
           key !== "produtos"
         ) {
@@ -409,12 +411,12 @@ const CadastroMEIPage: React.FC = () => {
 
       portfolioFileList.forEach((file) => {
         if (file.originFileObj) {
-          formData.append("produtos", file.originFileObj);
+          formData.append("produtos", file.originFileObj); // Nome do campo 'produtos'
         }
       });
 
       if (ccmeiFileList.length > 0 && ccmeiFileList[0].originFileObj) {
-        formData.append("ccmei", ccmeiFileList[0].originFileObj);
+        formData.append("ccmei", ccmeiFileList[0].originFileObj); // Específico do MEI
       }
 
       await api.cadastrarEstabelecimento(formData);
@@ -442,36 +444,35 @@ const CadastroMEIPage: React.FC = () => {
       Object.entries(values).forEach(([key, value]) => {
         if (
           value &&
-          key !== "ccmeiFile" &&
-          key !== "portfolio" &&
+          key !== "ccmeiFile" && // Específico do MEI
+          key !== "portfolio" && // 'portfolio' é o nome do campo no formulário de update
           key !== "logo"
         ) {
           if (key === "locais" && Array.isArray(value)) {
+            // 'locais' é o nome do campo no formulário de update
             formData.append("areasAtuacao", value.join(", "));
           } else if (key === "tagsInvisiveis" && Array.isArray(value)) {
             formData.append(key, value.join(", "));
           } else {
             formData.append(key, value as string);
+            // O campo 'outrasAlteracoes' será pego aqui
           }
         }
       });
 
-      // 2. DEPOIS, ADICIONA OS ARQUIVOS
       if (logoFileList.length > 0 && logoFileList[0].originFileObj) {
         formData.append("logo", logoFileList[0].originFileObj);
       }
 
       portfolioFileList.forEach((file) => {
         if (file.originFileObj) {
-          formData.append("produtos", file.originFileObj); // O backend espera 'produtos'
+          formData.append("produtos", file.originFileObj); // Backend espera 'produtos'
         }
       });
 
-      // O CCMEI é o último para garantir que todos os dados de texto já foram processados
       if (ccmeiFileList.length > 0 && ccmeiFileList[0].originFileObj) {
-        formData.append("ccmei", ccmeiFileList[0].originFileObj);
+        formData.append("ccmei", ccmeiFileList[0].originFileObj); // Específico do MEI
       }
-      // --- CORREÇÃO FIM ---
 
       await api.atualizarEstabelecimento(formData);
 
@@ -495,20 +496,16 @@ const CadastroMEIPage: React.FC = () => {
     try {
       const formData = new FormData();
 
-      // Adiciona os campos de texto ao FormData
       Object.entries(values).forEach(([key, value]) => {
-        // Garante que não vamos adicionar o campo de confirmação ou o campo de ficheiro aqui
         if (value && key !== "confirmacao" && key !== "ccmeiFile") {
           formData.append(key, value as string);
         }
       });
 
-      // Adiciona o ficheiro CCMEI ao FormData
       if (ccmeiFileList.length > 0 && ccmeiFileList[0].originFileObj) {
-        formData.append("ccmei", ccmeiFileList[0].originFileObj);
+        formData.append("ccmei", ccmeiFileList[0].originFileObj); // Específico do MEI
       }
 
-      // Chama a API com o FormData
       await api.excluirEstabelecimento(formData);
 
       setSubmittedMessage({
@@ -526,6 +523,8 @@ const CadastroMEIPage: React.FC = () => {
     }
   };
 
+  // --- Funções de Renderização (Mantidas do original MeideSaquá) ---
+
   const customUploadAction = async (options: any) => {
     const { onSuccess, onError, file } = options;
     setTimeout(() => {
@@ -541,7 +540,7 @@ const CadastroMEIPage: React.FC = () => {
     <h2
       className="relative text-2xl font-semibold text-gray-800 mb-6 pl-4 
         before:content-[''] before:absolute before:left-0 before:top-0 before:h-full before:w-1 
-        before:bg-gradient-to-t from-[#017DB9] to-[#22c362]"
+        before:bg-gradient-to-t from-[#017DB9] to-[#22c362]" // Estilo MeideSaquá
     >
       {title}
     </h2>
@@ -549,6 +548,7 @@ const CadastroMEIPage: React.FC = () => {
 
   const renderInitialChoice = () => (
     <>
+      {/* Textos e Estilos do MeideSaquá */}
       <h1 className="text-4xl font-extrabold mb-6 inline-block pb-2 bg-gradient-to-r from-[#017DB9] to-[#22c362] bg-no-repeat [background-position:0_100%] [background-size:100%_4px]">
         <span className="bg-gradient-to-r from-[#017DB9] to-[#22c362] bg-clip-text text-transparent">
           PORTAL DO MEI
@@ -590,11 +590,11 @@ const CadastroMEIPage: React.FC = () => {
       onFinish={handleRegisterSubmit}
       autoComplete="off"
     >
+      {/* Campos Específicos do MEI (Mantidos) */}
       <section className="mb-8 border-t pt-4">
         {commonTitle("Informações do Responsável")}
         <Row gutter={24}>
           <Col xs={24} md={12}>
-            {/* CORREÇÃO: name="nome_responsavel" */}
             <Form.Item
               name="nome_responsavel"
               label="Nome Completo do Responsável"
@@ -606,7 +606,6 @@ const CadastroMEIPage: React.FC = () => {
             </Form.Item>
           </Col>
           <Col xs={24} md={12}>
-            {/* CORREÇÃO: name="cpf_responsavel" */}
             <Form.Item
               name="cpf_responsavel"
               label="CPF do Responsável"
@@ -641,10 +640,7 @@ const CadastroMEIPage: React.FC = () => {
         </Form.Item>
       </section>
 
-      {/* O RESTANTE DO FORMULÁRIO CONTINUA IGUAL */}
-      {/* ... (seções Informações do Negócio, Contato e Localização, Detalhes e Mídia) ... */}
-
-      {/* --------------------- Informações do Negócio --------------------- */}
+      {/* Campos Específicos do MEI (Mantidos) */}
       <section className="mb-8 border-t pt-4">
         {commonTitle("Informações do Negócio")}
         <Row gutter={24}>
@@ -787,7 +783,7 @@ const CadastroMEIPage: React.FC = () => {
         </Form.Item>
       </section>
 
-      {/* --------------------- Contato e Localização --------------------- */}
+      {/* Campos Específicos do MEI (Mantidos) */}
       <section className="mb-8 border-t pt-4">
         {commonTitle("Contato e Localização")}
         <Form.Item
@@ -831,7 +827,7 @@ const CadastroMEIPage: React.FC = () => {
         </Form.Item>
       </section>
 
-      {/* --------------------- Detalhes e Mídia --------------------- */}
+      {/* Campos Específicos do MEI (Mantidos) */}
       <section className="mb-8 border-t pt-5">
         {commonTitle("Detalhes e Mídia")}
         <Form.Item
@@ -954,6 +950,7 @@ const CadastroMEIPage: React.FC = () => {
       onFinish={handleUpdateSubmit}
       autoComplete="off"
     >
+      {/* Campos Específicos do MEI (Mantidos) */}
       <section className="mb-8 border-t pt-4">
         {commonTitle("Identificação do Negócio")}
         <p className="text-gray-600 mb-6 -mt-4">
@@ -963,7 +960,6 @@ const CadastroMEIPage: React.FC = () => {
 
         <Row gutter={24}>
           <Col xs={24} md={12}>
-            {/* CORREÇÃO: name="nome_responsavel" */}
             <Form.Item
               name="nome_responsavel"
               label="Nome Completo do Responsável"
@@ -978,7 +974,6 @@ const CadastroMEIPage: React.FC = () => {
             </Form.Item>
           </Col>
           <Col xs={24} md={12}>
-            {/* CORREÇÃO: name="cpf_responsavel" */}
             <Form.Item
               name="cpf_responsavel"
               label="CPF do Responsável"
@@ -1035,7 +1030,6 @@ const CadastroMEIPage: React.FC = () => {
                   message:
                     "O Certificado CCMEI é obrigatório para identificação!",
                 },
-                // Regra para verificar se há um arquivo carregado
                 () => ({
                   validator(_, value) {
                     if (ccmeiFileList.length > 0) {
@@ -1079,6 +1073,8 @@ const CadastroMEIPage: React.FC = () => {
           <Input placeholder="contato@email.com" />
         </Form.Item>
       </section>
+
+      {/* --- REFACTOR (Início) --- */}
       <section className="mb-8 border-t pt-4">
         {commonTitle("Informações para Atualizar")}
         <p className="text-gray-600 mb-6 -mt-4">
@@ -1086,7 +1082,6 @@ const CadastroMEIPage: React.FC = () => {
           branco não serão modificados.
         </p>
 
-        {/* Adiciona upload de Logo como opcional na atualização */}
         <Form.Item
           label="Nova Logo (Opcional)"
           help="Envie 1 nova imagem para substituir a logo atual."
@@ -1138,6 +1133,20 @@ const CadastroMEIPage: React.FC = () => {
             placeholder="Fale um pouco sobre o que você faz, quais produtos você vende ou tipo de serviço que realiza. Essa é a informação que os seus futuros clientes irão ver."
           />
         </Form.Item>
+
+        {/* --- NOVO CAMPO ADICIONADO --- */}
+        <Form.Item
+          name="outrasAlteracoes"
+          label="Outras Alterações (Opcional)"
+          help="Se precisar alterar algo que não está no formulário (ex: Categoria, Endereço, Instagram, etc.), descreva aqui."
+        >
+          <TextArea
+            rows={3}
+            placeholder="Ex: Por favor, alterar o Instagram para @novo_mei e o endereço para Rua Nova, 123."
+          />
+        </Form.Item>
+        {/* --- FIM DO NOVO CAMPO --- */}
+
         <Form.Item
           name="tagsInvisiveis"
           label="Novas Tags de Busca (Até 5)"
@@ -1167,7 +1176,7 @@ const CadastroMEIPage: React.FC = () => {
           </Select>
         </Form.Item>
         <Form.Item
-          name="portfolio"
+          name="portfolio" // Nome do campo no formulário
           label="Novas Fotos do Portfólio (até 4)"
           help="As imagens enviadas aqui irão substituir as atuais."
         >
@@ -1205,6 +1214,8 @@ const CadastroMEIPage: React.FC = () => {
           </Checkbox>
         </Form.Item>
       </section>
+      {/* --- REFACTOR (Fim) --- */}
+
       <Form.Item>
         <Button
           type="primary"
@@ -1219,7 +1230,6 @@ const CadastroMEIPage: React.FC = () => {
     </Form>
   );
 
-  //PÁGINA DE FORMULÁRIO DE EXCLUSÃO
   const renderDeleteForm = () => (
     <Form
       form={form}
@@ -1227,6 +1237,7 @@ const CadastroMEIPage: React.FC = () => {
       onFinish={handleDeleteSubmit}
       autoComplete="off"
     >
+      {/* Campos Específicos do MEI (Mantidos) */}
       <section className="mb-8 border-t pt-4">
         {commonTitle("Exclusão de Cadastro MEI")}
         <p className="text-red-700 bg-red-50 p-4 rounded-md mb-6 -mt-2">
@@ -1235,7 +1246,6 @@ const CadastroMEIPage: React.FC = () => {
           prosseguir, confirme sua identidade.
         </p>
 
-        {/* --------------------- IDENTIFICAÇÃO OBRIGATÓRIA --------------------- */}
         <Row gutter={24}>
           <Col xs={24} md={12}>
             <Form.Item
@@ -1309,7 +1319,6 @@ const CadastroMEIPage: React.FC = () => {
                   message:
                     "O Certificado CCMEI é obrigatório para identificação!",
                 },
-                // Regra para verificar se há um arquivo carregado (mantido como obrigatório)
                 () => ({
                   validator(_, value) {
                     if (ccmeiFileList.length > 0) {
@@ -1352,7 +1361,6 @@ const CadastroMEIPage: React.FC = () => {
         >
           <Input placeholder="contato@email.com" />
         </Form.Item>
-        {/* --------------------- FIM DA IDENTIFICAÇÃO OBRIGATÓRIA --------------------- */}
 
         <Form.Item name="motivo" label="Motivo da exclusão (Opcional)">
           <TextArea
@@ -1425,6 +1433,7 @@ const CadastroMEIPage: React.FC = () => {
   };
 
   return (
+    // Estilo MeideSaquá
     <div className="min-h-screen bg-gradient-to-br from-blue-300 to-blue-800 py-20 px-6 sm:px-12">
       <div className="max-w-5xl mx-auto bg-white rounded-3xl shadow-lg p-10 sm:p-16">
         <Spin spinning={loading} tip="A processar...">

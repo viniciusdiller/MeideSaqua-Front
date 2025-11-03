@@ -19,7 +19,7 @@ const FaleConoscoButton = () => {
         <TooltipTrigger asChild>
           <Link
             href="https://wa.me/+5522996018024"
-            className="hidden sm:flex fixed bottom-8 left-8 z-50 p-4 bg-blue-600 text-white rounded-full shadow-lg hover:bg-gradient-to-br from-[#017DB9] to-[#22c362] transition-colors duration-300 items-center justify-center"
+            className="hidden sm:flex fixed bottom-5 left-8 z-50 p-3 bg-blue-600 text-white rounded-full shadow-lg hover:bg-gradient-to-br from-[#017DB9] to-[#22c362] transition-colors duration-300 items-center justify-center"
             aria-label="Fale Conosco"
           >
             <MessageCircleQuestion size={28} />

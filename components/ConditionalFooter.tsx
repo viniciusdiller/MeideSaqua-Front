@@ -8,6 +8,7 @@ import Footer from "@/components/footer"; // Importa seu footer original
 const HIDE_FOOTER_ON_PATHS = [
   "/admin/dashboard",
   "/admin/login",
+  "/admin/estabelecimentos-ativos",
   // Adicione aqui qualquer outra rota /admin que você não queira o footer
 ];
 

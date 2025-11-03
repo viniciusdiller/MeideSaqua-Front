@@ -90,12 +90,10 @@ const SpringModal = ({
 
     setIsSubmitting(true);
 
-    const reviewData = {
+const reviewData = {
       nota: rating,
       comentario: comment,
-      estabelecimento: {
-        estabelecimentoId: estabelecimentoId,
-      },
+      estabelecimentoId: estabelecimentoId, // <--- CORRIGIDO!
     };
 
     try {

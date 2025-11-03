@@ -2,12 +2,12 @@ import type React from "react";
 import type { Metadata } from "next";
 import { Poppins } from "next/font/google";
 import "./globals.css";
-import { Navbar } from "./navbar";
+import { ConditionalNavbar } from "@/components/ConditionalNavbar";
 import { AuthProvider } from "@/context/AuthContext";
 import { Toaster } from "@/components/ui/sonner";
 import {ConditionalFooter} from "@/components/ConditionalFooter";
-import AccessibilityFeatures from "@/components/AccessibilityFeatures";
-import AccessibilityStyles from "@/components/AccessibilityStyles"; // 1. IMPORTE O NOVO COMPONENTE
+import { ConditionalAccessibility } from "@/components/ConditionalAccessibility";
+import AccessibilityStyles from "@/components/AccessibilityStyles";
 
 const poppins = Poppins({
   subsets: ["latin"],
@@ -24,7 +24,7 @@ export const metadata: Metadata = {
     title: "MeideSaquá",
     description:
       "Seu guia completo para explorar e conhecer os MEIs que movimentam a economia de Saquarema.",
-    url: "https://explora-saqua.vercel.app/",
+    url: "https://aquitemods.saquarema.rj.gov.br/",
     siteName: "MeideSaquá",
     images: [
       {
@@ -52,11 +52,11 @@ export default function RootLayout({
         className={`${poppins.variable} bg-white flex flex-col min-h-screen`}
       >
         <AuthProvider>
-          <Navbar />
+          <ConditionalNavbar />
           <main className="flex-grow">{children}</main>
           <ConditionalFooter />
           <Toaster richColors />
-          <AccessibilityFeatures />
+          <ConditionalAccessibility />
         </AuthProvider>
       </body>
     </html>
