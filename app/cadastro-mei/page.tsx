@@ -859,7 +859,7 @@ const CadastroMEIPage: React.FC = () => {
         >
           <TextArea
             rows={2}
-            placeholder="Descreva brevemente qual é o atrativo do seu produto ou serviço."
+            placeholder="Descreva brevemente qual é o atrativo do seu produto ou serviço. (Em até 150 caracteres)"
           />
         </Form.Item>
         <Row gutter={24}>
@@ -1145,7 +1145,7 @@ const CadastroMEIPage: React.FC = () => {
         <Form.Item name="descricao" label="Nova Descrição do Serviço/Produto">
           <TextArea
             rows={4}
-            placeholder="Fale um pouco sobre o que você faz, quais produtos você vende ou tipo de serviço que realiza."
+            placeholder="Fale um pouco sobre o que você faz, quais produtos você vende ou tipo de serviço que realiza. (Em até 500 caracteres)"
           />
         </Form.Item>
 

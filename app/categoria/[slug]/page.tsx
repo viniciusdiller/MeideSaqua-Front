@@ -1,5 +1,6 @@
+// app/categoria/[slug]/page.tsx
 "use client";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { motion } from "framer-motion";
 import Link from "next/link";
 import {
@@ -20,6 +21,7 @@ import { getAllEstablishments } from "@/lib/api";
 import { Button } from "@/components/ui/button";
 import FormattedDescription from "@/components/FormattedDescription";
 import MeiDetailPage from "./MEI/page";
+import { Pagination, Empty } from "antd";
 
 interface PageProps {
   params: {
@@ -27,11 +29,28 @@ interface PageProps {
   };
 }
 
+const MEIS_PER_PAGE = 8;
+
+// <-- 1. ADICIONADO: Constante da API URL -->
+const API_URL = process.env.NEXT_PUBLIC_API_URL || "";
+
+// <-- 2. ADICIONADO: Função para buscar a imagem (com fallback) -->
+const getImageUrl = (path?: string) => {
+  // Se não houver caminho, usa o logo padrão do MeideSaquá
+  if (!path) {
+    return "/Logo_mei_redonda.png"; 
+  }
+  // Remove barras duplicadas e normaliza
+  const cleanPath = path.replace(/\\/g, "/").replace(/^\/+|\/+$/g, "");
+  return `${API_URL}/${cleanPath}`;
+};
+
 export default function CategoryPage({ params }: PageProps) {
   const [locations, setLocations] = useState<any[]>([]);
   const [selectedLocation, setSelectedLocation] = useState<any>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
+  const [currentPage, setCurrentPage] = useState(1);
 
   useEffect(() => {
     const fetchLocations = async () => {
@@ -60,21 +79,42 @@ export default function CategoryPage({ params }: PageProps) {
 
   const category = categories.find((cat) => cat.id === params.slug);
 
-  const filteredLocations = locations.filter((location) => {
-    const normalizedSearchTerm = searchTerm.toLowerCase();
+  const filteredLocations = useMemo(
+    () =>
+      locations.filter((location) => {
+        const normalizedSearchTerm = searchTerm.toLowerCase();
 
-    const matchesName =
-      location.nomeFantasia &&
-      typeof location.nomeFantasia === "string" &&
-      location.nomeFantasia.toLowerCase().includes(normalizedSearchTerm);
+        const matchesName =
+          location.nomeFantasia &&
+          typeof location.nomeFantasia === "string" &&
+          location.nomeFantasia.toLowerCase().includes(normalizedSearchTerm);
 
-    const tagsString = location.tagsInvisiveis || "";
-    const matchesTags =
-      typeof tagsString === "string" &&
-      tagsString.toLowerCase().includes(normalizedSearchTerm);
+        const tagsString = location.tagsInvisiveis || "";
+        const matchesTags =
+          typeof tagsString === "string" &&
+          tagsString.toLowerCase().includes(normalizedSearchTerm);
 
-    return matchesName || matchesTags;
-  });
+        return matchesName || matchesTags;
+      }),
+    [locations, searchTerm]
+  );
+
+  const paginatedLocations = useMemo(() => {
+    const startIndex = (currentPage - 1) * MEIS_PER_PAGE;
+    const endIndex = startIndex + MEIS_PER_PAGE;
+    return filteredLocations.slice(startIndex, endIndex);
+  }, [filteredLocations, currentPage]);
+
+  const handlePageChange = (page: number) => {
+    setCurrentPage(page);
+    document
+      .getElementById("lista-meis")
+      ?.scrollTo({ top: 0, behavior: "smooth" });
+  };
+
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [searchTerm]);
 
   if (!category) {
     return (
@@ -95,7 +135,6 @@ export default function CategoryPage({ params }: PageProps) {
     );
   }
 
-  // Estado: Carregando
   if (isLoading) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4">
@@ -112,7 +151,6 @@ export default function CategoryPage({ params }: PageProps) {
     );
   }
 
-  // Estado: Nenhum Local Encontrado
   if (!locations || locations.length === 0) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4">
@@ -196,31 +234,47 @@ export default function CategoryPage({ params }: PageProps) {
               />
               <input
                 type="text"
-                placeholder="Pesquisar por nome..."
+                placeholder="Pesquisar por nome ou serviço..."
                 className="w-full pl-12 pr-4 py-3 rounded-2xl border border-gray-200 bg-white shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-600/80 focus:border-transparent transition-all duration-300 placeholder-gray-400 text-sm hover:shadow-md"
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
               />
             </div>
-            <div className="max-h-[50vh] overflow-y-auto px-2 space-y-4 pb-1 milecem:grid milecem:grid-cols-2 milecem:gap-4 milecem:space-y-0">
-              {filteredLocations.map((location: any, index: number) => (
+            <div
+              id="lista-meis"
+              className="max-h-[50vh] overflow-y-auto px-2 space-y-4 pb-1 milecem:grid milecem:grid-cols-2 milecem:gap-4 milecem:space-y-0"
+            >
+              {paginatedLocations.map((location: any, index: number) => (
                 <Link
-                  href={`${location.estabelecimentoId}/MEI/`}
+                  href={`/categoria/${params.slug}/${location.estabelecimentoId}/MEI/`}
                   key={location.estabelecimentoId}
                   className="block"
                 >
+                  {/* <-- 3. ALTERADO: Adicionado 'relative' --> */}
                   <motion.div
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ delay: index * 0.05 }}
-                    className={`bg-white rounded-xl shadow-md p-4 cursor-pointer transition-all duration-300 hover:shadow-xl hover:scale-[1.02] flex flex-col h-full ${
+                    className={`relative bg-white rounded-xl shadow-md p-4 cursor-pointer transition-all duration-300 hover:shadow-xl hover:scale-[1.02] flex flex-col h-full ${
                       selectedLocation?.id === location.estabelecimentoId
                         ? "ring-2 ring-offset-2 ring-[#017DB9] shadow-lg"
                         : ""
                     }`}
                   >
+                    {/* <-- 4. ADICIONADO: Bloco da Logo --> */}
+                    <div className="absolute top-4 right-4 w-12 h-12 rounded-full overflow-hidden bg-gray-100 border-2 border-white shadow-sm z-10">
+                      <Image
+                        src={getImageUrl(location.logoUrl)}
+                        alt={`Logo de ${location.nomeFantasia}`}
+                        fill
+                        sizes="48px"
+                        className="object-cover"
+                      />
+                    </div>
+                    
+                    {/* <-- 5. ALTERADO: Adicionado 'pr-16' para não sobrepor o título --> */}
                     <div className="flex justify-between items-start mb-2">
-                      <h3 className="text-lg font-semibold text-gray-800 break-words pr-2">
+                      <h3 className="text-lg font-semibold text-gray-800 break-words pr-16">
                         {location.nomeFantasia}
                       </h3>
                       {location.rating && (
@@ -232,6 +286,8 @@ export default function CategoryPage({ params }: PageProps) {
                         </div>
                       )}
                     </div>
+                    
+                    {/* O restante do card */}
                     <p className="text-gray-600 mb-4 text-sm break-words">
                       <FormattedDescription
                         text={location.descricaoDiferencial}
@@ -277,9 +333,30 @@ export default function CategoryPage({ params }: PageProps) {
                 </Link>
               ))}
             </div>
+
+            {filteredLocations.length > MEIS_PER_PAGE && (
+              <div className="flex justify-center mt-8">
+                <Pagination
+                  current={currentPage}
+                  pageSize={MEIS_PER_PAGE}
+                  total={filteredLocations.length}
+                  onChange={handlePageChange}
+                  showSizeChanger={false}
+                />
+              </div>
+            )}
+            
+            {filteredLocations.length === 0 &&
+              locations.length > 0 && (
+                <div className="mt-8 text-center">
+                  <Empty description="Nenhum MEI encontrado para a sua busca." />
+                </div>
+              )}
           </div>
+
+          {/* Coluna da direita (Carrossel) */}
           <div
-            className="lg:sticky lg:top-0 milecem:pl-6 h-fit"
+            className="milecem:col-span-1 flex flex-col lg:sticky lg:top-24 milecem:pl-6"
             id="map-container"
           >
             <motion.div
@@ -295,7 +372,8 @@ export default function CategoryPage({ params }: PageProps) {
                 clique no botão para explorar outra categoria
               </p>
             </motion.div>
-            <div className="w-full h-[300px] md:h-[500px] rounded-2xl shadow-lg overflow-hidden border border-blue-600">
+            
+            <div className="flex-grow w-full h-full min-h-[500px] rounded-2xl shadow-lg overflow-hidden border border-blue-600">
               <ModernCarousel currentCategoryId={category.id} />
             </div>
           </div>
