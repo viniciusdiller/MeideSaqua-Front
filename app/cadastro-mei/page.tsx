@@ -106,7 +106,7 @@ const api = {
 };
 
 // --- DADOS (Mantidos do original MeideSaquá) ---
-const areasAtuacao = [
+export const areasAtuacao = [
   "Entrega",
   "Retirada",
   "Entrega e Retirada",
@@ -156,7 +156,7 @@ const areasAtuacao = [
   "Vilatur",
   "Outro município",
 ];
-const categorias = [
+export const categorias = [
   "Artesanato e Criação Manual",
   "Beleza, Moda e Estética",
   "Comércio Local e Vendas",
@@ -171,7 +171,7 @@ const categorias = [
   "Produtores Rurais e Atividades Agrícolas",
 ];
 
-const tagsPorCategoria: { [key: string]: string[] } = {
+export const tagsPorCategoria: { [key: string]: string[] } = {
   "Artesanato e Criação Manual": [
     "Feito a Mão",
     "Peça Única",
@@ -436,6 +436,8 @@ const CadastroMEIPage: React.FC = () => {
     }
   };
 
+  // NENHUMA MUDANÇA NECESSÁRIA AQUI
+  // O loop "Object.entries" já pega o novo campo 'outrasAlteracoes'
   const handleUpdateSubmit = async (values: any) => {
     setLoading(true);
     try {
@@ -1074,7 +1076,7 @@ const CadastroMEIPage: React.FC = () => {
         </Form.Item>
       </section>
 
-      {/* --- REFACTOR (Início) --- */}
+      {/* --- INÍCIO DA REFATORAÇÃO --- */}
       <section className="mb-8 border-t pt-4">
         {commonTitle("Informações para Atualizar")}
         <p className="text-gray-600 mb-6 -mt-4">
@@ -1127,14 +1129,27 @@ const CadastroMEIPage: React.FC = () => {
             ))}
           </Select>
         </Form.Item>
-        <Form.Item name="descricao" label="Nova Descrição do Serviço/Produto">
+
+        {/* CAMPO ADICIONADO DO REFACTOR (Briefing -> Diferencial) */}
+        <Form.Item
+          name="descricaoDiferencial"
+          label="Novo Diferencial (Resumo)"
+        >
           <TextArea
-            rows={4}
-            placeholder="Fale um pouco sobre o que você faz, quais produtos você vende ou tipo de serviço que realiza. Essa é a informação que os seus futuros clientes irão ver."
+            rows={2}
+            placeholder="Descreva brevemente qual é o atrativo do seu produto ou serviço."
           />
         </Form.Item>
 
-        {/* --- NOVO CAMPO ADICIONADO --- */}
+        {/* CAMPO ADICIONADO DO REFACTOR */}
+        <Form.Item name="descricao" label="Nova Descrição do Serviço/Produto">
+          <TextArea
+            rows={4}
+            placeholder="Fale um pouco sobre o que você faz, quais produtos você vende ou tipo de serviço que realiza."
+          />
+        </Form.Item>
+
+        {/* CAMPO ADICIONADO DO REFACTOR */}
         <Form.Item
           name="outrasAlteracoes"
           label="Outras Alterações (Opcional)"
@@ -1145,7 +1160,6 @@ const CadastroMEIPage: React.FC = () => {
             placeholder="Ex: Por favor, alterar o Instagram para @novo_mei e o endereço para Rua Nova, 123."
           />
         </Form.Item>
-        {/* --- FIM DO NOVO CAMPO --- */}
 
         <Form.Item
           name="tagsInvisiveis"
@@ -1166,13 +1180,12 @@ const CadastroMEIPage: React.FC = () => {
             placeholder="Selecione as tags"
             maxTagCount={5}
           >
-            {Object.values(tagsPorCategoria)
-              .flat()
-              .map((tag) => (
-                <Option key={tag} value={tag}>
-                  {tag}
-                </Option>
-              ))}
+            {/* Mapeia todas as tags possíveis */}
+            {[...new Set(Object.values(tagsPorCategoria).flat())].map((tag) => (
+              <Option key={tag} value={tag}>
+                {tag}
+              </Option>
+            ))}
           </Select>
         </Form.Item>
         <Form.Item
@@ -1214,7 +1227,7 @@ const CadastroMEIPage: React.FC = () => {
           </Checkbox>
         </Form.Item>
       </section>
-      {/* --- REFACTOR (Fim) --- */}
+      {/* --- FIM DA REFATORAÇÃO --- */}
 
       <Form.Item>
         <Button
@@ -1230,6 +1243,7 @@ const CadastroMEIPage: React.FC = () => {
     </Form>
   );
 
+  //PÁGINA DE FORMULÁRIO DE EXCLUSÃO
   const renderDeleteForm = () => (
     <Form
       form={form}
