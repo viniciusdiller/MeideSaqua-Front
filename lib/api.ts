@@ -9,9 +9,15 @@ async function fetchApi(path: string, options: RequestInit = {}) {
     ...(options.headers as Record<string, string>),
   };
 
-  // Adiciona Content-Type: application/json se o body existir e NÃO for FormData
+  // Se o body NÃO for FormData, define Content-Type: application/json
   if (options.body && !(options.body instanceof FormData)) {
     headers["Content-Type"] = "application/json";
+  }
+
+  // Remove o Content-Type se for FormData para deixar o navegador definir
+  // o boundary corretamente, PREVENINDO O BUG DE UPLOAD DE ARQUIVOS.
+  if (options.body instanceof FormData && headers["Content-Type"]) {
+    delete headers["Content-Type"];
   }
 
   // Adiciona o header de Autorização se ele foi passado nas opções
@@ -30,7 +36,6 @@ async function fetchApi(path: string, options: RequestInit = {}) {
   let data: any;
 
   try {
-    // Tenta parsear o JSON, se falhar, usa um objeto de erro com o texto
     data = text ? JSON.parse(text) : {};
   } catch (error) {
     data = { message: text || "Resposta inválida da API" };
@@ -133,14 +138,13 @@ export const getEstablishmentById = (id: string) =>
   fetchApi(`/api/estabelecimentos/${id}`);
 
 /**
- * Busca avaliações de um ESTABELECIMENTO.
- * O nome está correto (getReviewsByEstablishment) para bater com a página MEI.
+ * Busca avaliações de um ESTABELECIMENTO (Rota Pública).
  */
 export const getReviewsByEstablishment = (id: string) =>
-  fetchApi(`/api/avaliacoes/estabelecimento/${id}`);
+  fetchApi(`/api/avaliacoes/estabelecimento/${id}`); // Rota que usa no seu Controller
 
 // ==================================================================
-// --- Funções de Avaliação (MeideSaqua) ---
+// --- Funções de Avaliação (MeideSaqua) - Usuário Comum ---
 // ==================================================================
 
 export const submitReview = (data: any, token: string) =>
@@ -177,7 +181,6 @@ export const getPendingAdminRequests = (token: string) =>
 
 /**
  * [ADMIN] Busca todos os estabelecimentos ativos (aprovados).
- * CORREÇÃO: Esta função agora chama a rota pública, que já retorna apenas os ativos.
  */
 export const getAllActiveEstablishments = (token: string) =>
   fetchApi("/api/estabelecimentos", {
@@ -189,33 +192,77 @@ export const getAllActiveEstablishments = (token: string) =>
 
 /**
  * [ADMIN] Deleta (desativa) um estabelecimento.
- * CORREÇÃO: Aponta para a rota de alterar status para 'ativo: false'.
  */
 export const adminDeleteEstablishment = (id: number, token: string) =>
-  fetchApi(`/api/admin/estabelecimento/${id}`, { // Rota correta (a sua rota)
-    method: "DELETE", // Método correto
+  fetchApi(`/api/admin/estabelecimento/${id}`, {
+    method: "DELETE",
     headers: {
       Authorization: `Bearer ${token}`,
     },
-    // O body não é necessário para um DELETE
   });
 
 /**
- * [ADMIN] Atualiza um estabelecimento (usa FormData para arquivos).
- * CORREÇÃO: Aponta para a rota de solicitar atualização.
+ * [ADMIN] Atualiza um estabelecimento (no modal de Estabelecimentos Ativos).
+ * Usa PUT para ser mais semântico para atualização.
  */
 export const adminUpdateEstablishment = (
-  id: number, // O ID agora é usado corretamente na URL
+  id: number,
+  data: FormData,
+  token: string
+) =>
+  fetchApi(`/api/admin/estabelecimento/${id}`, {
+    method: "PUT",
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+    body: data,
+  });
+
+/**
+ * [ADMIN] Atualiza/Aprova um estabelecimento pendente (no Dashboard).
+ * Mantém POST para o endpoint de aprovação.
+ */
+export const adminEditAndApproveEstablishment = (
+  id: number,
   data: FormData,
   token: string
 ) =>
   fetchApi(`/api/admin/edit-and-approve/${id}`, {
-    method: "POST", // Baseado no seu dashboard, este endpoint espera POST
+    method: "POST",
     headers: {
       Authorization: `Bearer ${token}`,
-      // Não defina 'Content-Type', o fetchApi fará isso por ser FormData
     },
     body: data,
+  });
+
+// --- NOVAS FUNÇÕES DE ADMIN (GERENCIAMENTO DE REVIEWS) ---
+
+/**
+ * [ADMIN] Busca todas as avaliações de um estabelecimento específico.
+ * ROTA NOVA DE ADMIN (Sugestão para isolamento de rota)
+ * @param id ID do estabelecimento.
+ * @param token Token de autenticação do Admin.
+ */
+export const adminGetReviewsByEstablishment = (id: string, token: string) =>
+  fetchApi(`/api/admin/avaliacoes/estabelecimento/${id}`, {
+    method: "GET",
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  });
+
+/**
+ * [ADMIN] Deleta uma avaliação específica.
+ * ROTA NOVA DE ADMIN (Sugestão para isolamento de rota)
+ * @param id ID da avaliação.
+ * @param token Token de autenticação do Admin.
+ */
+export const adminDeleteReview = (id: number, token: string) =>
+  fetchApi(`/api/admin/avaliacoes/${id}`, {
+    method: "DELETE",
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
   });
 
 // ==================================================================
@@ -240,4 +287,3 @@ export function formatarDataParaMesAno(dateString: string): string {
     year: "numeric",
   }).format(data);
 }
-
