@@ -18,9 +18,10 @@ import {
   Alert,
   Avatar,
   Table,
-  Grid, // IMPORTADO (NOVA FEATURE)
-  Pagination, // IMPORTADO (NOVA FEATURE)
-  Input, // IMPORTADO (NOVA FEATURE)
+  Input,
+  Select,
+  Pagination,
+  Grid,
 } from "antd";
 import {
   UserAddOutlined,
@@ -29,23 +30,21 @@ import {
   CheckOutlined,
   CloseOutlined,
   DatabaseOutlined,
-  CommentOutlined, // IMPORTADO (NOVA FEATURE)
+  CommentOutlined,
 } from "@ant-design/icons";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { getPendingAdminRequests } from "@/lib/api"; // Função da API existente
-import AdminEstabelecimentoModal from "@/components/AdminEstabelecimentoModal"; // Modal existente
-import {
-  Estabelecimento,
-  ImagemProduto,
-} from "@/types/Interface-Estabelecimento"; // Interface existente
+import { getPendingAdminRequests, adminUpdateEstablishment } from "@/lib/api"; // <-- API do MeideSaquá
+import AdminEstabelecimentoModal from "@/components/AdminEstabelecimentoModal"; // <-- Modal do MeideSaquá
+import { Estabelecimento } from "@/types/Interface-Estabelecimento"; // <-- Interface do MeideSaquá
 
 const { Text, Title } = Typography;
 const { Column } = Table;
-const { TextArea } = Input; // ADICIONADO (NOVA FEATURE)
-const { useBreakpoint } = Grid; // ADICIONADO (NOVA FEATURE)
+const { TextArea } = Input;
+const { Option } = Select;
+const { useBreakpoint } = Grid;
 
-// Enum de Status (mantido do original)
+// Enum adaptado para Estabelecimento
 enum StatusEstabelecimento {
   PENDENTE_APROVACAO = "pendente_aprovacao",
   PENDENTE_ATUALIZACAO = "pendente_atualizacao",
@@ -53,17 +52,24 @@ enum StatusEstabelecimento {
 }
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL;
-const DASHBOARD_PAGE_SIZE = 5; // ADICIONADO (NOVA FEATURE)
 
-// Ícones dos cards (mantido do original)
+const DASHBOARD_PAGE_SIZE = 5;
+
+// Objeto para os ícones dos cards
 const listIcons: { [key: string]: React.ReactNode } = {
   "Novos Cadastros": <UserAddOutlined style={{ color: "#52c41a" }} />,
   Atualizações: <EditOutlined style={{ color: "#1890ff" }} />,
   Exclusões: <DeleteOutlined style={{ color: "#f5222d" }} />,
 };
 
-// fieldConfig (ESSENCIAL - MANTIDO DO ORIGINAL MEIDESAQUÁ)
-// Define os campos e a ordem para ESTABELECIMENTO
+// Interface de dados adaptada
+interface PendingData {
+  cadastros: Estabelecimento[];
+  atualizacoes: Estabelecimento[];
+  exclusoes: Estabelecimento[];
+}
+
+// fieldConfig ORIGINAL do MeideSaquá
 const fieldConfig: { [key: string]: { label: string; order: number } } = {
   estabelecimentoId: { label: "ID", order: 1 },
   nomeFantasia: { label: "Nome Fantasia", order: 2 },
@@ -79,10 +85,9 @@ const fieldConfig: { [key: string]: { label: string; order: number } } = {
   contatoEstabelecimento: { label: "Contato", order: 21 },
   endereco: { label: "Endereço", order: 22 },
   areasAtuacao: { label: "Áreas de Atuação", order: 23 },
-
   descricao: { label: "Descrição", order: 30 },
   descricaoDiferencial: { label: "Diferencial", order: 31 },
-  // Mídia e Links
+  outrasAlteracoes: { label: "Outras Alterações", order: 32 }, // <-- Feature nova
   website: { label: "Website", order: 40 },
   instagram: { label: "Instagram", order: 41 },
   logoUrl: { label: "Logo Atual", order: 42 },
@@ -91,20 +96,12 @@ const fieldConfig: { [key: string]: { label: string; order: number } } = {
   ccmei: { label: "Novo CCMEI", order: 43 },
   produtosImg: { label: "Portfólio Atual", order: 44 },
   produtos: { label: "Novo Portfólio", order: 44 },
-  // Outros
   tagsInvisiveis: { label: "Tags", order: 50 },
   motivo: { label: "Motivo da Exclusão", order: 1000 },
   motivoExclusao: { label: "Motivo da Exclusão", order: 6 },
   createdAt: { label: "Data de Criação", order: 100 },
   updatedAt: { label: "Última Atualização", order: 101 },
 };
-// --- FIM DO CONFIG DE CAMPOS ---
-
-interface PendingData {
-  cadastros: Estabelecimento[];
-  atualizacoes: Estabelecimento[];
-  exclusoes: Estabelecimento[];
-}
 
 const AdminDashboard: React.FC = () => {
   const [loading, setLoading] = useState(true);
@@ -114,16 +111,14 @@ const AdminDashboard: React.FC = () => {
     exclusoes: [],
   });
   const [modalVisible, setModalVisible] = useState(false);
-  const [selectedItem, setSelectedItem] = useState<Estabelecimento | null>(
-    null
-  );
+  const [selectedItem, setSelectedItem] = useState<Estabelecimento | null>(null); // <-- Tipo Corrigido
   const router = useRouter();
   const [isActionLoading, setIsActionLoading] = useState(false);
-  const [isEditModalVisible, setIsEditModalVisible] = useState(false);
 
-  // --- NOVOS ESTADOS (NOVA FEATURE) ---
+  const [isEditModalVisible, setIsEditModalVisible] = useState(false);
   const [isRejectModalVisible, setIsRejectModalVisible] = useState(false);
   const [rejectionReason, setRejectionReason] = useState("");
+
   const [currentPages, setCurrentPages] = useState({
     cadastros: 1,
     atualizacoes: 1,
@@ -132,27 +127,23 @@ const AdminDashboard: React.FC = () => {
 
   const screens = useBreakpoint();
   const isMobile = !screens.md;
-  // --- FIM DOS NOVOS ESTADOS ---
 
-  // getFullImageUrl (ATUALIZADA - MAIS ROBUSTA)
   const getFullImageUrl = (path: string): string => {
     if (!path) return "";
-    // Normaliza barras (Windows vs Linux)
     const normalizedPath = path.replace(/\\/g, "/");
-    // Remove barra inicial duplicada se houver
     const cleanPath = normalizedPath.startsWith("/")
       ? normalizedPath.substring(1)
       : normalizedPath;
     return `${API_URL}/${cleanPath}`;
   };
 
-  // renderValue (ESSENCIAL - MANTIDO DO ORIGINAL MEIDESAQUÁ)
-  // Esta é a função correta que sabe renderizar CCMEI, Produtos, etc.
+  // renderValue ORIGINAL do MeideSaquá
   const renderValue = (key: string, value: any): React.ReactNode => {
     if (value === null || value === undefined || value === "") {
       return <Text type="secondary">Não informado</Text>;
     }
 
+    // Lógica para renderizar CCMEI (PDF ou Imagem)
     if (
       (key === "ccmeiUrl" || key === "ccmei") &&
       typeof value === "string" &&
@@ -176,30 +167,28 @@ const AdminDashboard: React.FC = () => {
       return <Image src={fileUrl} alt={`CCMEI`} width={150} />;
     }
 
-    if ((key === "produtosImg" || key === "produtos") && Array.isArray(value)) {
+    // Lógica para renderizar Portfólio (produtosImg)
+    if (
+      (key === "produtosImg" || key === "produtos") &&
+      Array.isArray(value) &&
+      value.length > 0
+    ) {
       const imagesUrls = value
         .map((item) => (typeof item === "string" ? item : item.url))
         .map(getFullImageUrl)
         .filter(Boolean);
 
-      if (imagesUrls.length > 0) {
-        return (
-          <Image.PreviewGroup>
-            <Row gutter={[8, 8]}>
-              {imagesUrls.map((imageUrl, index) => (
-                <Col key={index}>
-                  <Image
-                    src={imageUrl}
-                    alt={`Produto ${index + 1}`}
-                    width={80}
-                  />
-                </Col>
-              ))}
-            </Row>
-          </Image.PreviewGroup>
-        );
-      }
-      return <Text type="secondary">Nenhuma imagem.</Text>;
+      return (
+        <Image.PreviewGroup>
+          <Row gutter={[8, 8]}>
+            {imagesUrls.map((imageUrl, index) => (
+              <Col key={index}>
+                <Image src={imageUrl} alt={`Produto ${index + 1}`} width={80} />
+              </Col>
+            ))}
+          </Row>
+        </Image.PreviewGroup>
+      );
     }
 
     if (
@@ -207,17 +196,23 @@ const AdminDashboard: React.FC = () => {
       typeof value === "string" &&
       value
     ) {
-      return <Image src={getFullImageUrl(value)} alt={`Logo`} width={150} />;
+      return <Image src={getFullImageUrl(value)} alt="Logo" width={150} />;
     }
 
-    if (typeof value === "object" && value !== null) {
+    if (typeof value === "object" && value !== null)
       return JSON.stringify(value);
+
+    // Lógica para tags/areas (que são arrays)
+    if (
+      (key === "tagsInvisiveis" || key === "areasAtuacao") &&
+      Array.isArray(value)
+    ) {
+      return value.join(", ");
     }
 
     return String(value);
   };
 
-  // fetchData (ATUALIZADO - Reseta a paginação)
   const fetchData = useCallback(async () => {
     setLoading(true);
     const token = localStorage.getItem("admin_token");
@@ -229,7 +224,6 @@ const AdminDashboard: React.FC = () => {
     try {
       const pendingData = await getPendingAdminRequests(token);
       setData(pendingData);
-      // Reseta a paginação ao buscar novos dados
       setCurrentPages({
         cadastros: 1,
         atualizacoes: 1,
@@ -246,7 +240,6 @@ const AdminDashboard: React.FC = () => {
     fetchData();
   }, [fetchData]);
 
-  // handleAction (ATUALIZADO - Envia motivo de rejeição)
   const handleAction = async (
     action: "approve" | "reject",
     motivoRejeicao?: string
@@ -264,7 +257,6 @@ const AdminDashboard: React.FC = () => {
         },
       };
 
-      // Adiciona o body APENAS se for "reject"
       if (action === "reject") {
         fetchOptions.headers = {
           ...fetchOptions.headers,
@@ -275,13 +267,12 @@ const AdminDashboard: React.FC = () => {
         });
       }
 
-      // IMPORTANTE: USA O ID DE ESTABELECIMENTO
+      // Endpoint corrigido para estabelecimentoId
       const response = await fetch(
         `${API_URL}/api/admin/${action}/${selectedItem.estabelecimentoId}`,
         fetchOptions
       );
 
-      // Tratamento de erro robusto (NOVA FEATURE)
       if (!response.ok) {
         const errorText = await response.text();
         try {
@@ -298,10 +289,10 @@ const AdminDashboard: React.FC = () => {
       const result = await response.json();
       message.success(result.message || `Ação executada com sucesso!`);
 
-      // Atualiza os dados
       setData((prevData) => {
         const newData = { ...prevData };
         (Object.keys(newData) as Array<keyof PendingData>).forEach((key) => {
+          // ID corrigido para estabelecimentoId
           newData[key] = newData[key].filter(
             (item) => item.estabelecimentoId !== selectedItem.estabelecimentoId
           );
@@ -309,7 +300,7 @@ const AdminDashboard: React.FC = () => {
         return newData;
       });
 
-      // Reseta a paginação da lista específica (NOVA FEATURE)
+      // Lógica de paginação adaptada
       if (selectedItem.status === StatusEstabelecimento.PENDENTE_APROVACAO) {
         handlePageChange("cadastros")(1);
       } else if (
@@ -323,7 +314,7 @@ const AdminDashboard: React.FC = () => {
       }
 
       setModalVisible(false);
-      setIsRejectModalVisible(false); // Fecha o novo modal
+      setIsRejectModalVisible(false);
       setSelectedItem(null);
       setRejectionReason("");
     } catch (error: any) {
@@ -333,7 +324,7 @@ const AdminDashboard: React.FC = () => {
     }
   };
 
-  const showModal = (item: Estabelecimento) => {
+  const showModal = (item: Estabelecimento) => { // <-- Tipo Corrigido
     setSelectedItem(item);
     setModalVisible(true);
   };
@@ -343,8 +334,8 @@ const AdminDashboard: React.FC = () => {
     setIsEditModalVisible(true);
   };
 
-  // handleEditAndApproveSubmit (ATUALIZADO - Tratamento de erro melhorado)
-  const handleEditAndApproveSubmit = async (values: any) => {
+  // handleEditAndApproveSubmit adaptado para FormData
+  const handleEditAndApproveSubmit = async (formData: FormData) => {
     if (!selectedItem) return;
 
     setIsActionLoading(true);
@@ -356,37 +347,29 @@ const AdminDashboard: React.FC = () => {
     }
 
     try {
-      // IMPORTANTE: USA O ID DE ESTABELECIMENTO
-      const response = await fetch(
-        `${API_URL}/api/admin/edit-and-approve/${selectedItem.estabelecimentoId}`,
-        {
-          method: "POST",
-          headers: {
-            Authorization: `Bearer ${token}`,
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify(values),
-        }
+      // Usa a função da API já corrigida, que envia FormData
+      await adminUpdateEstablishment(
+        selectedItem.estabelecimentoId,
+        formData,
+        token
       );
-      const result = await response.json();
-      if (!response.ok) throw new Error(result.message);
-
+      
+      // A mensagem de sucesso é mostrada pelo modal
       setIsEditModalVisible(false);
       setModalVisible(false);
       setSelectedItem(null);
       fetchData(); // Recarrega os dados
     } catch (error: any) {
-      setIsActionLoading(false); // Garante que pare o loading no erro
-      throw error; // Lança o erro para o modal (AdminEstabelecimentoModal) tratar
+      setIsActionLoading(false);
+      throw error; // Lança o erro para o modal tratar
     } finally {
       setIsActionLoading(false);
     }
   };
 
-  // renderDiffTable (ESSENCIAL - MANTIDO DO ORIGINAL MEIDESAQUÁ)
-  // Esta função está correta para Estabelecimento.
+  // renderDiffTable adaptado
   const renderDiffTable = (
-    status: StatusEstabelecimento,
+    status: "pendente_atualizacao" | "pendente_exclusao",
     alertType: "info" | "error",
     title: string,
     keysToFilter: string[] = []
@@ -399,19 +382,13 @@ const AdminDashboard: React.FC = () => {
       return null;
     }
 
-    // KeyMap específico para Estabelecimento
+    // Mapa de chaves do MeideSaquá
     const keyMap: { [newKey: string]: { oldKey: string; labelKey: string } } = {
       logo: { oldKey: "logoUrl", labelKey: "logo" },
-      ccmei: { oldKey: "ccmeiUrl", labelKey: "ccmei" },
-      produtos: { oldKey: "produtosImg", labelKey: "produtos" },
-      nome_responsavel: {
-        oldKey: "nomeResponsavel",
-        labelKey: "nomeResponsavel",
-      },
-      cpf_responsavel: {
-        oldKey: "cpfResponsavel",
-        labelKey: "cpfResponsavel",
-      },
+      produtos: { oldKey: "produtosImg", labelKey: "produtos" }, // 'produtos' em vez de 'imagens'
+      ccmei: { oldKey: "ccmeiUrl", labelKey: "ccmei" }, // 'ccmei'
+      nome_responsavel: { oldKey: "nomeResponsavel", labelKey: "nome_responsavel" },
+      cpf_responsavel: { oldKey: "cpfResponsavel", labelKey: "cpf_responsavel" },
     };
 
     const diffData = Object.entries(selectedItem.dados_atualizacao)
@@ -421,14 +398,13 @@ const AdminDashboard: React.FC = () => {
         const oldKey = mapping ? mapping.oldKey : key;
         const labelKey = mapping ? mapping.labelKey : key;
 
-        // Usa o fieldConfig de Estabelecimento
-        const fieldLabel = fieldConfig[labelKey]?.label ?? `Novo ${key}`;
         const oldValue = selectedItem[oldKey];
+        const fieldLabel = fieldConfig[labelKey]?.label ?? `Novo ${key}`;
 
         let finalLabel = fieldLabel;
         if (labelKey === "produtos") finalLabel = "Portfólio";
-        if (labelKey === "ccmei") finalLabel = "CCMEI";
         if (labelKey === "logo") finalLabel = "Logo";
+        if (labelKey === "ccmei") finalLabel = "CCMEI";
         if (key === "motivo") finalLabel = "Motivo da Exclusão";
 
         return {
@@ -488,7 +464,6 @@ const AdminDashboard: React.FC = () => {
     );
   };
 
-  // handlePageChange (NOVA FEATURE)
   const handlePageChange = (listKey: keyof PendingData) => (page: number) => {
     setCurrentPages((prev) => ({
       ...prev,
@@ -496,10 +471,10 @@ const AdminDashboard: React.FC = () => {
     }));
   };
 
-  // renderList (ATUALIZADO - Com paginação e campos de MEI)
+  // renderList adaptado
   const renderList = (
     title: string,
-    listData: Estabelecimento[],
+    listData: Estabelecimento[], // <-- Tipo Corrigido
     listKey: keyof PendingData
   ) => {
     const totalCount = listData.length;
@@ -522,7 +497,7 @@ const AdminDashboard: React.FC = () => {
           {listData.length > 0 ? (
             <>
               <List
-                dataSource={pagedData} // Usa dados paginados
+                dataSource={pagedData}
                 renderItem={(item) => (
                   <List.Item
                     actions={[
@@ -538,14 +513,12 @@ const AdminDashboard: React.FC = () => {
                           icon={listIcons[title]}
                         />
                       }
-                      // IMPORTANTE: Campos adaptados para ESTABELECIMENTO
-                      title={item.nomeFantasia}
-                      description={`CNPJ: ${item.cnpj}`}
+                      title={item.nomeFantasia} // <-- Campo Corrigido
+                      description={`CNPJ: ${item.cnpj}`} // <-- Campo Corrigido
                     />
                   </List.Item>
                 )}
               />
-              {/* Renderiza a paginação */}
               {totalCount > DASHBOARD_PAGE_SIZE && (
                 <div className="mt-4 text-center">
                   <Pagination
@@ -570,7 +543,6 @@ const AdminDashboard: React.FC = () => {
   return (
     <div className="p-8">
       <Spin spinning={loading}>
-        {/* CABEÇALHO ATUALIZADO (Responsivo + Botão Comentários) */}
         <div className="flex flex-col md:flex-row md:justify-between md:items-center mb-6 gap-4">
           <Title
             level={isMobile ? 3 : 2}
@@ -580,7 +552,7 @@ const AdminDashboard: React.FC = () => {
           </Title>
 
           <div className="flex flex-col md:flex-row gap-2 w-full md:w-auto">
-            {/* Link adaptado para ESTABELECIMENTOS */}
+            {/* Link Corrigido */}
             <Link href="/admin/estabelecimentos-ativos" passHref>
               <Button
                 type="primary"
@@ -592,12 +564,11 @@ const AdminDashboard: React.FC = () => {
               </Button>
             </Link>
 
-            {/* Link novo para COMENTÁRIOS */}
             <Link href="/admin/comentarios" passHref>
               <Button
                 icon={<CommentOutlined />}
                 size="large"
-                style={{ backgroundColor: "#3C6AB2", color: "#fff" }}
+                style={{ backgroundColor: "#3C6AB2", color: "#fff" }} // Pode ajustar a cor
                 className={isMobile ? "w-full" : ""}
               >
                 Gerenciar Comentários
@@ -606,7 +577,6 @@ const AdminDashboard: React.FC = () => {
           </div>
         </div>
 
-        {/* Chamada do renderList atualizada */}
         <Row gutter={[16, 16]}>
           {renderList("Novos Cadastros", data.cadastros, "cadastros")}
           {renderList("Atualizações", data.atualizacoes, "atualizacoes")}
@@ -616,21 +586,21 @@ const AdminDashboard: React.FC = () => {
 
       {selectedItem && (
         <Modal
-          title={`Detalhes de ${selectedItem.nomeFantasia}`}
+          title={`Detalhes de ${selectedItem.nomeFantasia}`} // <-- Campo Corrigido
           open={modalVisible}
           onCancel={() => setModalVisible(false)}
           width={1000}
-          // FOOTER ATUALIZADO (Botão "Recusar" abre novo modal + Ordem)
           footer={[
             <Button
               key="reject"
-              onClick={() => setIsRejectModalVisible(true)} // ABRE MODAL DE REJEIÇÃO
+              onClick={() => setIsRejectModalVisible(true)}
               icon={<CloseOutlined />}
               danger
               loading={isActionLoading}
             >
               Recusar
             </Button>,
+
             selectedItem.status !== StatusEstabelecimento.PENDENTE_EXCLUSAO && (
               <Button
                 key="edit_and_approve"
@@ -641,10 +611,11 @@ const AdminDashboard: React.FC = () => {
                 Editar e Aprovar
               </Button>
             ),
+
             selectedItem.status !== StatusEstabelecimento.PENDENTE_EXCLUSAO ? (
               <Button
                 key="approve_direct"
-                type="primary" // Botão de aprovação principal
+                type="primary"
                 onClick={() => handleAction("approve")}
                 icon={<CheckOutlined />}
                 loading={isActionLoading}
@@ -665,16 +636,28 @@ const AdminDashboard: React.FC = () => {
             ),
           ]}
         >
-          {/* Conteúdo do Modal (ESSENCIAL - MANTIDO DO ORIGINAL MEIDESAQUÁ) */}
-          <Title level={4}>Dados Atuais</Title>
+          <Title level={4}>Dados do Estabelecimento</Title> {/* <-- Texto Corrigido */}
           <Descriptions bordered column={1} size="small">
+            {/* Lógica de renderização do MeideSaquá (com logo e portfolio primeiro) */}
+            {selectedItem.logoUrl && (
+              <Descriptions.Item label={fieldConfig.logoUrl.label}>
+                {renderValue("logoUrl", selectedItem.logoUrl)}
+              </Descriptions.Item>
+            )}
+
+            {selectedItem.produtosImg && selectedItem.produtosImg.length > 0 && (
+              <Descriptions.Item label={fieldConfig.produtosImg.label}>
+                {renderValue("produtosImg", selectedItem.produtosImg)}
+              </Descriptions.Item>
+            )}
+
             {Object.entries(selectedItem)
               .filter(
-                ([key, value]) =>
+                ([key]) =>
                   key !== "dados_atualizacao" &&
-                  value !== null &&
-                  value !== "" &&
-                  value !== undefined
+                  key !== "logoUrl" &&
+                  key !== "produtosImg" && // <-- Campo Corrigido
+                  key !== "status"
               )
               .sort(
                 ([keyA], [keyB]) =>
@@ -683,7 +666,7 @@ const AdminDashboard: React.FC = () => {
               )
               .map(
                 ([key, value]) =>
-                  fieldConfig[key] && ( // Garante que só renderiza campos do config
+                  fieldConfig[key] && (
                     <Descriptions.Item
                       key={key}
                       label={fieldConfig[key]?.label ?? key}
@@ -694,16 +677,15 @@ const AdminDashboard: React.FC = () => {
               )}
           </Descriptions>
 
-          {/* Tabelas de Diff (MANTIDAS DO ORIGINAL) */}
           {renderDiffTable(
-            StatusEstabelecimento.PENDENTE_EXCLUSAO,
+            "pendente_exclusao",
             "error",
             "Solicitação de Exclusão",
-            ["estabelecimentoId", "confirmacao"]
+            ["estabelecimentoId", "confirmacao"] // <-- Campo Corrigido
           )}
 
           {renderDiffTable(
-            StatusEstabelecimento.PENDENTE_ATUALIZACAO,
+            "pendente_atualizacao",
             "info",
             "Dados para Atualizar",
             ["motivoExclusao"]
@@ -711,11 +693,11 @@ const AdminDashboard: React.FC = () => {
         </Modal>
       )}
 
-      {/* Modal de Edição (ESSENCIAL - MANTIDO DO ORIGINAL MEIDESAQUÁ) */}
-      <AdminEstabelecimentoModal
-        estabelecimento={selectedItem}
+      {/* ---MODAL DE EDIÇÃO --- */}
+      <AdminEstabelecimentoModal // <-- Componente Corrigido
+        estabelecimento={selectedItem} // <-- Prop Corrigida
         visible={isEditModalVisible}
-        onClose={(shouldRefresh) => {
+        onClose={(shouldRefresh: boolean) => { // <-- Tipo 'boolean' adicionado
           setIsEditModalVisible(false);
           if (shouldRefresh) {
             setModalVisible(false);
@@ -726,14 +708,13 @@ const AdminDashboard: React.FC = () => {
         mode="edit-and-approve"
         onEditAndApprove={handleEditAndApproveSubmit}
       />
-
-      {/* --- NOVO MODAL DE REJEIÇÃO (NOVA FEATURE) --- */}
+      {/* --- MODAL DE REJEIÇÃO --- */}
       <Modal
         title="Confirmar Rejeição"
         open={isRejectModalVisible}
         onCancel={() => {
           setIsRejectModalVisible(false);
-          setRejectionReason(""); // Limpa ao cancelar
+          setRejectionReason("");
         }}
         onOk={() => handleAction("reject", rejectionReason)}
         confirmLoading={isActionLoading}
@@ -748,7 +729,7 @@ const AdminDashboard: React.FC = () => {
           rows={4}
           value={rejectionReason}
           onChange={(e) => setRejectionReason(e.target.value)}
-          placeholder="O cadastro foi rejeitado pois..."
+          placeholder="O cadastro foi rejeitado pois..." // <-- Texto Corrigido
         />
       </Modal>
     </div>
