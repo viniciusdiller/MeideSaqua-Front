@@ -12,11 +12,12 @@ import {
   Empty,
   Avatar,
   Pagination,
-  Grid,
+  Grid, // 1. IMPORTADO DO NOVO CÓDIGO
 } from "antd";
 import { DeleteOutlined, ArrowLeftOutlined } from "@ant-design/icons";
 import { useRouter, useParams } from "next/navigation";
 import Link from "next/link";
+// 2. FUNÇÕES ADAPTADAS PARA O API.TS DO MEIDESAQUÁ
 import {
   adminGetReviewsByEstablishment,
   adminDeleteReview,
@@ -24,11 +25,11 @@ import {
 
 const { Title, Text } = Typography;
 const { confirm } = Modal;
-const { useBreakpoint } = Grid;
+const { useBreakpoint } = Grid; // 3. HOOK DE BREAKPOINT MANTIDO
 
 const PAGE_SIZE = 5;
 
-// Interfaces (Mantidas)
+// Interface para a Avaliação (do seu novo código)
 interface AvaliacaoAdmin {
   avaliacoesId: number;
   comentario: string;
@@ -40,10 +41,11 @@ interface AvaliacaoAdmin {
   };
 }
 
+// 4. INTERFACE ADAPTADA PARA "ESTABELECIMENTO"
 interface PageData {
   estabelecimento: {
-    id: number;
-    nomeFantasia: string;
+    estabelecimentoId: number;
+    nomeEstabelecimento: string;
     categoria: string;
   };
   avaliacoes: AvaliacaoAdmin[];
@@ -57,33 +59,14 @@ const AdminComentariosDoEstabelecimento: React.FC = () => {
   const router = useRouter();
   const params = useParams();
   
-  // Obtém o ID da URL. Ele é sempre uma string (ou string[]).
-  const rawId = params.id;
+  // 5. VARIÁVEL RENOMEADA PARA CLAREZA
+  const estabelecimentoId = params.id as string;
 
-  const screens = useBreakpoint();
+  const screens = useBreakpoint(); // 6. HOOK DE RESPONSIVIDADE MANTIDO
 
   const fetchData = useCallback(async () => {
-    // 1. VALIDAÇÃO E CONVERSÃO DO ID: Ponto principal da correção.
-    if (!rawId || Array.isArray(rawId)) {
-        setLoading(false);
-        // Evita a chamada de API se o ID for inválido
-        // message.error("ID do estabelecimento inválido na URL.");
-        // router.push('/admin/comentarios'); 
-        return;
-    }
-    
-    const numericId = parseInt(rawId, 10);
-    if (isNaN(numericId) || numericId <= 0) {
-      setLoading(false);
-      message.error("ID do estabelecimento inválido. Redirecionando...");
-      router.push('/admin/comentarios');
-      return;
-    }
-    
-    // Usamos a string numérica validada
-    const estabelecimentoId = numericId.toString();
-
-    // FIM DA CORREÇÃO CRÍTICA
+    // 7. LÓGICA ATUALIZADA
+    if (!estabelecimentoId) return;
 
     setLoading(true);
     const token = localStorage.getItem("admin_token");
@@ -94,32 +77,23 @@ const AdminComentariosDoEstabelecimento: React.FC = () => {
     }
 
     try {
-      // Chama a API com o ID VALIDADO
-      const data = await adminGetReviewsByEstablishment(
-        estabelecimentoId,
-        token
-      );
+      // 8. CHAMADA DE API CORRETA DO MEIDESAQUÁ
+      const data = await adminGetReviewsByEstablishment(estabelecimentoId, token);
       setPageData(data);
       setCurrentPage(1);
     } catch (error: any) {
-      const msg = error.message.includes('404') 
-          ? 'Estabelecimento não encontrado ou erro na API.' 
-          : error.message || "Falha ao buscar comentários.";
-      message.error(msg);
-      setPageData(null);
+      message.error(error.message || "Falha ao buscar comentários.");
     } finally {
       setLoading(false);
     }
-  }, [rawId, router]); // Dependência em rawId
+    // 9. DEPENDÊNCIA ATUALIZADA
+  }, [estabelecimentoId, router]);
 
   useEffect(() => {
-    // Garante que o fetch só ocorra se o rawId estiver disponível
-    if (rawId && !Array.isArray(rawId)) {
-      fetchData();
-    }
-  }, [fetchData, rawId]);
+    fetchData();
+  }, [fetchData]);
 
-  // A função handleDelete (excluir) não precisa de alteração
+  // A função handleDelete é idêntica e foi mantida
   const handleDelete = (id: number) => {
     confirm({
       title: "Você tem certeza que quer excluir este comentário?",
@@ -137,9 +111,10 @@ const AdminComentariosDoEstabelecimento: React.FC = () => {
         }
 
         try {
+          // 10. CHAMADA DE API CORRETA DO MEIDESAQUÁ
           await adminDeleteReview(id, token);
           message.success("Comentário excluído com sucesso!");
-          fetchData(); 
+          fetchData(); // Recarrega os dados
         } catch (error: any) {
           message.error(error.message || "Falha ao excluir comentário.");
         } finally {
@@ -148,13 +123,13 @@ const AdminComentariosDoEstabelecimento: React.FC = () => {
       },
     });
   };
-  
-  // Resto do componente (JSX e lógica de renderização) permanece o mesmo
-  
-  const pageTitle = pageData?.estabelecimento?.nomeFantasia
-    ? `Comentários de: ${pageData.estabelecimento.nomeFantasia}`
+
+  // 11. TÍTULO DA PÁGINA ATUALIZADO
+  const pageTitle = pageData?.estabelecimento?.nomeEstabelecimento
+    ? `Comentários de: ${pageData.estabelecimento.nomeEstabelecimento}`
     : "Carregando comentários...";
 
+  // Lógica de paginação (mantida)
   const allAvaliacoes = pageData?.avaliacoes || [];
   const totalCount = allAvaliacoes.length;
   const paginatedAvaliacoes = allAvaliacoes.slice(
@@ -162,17 +137,20 @@ const AdminComentariosDoEstabelecimento: React.FC = () => {
     currentPage * PAGE_SIZE
   );
 
+  // 12. LÓGICA DE RESPONSIVIDADE MANTIDA
   const isMobile = !screens.md;
 
-  // A parte JSX é mantida
   return (
+    // 13. PADDING RESPONSIVO MANTIDO
     <div className="p-4 md:p-8">
+      {/* 14. CABEÇALHO RESPONSIVO MANTIDO */}
       <div className="flex flex-col md:flex-row md:justify-between md:items-start gap-4 mb-6">
         {/* Bloco Título + Tag */}
         <div>
           <Title level={isMobile ? 3 : 2} className="m-0" ellipsis>
             {pageTitle}
           </Title>
+          {/* 15. TAG ATUALIZADA */}
           {pageData?.estabelecimento?.categoria && (
             <Tag
               color="blue"
@@ -184,13 +162,15 @@ const AdminComentariosDoEstabelecimento: React.FC = () => {
           )}
         </div>
 
-        {/* Botão Voltar */}
+        {/* Bloco Botão Voltar */}
         <Link href="/admin/comentarios" passHref>
           <Button
             icon={<ArrowLeftOutlined />}
             size={isMobile ? "middle" : "large"}
+            // 16. BOTÃO RESPONSIVO MANTIDO
             className={isMobile ? "w-full" : ""}
           >
+            {/* 17. TEXTO ATUALIZADO */}
             Voltar para Estabelecimentos
           </Button>
         </Link>
@@ -203,6 +183,7 @@ const AdminComentariosDoEstabelecimento: React.FC = () => {
           dataSource={paginatedAvaliacoes}
           locale={{
             emptyText: (
+              // 18. TEXTO ATUALIZADO
               <Empty description="Nenhum comentário encontrado para este estabelecimento." />
             ),
           }}
@@ -210,6 +191,7 @@ const AdminComentariosDoEstabelecimento: React.FC = () => {
             <List.Item
               key={item.avaliacoesId}
               actions={[
+                // 19. BOTÃO DE EXCLUIR RESPONSIVO MANTIDO
                 <Button
                   type="primary"
                   danger
@@ -217,6 +199,7 @@ const AdminComentariosDoEstabelecimento: React.FC = () => {
                   onClick={() => handleDelete(item.avaliacoesId)}
                   loading={isActionLoading}
                 >
+                  {/* O texto "Excluir" some em telas pequenas */}
                   {isMobile ? null : "Excluir"}
                 </Button>,
               ]}
@@ -248,12 +231,14 @@ const AdminComentariosDoEstabelecimento: React.FC = () => {
 
         {totalCount > PAGE_SIZE && (
           <div className="mt-6 text-center">
+            {/* 20. PAGINAÇÃO RESPONSIVA MANTIDA */}
             <Pagination
               current={currentPage}
               pageSize={PAGE_SIZE}
               total={totalCount}
               onChange={(page) => setCurrentPage(page)}
               showSizeChanger={false}
+              // Usa o modo "simple" em telas pequenas
               simple={isMobile}
             />
           </div>

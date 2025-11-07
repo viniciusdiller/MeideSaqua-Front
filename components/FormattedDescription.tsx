@@ -2,34 +2,39 @@
 import React from "react";
 
 interface FormattedDescriptionProps {
-  text: string | null | undefined; // Permite texto nulo ou indefinido
+  /**
+   * O texto a ser formatado, geralmente vindo de um banco de dados.
+   * Suporta quebras de linha com '\n'.
+   */
+  text: string | null | undefined;
 }
 
+/**
+ * Um componente que pega um texto simples com quebras de linha ('\n')
+ * e o renderiza como parágrafos HTML, removendo linhas vazias.
+ */
 const FormattedDescription: React.FC<FormattedDescriptionProps> = ({
   text,
 }) => {
-  // Verifica se o texto é nulo, indefinido ou vazio
+  // 1. Se o texto for nulo, indefinido ou vazio, não renderiza nada.
   if (!text) {
-    return null; // Não renderiza nada se não houver texto
+    return null;
   }
 
-  // 1. Divide o texto em linhas baseado no caractere de nova linha (\n)
-  // 2. Remove linhas que contêm apenas espaços em branco (trim() remove espaços no início/fim)
-  // 3. Garante que não criamos parágrafos vazios
+  // 2. Divide o texto por quebras de linha e remove parágrafos vazios.
   const paragraphs = text.split("\n").filter((p) => p.trim().length > 0);
 
-  // Se, após filtrar, não houver parágrafos, não renderiza nada
+  // 3. Se não sobrar nenhum parágrafo, não renderiza nada.
   if (paragraphs.length === 0) {
     return null;
   }
 
-  // Renderiza cada linha filtrada como um parágrafo separado
   return (
-    <div className="text-gray-700 leading-relaxed space-y-4">
-      {" "}
-      {/* Mantém o estilo */}
+    <div className="text-gray-600 leading-relaxed">
       {paragraphs.map((paragraph, index) => (
-        <p key={index}>{paragraph}</p>
+        <p key={index} className="break-words m-0">
+          {paragraph}
+        </p>
       ))}
     </div>
   );
