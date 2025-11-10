@@ -459,7 +459,7 @@ export default function MeiDetailPage({
                         `${API_URL}/${normalizeImagePath(
                           meiDetails.logoUrl
                         )}`) ||
-                      "/LogoExploraMonocromática.png"
+                      "/LogoMeideSaqua.png"
                     }
                     alt={`Logo de ${meiDetails.nomeFantasia}`}
                     width={500}

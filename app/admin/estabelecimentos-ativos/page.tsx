@@ -15,8 +15,8 @@ import {
   Tabs,
   Input,
   Popconfirm,
-  Grid, // 1. IMPORTADO
-  Pagination, // 2. IMPORTADO
+  Grid,
+  Pagination,
 } from "antd";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
@@ -26,24 +26,22 @@ import {
   DeleteOutlined,
 } from "@ant-design/icons";
 import {
-  getAllActiveEstablishments,
-  adminDeleteEstablishment,
+  getAllActiveEstablishments, // <-- API MeideSaquá
+  adminDeleteEstablishment, // <-- API MeideSaquá
 } from "@/lib/api";
-import AdminEstabelecimentoModal from "@/components/AdminEstabelecimentoModal";
-import { Estabelecimento } from "@/types/Interface-Estabelecimento";
+import AdminEstabelecimentoModal from "@/components/AdminEstabelecimentoModal"; // <-- Modal MeideSaquá
+import { Estabelecimento } from "@/types/Interface-Estabelecimento"; // <-- Interface MeideSaquá
 
 const { Title, Text } = Typography;
 const { Search } = Input;
 const { TabPane } = Tabs;
-const { useBreakpoint } = Grid; // 3. IMPORTADO
+const { useBreakpoint } = Grid;
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL;
-const PAGE_SIZE = 6; // 4. ADICIONADO (você pode ajustar este número)
+const PAGE_SIZE = 6; // 6 estabelecimentos por página (em cada aba)
 
-// Helper para obter URL completa da imagem
 const getFullImageUrl = (path: string): string => {
   if (!path) return "";
-  if (path.startsWith("http")) return path; // Já é uma URL completa
   const normalizedPath = path.replace(/\\/g, "/");
   const cleanPath = normalizedPath.startsWith("/")
     ? normalizedPath.substring(1)
@@ -53,7 +51,9 @@ const getFullImageUrl = (path: string): string => {
 
 const EstabelecimentosAtivosPage: React.FC = () => {
   const [loading, setLoading] = useState(true);
-  const [estabelecimentos, setEstabelecimentos] = useState<Estabelecimento[]>([]);
+  const [estabelecimentos, setEstabelecimentos] = useState<Estabelecimento[]>(
+    []
+  );
   const [filteredEstabelecimentos, setFilteredEstabelecimentos] = useState<
     Estabelecimento[]
   >([]);
@@ -61,11 +61,10 @@ const EstabelecimentosAtivosPage: React.FC = () => {
     null
   );
   const [isEditModalVisible, setIsEditModalVisible] = useState(false);
-  const [currentPage, setCurrentPage] = useState(1); // 5. ADICIONADO ESTADO
+  const [currentPage, setCurrentPage] = useState(1);
   const router = useRouter();
-  const screens = useBreakpoint(); // 6. ADICIONADO
+  const screens = useBreakpoint();
 
-  // Busca os dados (similar ao de projetos)
   const fetchData = useCallback(async () => {
     setLoading(true);
     const token = localStorage.getItem("admin_token");
@@ -75,6 +74,7 @@ const EstabelecimentosAtivosPage: React.FC = () => {
       return;
     }
     try {
+      // Usando a API do MeideSaquá
       const data = await getAllActiveEstablishments(token);
       setEstabelecimentos(data);
       setFilteredEstabelecimentos(data);
@@ -89,21 +89,20 @@ const EstabelecimentosAtivosPage: React.FC = () => {
     fetchData();
   }, [fetchData]);
 
-  // Lógica de busca (adaptada para estabelecimento)
   const handleSearch = (value: string) => {
     const lowerCaseValue = value.toLowerCase();
     const filtered = estabelecimentos.filter(
-      (e) =>
-        e.nomeFantasia.toLowerCase().includes(lowerCaseValue) ||
-        e.cnpj.toLowerCase().includes(lowerCaseValue) ||
-        (e.categoria && e.categoria.toLowerCase().includes(lowerCaseValue))
+      (p) =>
+        p.nomeFantasia.toLowerCase().includes(lowerCaseValue) ||
+        (p.cnpj || "").toLowerCase().includes(lowerCaseValue) ||
+        p.categoria.toLowerCase().includes(lowerCaseValue)
     );
     setFilteredEstabelecimentos(filtered);
-    setCurrentPage(1); // 7. ADICIONADO (reseta a página na busca)
+    setCurrentPage(1); // Reseta a paginação ao buscar
   };
 
-  const openEditModal = (estabelecimento: Estabelecimento) => {
-    setSelectedItem(estabelecimento);
+  const openEditModal = (est: Estabelecimento) => {
+    setSelectedItem(est);
     setIsEditModalVisible(true);
   };
 
@@ -111,12 +110,11 @@ const EstabelecimentosAtivosPage: React.FC = () => {
     setIsEditModalVisible(false);
     setSelectedItem(null);
     if (shouldRefresh) {
-      fetchData(); // Recarrega os dados se uma edição foi salva
+      fetchData(); // Recarrega os dados se o modal salvar
     }
   };
 
-  // Lógica de exclusão (adaptada para estabelecimento)
-  const handleDelete = async (estabelecimentoId: number) => {
+  const handleDelete = async (estId: number) => {
     const token = localStorage.getItem("admin_token");
     if (!token) {
       message.error("Autenticação expirada.");
@@ -125,42 +123,43 @@ const EstabelecimentosAtivosPage: React.FC = () => {
 
     setLoading(true);
     try {
-      await adminDeleteEstablishment(estabelecimentoId, token);
+      // Usando a API de delete do MeideSaquá
+      await adminDeleteEstablishment(estId, token);
       message.success("Estabelecimento excluído com sucesso!");
-      fetchData(); // Recarrega a lista
+      fetchData(); // Recarrega os dados
     } catch (error: any) {
       message.error(error.message || "Falha ao excluir o estabelecimento.");
       setLoading(false);
     }
   };
 
-  // 8. ADICIONADO (reseta a página ao trocar de aba)
+  // Reseta a página ao trocar de aba
   const handleTabChange = () => {
     setCurrentPage(1);
   };
 
-  // Agrupa os estabelecimentos por CATEGORIA (em vez de ODS)
+  // Agrupa os estabelecimentos por Categoria
   const groupedEstabelecimentos = filteredEstabelecimentos.reduce(
-    (acc, estabelecimento) => {
-      const categoria = estabelecimento.categoria || "Sem Categoria";
+    (acc, est) => {
+      const categoria = est.categoria || "Sem Categoria";
       if (!acc[categoria]) {
         acc[categoria] = [];
       }
-      acc[categoria].push(estabelecimento);
+      acc[categoria].push(est);
       return acc;
     },
     {} as { [key: string]: Estabelecimento[] }
   );
 
+  // Ordena as categorias alfabeticamente
   const sortedCategories = Object.keys(groupedEstabelecimentos).sort((a, b) =>
     a.localeCompare(b)
   );
 
-  // 9. ADICIONADO (para responsividade das abas)
   const tabPosition = screens.md ? "left" : "top";
 
   return (
-    <div className="p-4 md:p-8"> {/* Padding responsivo */}
+    <div className="p-4 md:p-8">
       <Link href="/admin/dashboard" passHref>
         <Button icon={<ArrowLeftOutlined />} type="text" className="mb-4">
           Voltar ao Dashboard
@@ -185,57 +184,55 @@ const EstabelecimentosAtivosPage: React.FC = () => {
           <Empty description="Nenhum estabelecimento ativo encontrado." />
         ) : (
           <Tabs
-            defaultActiveKey={sortedCategories[0]}
-            tabPosition={tabPosition} // 10. ATUALIZADO
-            onChange={handleTabChange} // 11. ADICIONADO
+            defaultActiveKey={sortedCategories[0]} // Inicia na primeira categoria
+            tabPosition={tabPosition}
+            onChange={handleTabChange}
           >
             {sortedCategories.map((categoria) => {
-              // 12. LÓGICA DE PAGINAÇÃO POR ABA
-              const allEstabelecimentosForCategoria =
-                groupedEstabelecimentos[categoria];
-              const totalCount = allEstabelecimentosForCategoria.length;
-              const estabelecimentosToShow =
-                allEstabelecimentosForCategoria.slice(
-                  (currentPage - 1) * PAGE_SIZE,
-                  currentPage * PAGE_SIZE
-                );
+              // Lógica de paginação por aba
+              const allEstabelecimentosForCat = groupedEstabelecimentos[categoria];
+              const totalCount = allEstabelecimentosForCat.length;
+              const estabelecimentosToShow = allEstabelecimentosForCat.slice(
+                (currentPage - 1) * PAGE_SIZE,
+                currentPage * PAGE_SIZE
+              );
 
               return (
                 <TabPane
-                  tab={`${categoria} (${totalCount})`} // Mostra o total
+                  tab={`${categoria} (${allEstabelecimentosForCat.length})`}
                   key={categoria}
                 >
                   <Row gutter={[16, 16]}>
-                    {/* 13. MAPEIA APENAS OS ITENS DA PÁGINA */}
-                    {estabelecimentosToShow.map((estabelecimento) => (
-                      <Col
-                        xs={24}
-                        md={12}
-                        lg={8}
-                        key={estabelecimento.estabelecimentoId}
-                      >
+                    {estabelecimentosToShow.map((est) => (
+                      <Col xs={24} md={12} lg={8} key={est.estabelecimentoId}>
                         <Card
                           hoverable
                           actions={[
                             <Button
-                              type="link"
+                              type="text"
                               icon={<EditOutlined />}
-                              onClick={() => openEditModal(estabelecimento)}
+                              onClick={() => openEditModal(est)}
+                              className="hover:!bg-blue-500 hover:!text-white"
                             >
                               Editar
                             </Button>,
                             <Popconfirm
                               key="delete"
                               title="Excluir Estabelecimento"
-                              description="Tem certeza que deseja excluir este estabelecimento? Esta ação não pode ser desfeita."
+                              description="Tem certeza que deseja excluir este MEI? Esta ação não pode ser desfeita."
                               onConfirm={() =>
-                                handleDelete(estabelecimento.estabelecimentoId)
+                                handleDelete(est.estabelecimentoId)
                               }
                               okText="Sim, Excluir"
                               cancelText="Não"
                               okButtonProps={{ danger: true }}
                             >
-                              <Button type="link" danger icon={<DeleteOutlined />}>
+                              <Button
+                                type="text"
+                                danger
+                                icon={<DeleteOutlined />}
+                                className="hover:!bg-red-500 hover:!text-white"
+                              >
                                 Excluir
                               </Button>
                             </Popconfirm>,
@@ -244,18 +241,23 @@ const EstabelecimentosAtivosPage: React.FC = () => {
                           <Card.Meta
                             avatar={
                               <Avatar
-                                src={getFullImageUrl(
-                                  estabelecimento.logoUrl || ""
-                                )}
+                                src={getFullImageUrl(est.logoUrl || "")}
                               />
                             }
-                            title={estabelecimento.nomeFantasia}
+                            title={est.nomeFantasia}
                             description={
                               <>
-                                <Text>CNPJ: {estabelecimento.cnpj}</Text>
+                                <Text>
+                                  <strong>ID:</strong> {est.estabelecimentoId}
+                                </Text>
                                 <br />
-                                <Text type="secondary">
-                                  {estabelecimento.status}
+                                <Text>
+                                  <strong>CNPJ:</strong> {est.cnpj}
+                                </Text>
+                                <br />
+                                <Text>
+                                  <strong>Responsável:</strong>{" "}
+                                  {est.nomeResponsavel}
                                 </Text>
                               </>
                             }
@@ -265,7 +267,7 @@ const EstabelecimentosAtivosPage: React.FC = () => {
                     ))}
                   </Row>
 
-                  {/* 14. RENDERIZA O COMPONENTE DE PAGINAÇÃO */}
+                  {/* Renderiza o componente de paginação da aba */}
                   {totalCount > PAGE_SIZE && (
                     <div className="mt-6 text-center">
                       <Pagination
@@ -284,11 +286,14 @@ const EstabelecimentosAtivosPage: React.FC = () => {
         )}
       </Spin>
 
+      {/* Modal de Edição do MeideSaquá */}
       <AdminEstabelecimentoModal
         estabelecimento={selectedItem}
         visible={isEditModalVisible}
         onClose={handleModalClose}
-        mode="edit-only" // Modo correto para esta página
+        mode="edit-only"
+        // Passa uma função vazia pois o modal "edit-only" não usa
+        onEditAndApprove={async () => {}}
       />
     </div>
   );

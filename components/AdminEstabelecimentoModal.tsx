@@ -1,4 +1,3 @@
-// components/AdminEstabelecimentoModal.tsx
 "use client";
 
 import React, { useState, useEffect } from "react";
@@ -14,28 +13,30 @@ import {
   Alert,
   message,
   Typography,
-  Upload,
+  Image as AntdImage,
+  Tag,
+  Popconfirm,
 } from "antd";
-import { UploadOutlined } from "@ant-design/icons";
-import type { UploadFile } from "antd/es/upload/interface";
-import { adminUpdateEstablishment } from "@/lib/api";
-import { Estabelecimento } from "@/types/Interface-Estabelecimento";
-
-// Importa as constantes do arquivo de cadastro
+import { CloseOutlined, QuestionCircleOutlined } from "@ant-design/icons";
+import {
+  adminUpdateEstablishment,
+  adminEditAndApproveEstablishment,
+} from "@/lib/api";
+import {
+  Estabelecimento,
+  ImagemProduto,
+} from "@/types/Interface-Estabelecimento"; // Isto agora está correto
 import {
   categorias,
-  tagsPorCategoria,
   areasAtuacao,
+  tagsPorCategoria,
 } from "@/app/cadastro-mei/page";
 
 const { Title } = Typography;
 const { TextArea } = Input;
 const { Option } = Select;
 
-// Helper para criar uma lista única de todas as tags
-const allTags = [
-  ...new Set(Object.values(tagsPorCategoria).flat()),
-].sort((a, b) => a.localeCompare(b));
+const API_URL = process.env.NEXT_PUBLIC_API_URL;
 
 interface AdminEstabelecimentoModalProps {
   estabelecimento: Estabelecimento | null;
@@ -56,14 +57,41 @@ const AdminEstabelecimentoModal: React.FC<AdminEstabelecimentoModalProps> = ({
   const [editForm] = Form.useForm();
   const [outrasAlteracoes, setOutrasAlteracoes] = useState<string | null>(null);
 
-  // Estados para os arquivos
-  const [logoFileList, setLogoFileList] = useState<UploadFile[]>([]);
-  const [portfolioFileList, setPortfolioFileList] = useState<UploadFile[]>([]);
-  const [ccmeiFileList, setCcmeiFileList] = useState<UploadFile[]>([]);
+  const [currentLogo, setCurrentLogo] = useState<string | null>(null);
+  const [currentPortfolio, setCurrentPortfolio] = useState<ImagemProduto[]>([]);
+  const [portfolioToDelete, setPortfolioToDelete] = useState<string[]>([]);
+  const [logoToDelete, setLogoToDelete] = useState<boolean>(false);
+  const [allTags, setAllTags] = useState<string[]>([]);
+
+  // A função que corrige o bug da imagem quebrada
+  const getFullImageUrl = (
+    path: string | null | undefined
+  ): string | undefined => {
+    if (!path) return undefined;
+    if (path.startsWith("http") || path.startsWith("blob:")) {
+      return path;
+    }
+    const normalizedPath = path.replace(/\\/g, "/");
+    const cleanPath = normalizedPath.startsWith("/")
+      ? normalizedPath.substring(1)
+      : normalizedPath;
+    return `${API_URL}/${cleanPath}`;
+  };
 
   useEffect(() => {
+    const uniqueTags = [
+      ...new Set(Object.values(tagsPorCategoria).flat()),
+    ].sort();
+    setAllTags(uniqueTags);
+
     if (estabelecimento) {
       let dataToEdit: any = { ...estabelecimento };
+      let finalLogoUrl = estabelecimento.logoUrl || null;
+      
+      // --- CORREÇÃO AQUI ---
+      // Usar 'produtosImg' (do backend/interface) em vez de 'imagensProduto'
+      let finalPortfolioImgs = estabelecimento.produtosImg || []; 
+      // --- FIM DA CORREÇÃO ---
 
       if (
         estabelecimento.status === "pendente_atualizacao" &&
@@ -73,29 +101,49 @@ const AdminEstabelecimentoModal: React.FC<AdminEstabelecimentoModalProps> = ({
         setOutrasAlteracoes(
           estabelecimento.dados_atualizacao.outrasAlteracoes || null
         );
+        finalLogoUrl =
+          estabelecimento.dados_atualizacao.logo || finalLogoUrl;
+        if (estabelecimento.dados_atualizacao.produtos) {
+          finalPortfolioImgs =
+            estabelecimento.dados_atualizacao.produtos.map(
+              (url: string) => ({ url: url })
+            );
+        }
         delete dataToEdit.outrasAlteracoes;
       } else {
         setOutrasAlteracoes(null);
       }
-      
-      // --- CORREÇÃO DO BUG ---
-      // Mapeia os campos de camelCase (do objeto base) para snake_case (do formulário)
-      // Isso corrige o bug dos campos vazios no modo "edit-only".
-      if (!dataToEdit.nome_responsavel && dataToEdit.nomeResponsavel) {
-        dataToEdit.nome_responsavel = dataToEdit.nomeResponsavel;
-      }
-      if (!dataToEdit.cpf_responsavel && dataToEdit.cpfResponsavel) {
-        dataToEdit.cpf_responsavel = dataToEdit.cpfResponsavel;
-      }
-      // --- FIM DA CORREÇÃO ---
 
-      if (typeof dataToEdit.tagsInvisiveis === "string") {
-        dataToEdit.tagsInvisiveis = dataToEdit.tagsInvisiveis
+      // Lógica (que já tínhamos) para filtrar o logo do portfólio
+      const normalize = (path: string | null | undefined): string => {
+        if (!path) return "";
+        return path
+          .replace(API_URL || "", "")
+          .replace(/\\/g, "/")
+          .replace(/^\/+|\/+$/g, "");
+      };
+
+      const normalizedLogoPath = normalize(finalLogoUrl);
+      
+      const filteredPortfolio = finalPortfolioImgs.filter((img) => {
+        if (!img || !img.url) return false;
+        if (normalizedLogoPath === "") return true;
+        return normalize(img.url) !== normalizedLogoPath;
+      });
+
+      setCurrentLogo(finalLogoUrl);
+      setCurrentPortfolio(filteredPortfolio); // Agora 'filteredPortfolio' deve ter as imagens corretas
+
+      setPortfolioToDelete([]);
+      setLogoToDelete(false);
+
+      if (typeof dataToEdit.areasAtuacao === "string") {
+        dataToEdit.areasAtuacao = dataToEdit.areasAtuacao
           .split(",")
           .map((s: string) => s.trim());
       }
-      if (typeof dataToEdit.areasAtuacao === "string") {
-        dataToEdit.areasAtuacao = dataToEdit.areasAtuacao
+      if (typeof dataToEdit.tagsInvisiveis === "string") {
+        dataToEdit.tagsInvisiveis = dataToEdit.tagsInvisiveis
           .split(",")
           .map((s: string) => s.trim());
       }
@@ -104,9 +152,10 @@ const AdminEstabelecimentoModal: React.FC<AdminEstabelecimentoModalProps> = ({
     } else {
       editForm.resetFields();
       setOutrasAlteracoes(null);
-      setLogoFileList([]);
-      setPortfolioFileList([]);
-      setCcmeiFileList([]);
+      setCurrentLogo(null);
+      setCurrentPortfolio([]);
+      setPortfolioToDelete([]);
+      setLogoToDelete(false);
     }
   }, [estabelecimento, visible, editForm]);
 
@@ -115,32 +164,25 @@ const AdminEstabelecimentoModal: React.FC<AdminEstabelecimentoModalProps> = ({
 
     setIsEditLoading(true);
 
-    if (Array.isArray(values.tagsInvisiveis)) {
-      values.tagsInvisiveis = values.tagsInvisiveis.join(", ");
-    }
-    if (Array.isArray(values.areasAtuacao)) {
-      values.areasAtuacao = values.areasAtuacao.join(", ");
-    }
-
     const formData = new FormData();
-    for (const key in values) {
-      if (values[key] !== null && values[key] !== undefined) {
-        formData.append(key, values[key]);
+
+    Object.keys(values).forEach((key) => {
+      const value = values[key];
+      if (value) {
+        if (Array.isArray(value)) {
+          formData.append(key, value.join(", "));
+        } else {
+          formData.append(key, value);
+        }
       }
+    });
+
+    if (logoToDelete) {
+      formData.append("logoUrl", "DELETE");
     }
 
-    if (logoFileList.length > 0 && logoFileList[0].originFileObj) {
-      formData.append("logo", logoFileList[0].originFileObj);
-    }
-    if (portfolioFileList.length > 0) {
-      portfolioFileList.forEach((file) => {
-        if (file.originFileObj) {
-          formData.append("produtos", file.originFileObj);
-        }
-      });
-    }
-    if (ccmeiFileList.length > 0 && ccmeiFileList[0].originFileObj) {
-      formData.append("ccmei", ccmeiFileList[0].originFileObj);
+    if (portfolioToDelete.length > 0) {
+      formData.append("urlsParaExcluir", JSON.stringify(portfolioToDelete));
     }
 
     try {
@@ -170,13 +212,6 @@ const AdminEstabelecimentoModal: React.FC<AdminEstabelecimentoModalProps> = ({
       setIsEditLoading(false);
     }
   };
-
-  const handleLogoChange = ({ fileList }: { fileList: UploadFile[] }) =>
-    setLogoFileList(fileList);
-  const handlePortfolioChange = ({ fileList }: { fileList: UploadFile[] }) =>
-    setPortfolioFileList(fileList);
-  const handleCCMEIChange = ({ fileList }: { fileList: UploadFile[] }) =>
-    setCcmeiFileList(fileList);
 
   return (
     <Modal
@@ -239,10 +274,10 @@ const AdminEstabelecimentoModal: React.FC<AdminEstabelecimentoModalProps> = ({
             <Col span={12}>
               <Form.Item
                 name="categoria"
-                label="Categoria"
+                label="Categoria Principal"
                 rules={[{ required: true }]}
               >
-                <Select placeholder="Selecione a categoria">
+                <Select placeholder="Selecione a categoria principal">
                   {categorias.map((cat) => (
                     <Option key={cat} value={cat}>
                       {cat}
@@ -254,22 +289,12 @@ const AdminEstabelecimentoModal: React.FC<AdminEstabelecimentoModalProps> = ({
           </Row>
           <Row gutter={16}>
             <Col span={12}>
-              {/* Este nome (snake_case) é o que o formulário usa */}
-              <Form.Item
-                name="nome_responsavel"
-                label="Nome do Responsável"
-                rules={[{ required: true }]}
-              >
+              <Form.Item name="cnpj" label="CNPJ" rules={[{ required: true }]}>
                 <Input />
               </Form.Item>
             </Col>
             <Col span={12}>
-              {/* Este nome (snake_case) é o que o formulário usa */}
-              <Form.Item
-                name="cpf_responsavel"
-                label="CPF do Responsável"
-                rules={[{ required: true }]}
-              >
+              <Form.Item name="cnae" label="CNAE" rules={[{ required: true }]}>
                 <Input />
               </Form.Item>
             </Col>
@@ -277,8 +302,8 @@ const AdminEstabelecimentoModal: React.FC<AdminEstabelecimentoModalProps> = ({
           <Row gutter={16}>
             <Col span={12}>
               <Form.Item
-                name="cnpj"
-                label="CNPJ"
+                name="nomeResponsavel"
+                label="Nome do Responsável"
                 rules={[{ required: true }]}
               >
                 <Input />
@@ -286,8 +311,8 @@ const AdminEstabelecimentoModal: React.FC<AdminEstabelecimentoModalProps> = ({
             </Col>
             <Col span={12}>
               <Form.Item
-                name="cnae"
-                label="CNAE"
+                name="cpfResponsavel"
+                label="CPF do Responsável"
                 rules={[{ required: true }]}
               >
                 <Input />
@@ -369,7 +394,7 @@ const AdminEstabelecimentoModal: React.FC<AdminEstabelecimentoModalProps> = ({
             </Select>
           </Form.Item>
           <Form.Item name="tagsInvisiveis" label="Tags de Busca">
-            <Select mode="multiple" placeholder="Selecione as tags">
+            <Select mode="multiple" placeholder="Selecione as tags de busca">
               {allTags.map((tag) => (
                 <Option key={tag} value={tag}>
                   {tag}
@@ -379,61 +404,118 @@ const AdminEstabelecimentoModal: React.FC<AdminEstabelecimentoModalProps> = ({
           </Form.Item>
 
           <Title level={5} className="mt-4">
-            Arquivos (Substituir)
+            Gerenciamento de Imagens
           </Title>
-          <Alert
-            message="Aviso sobre Arquivos"
-            description="Para alterar a Logo, Portfólio ou CCMEI, basta carregar os novos arquivos. Os arquivos antigos serão substituídos. Deixe em branco para manter os atuais."
-            type="warning"
-            showIcon
-            className="mb-4"
-          />
           <Row gutter={16}>
-            <Col span={8}>
-              <Form.Item label="Logo">
-                <Upload
-                  customRequest={({ onSuccess }) =>
-                    setTimeout(() => onSuccess && onSuccess("ok"), 0)
-                  }
-                  fileList={logoFileList}
-                  onChange={handleLogoChange}
-                  listType="picture"
-                  maxCount={1}
-                >
-                  <Button icon={<UploadOutlined />}>Carregar Nova Logo</Button>
-                </Upload>
-              </Form.Item>
+            <Col span={12}>
+              <Title level={5} style={{ fontSize: "16px" }}>
+                Logo
+              </Title>
+              <div style={{ position: "relative", width: "fit-content" }}>
+                <AntdImage
+                  src={getFullImageUrl(currentLogo)}
+                  alt="Logo do Estabelecimento"
+                  style={{
+                    width: 150,
+                    height: 150,
+                    objectFit: "cover",
+                    border: "1px solid #d9d9d9",
+                    borderRadius: "8px",
+                    opacity: logoToDelete ? 0.5 : 1,
+                  }}
+                  fallback="/logo_mei_redonda.png" //
+                />
+                {currentLogo && (
+                  <Popconfirm
+                    title="Remover esta logo?"
+                    okText="Remover"
+                    cancelText="Cancelar"
+                    okType="danger"
+                    placement="topRight"
+                    icon={<QuestionCircleOutlined style={{ color: "red" }} />}
+                    onConfirm={() => {
+                      setLogoToDelete(true);
+                      setCurrentLogo(null);
+                      message.info("Logo marcada para remoção.");
+                    }}
+                  >
+                    <Button
+                      type="primary"
+                      danger
+                      icon={<CloseOutlined />}
+                      style={{ position: "absolute", top: 5, right: 5 }}
+                      size="small"
+                      title="Remover Logo"
+                    />
+                  </Popconfirm>
+                )}
+              </div>
+              {logoToDelete && (
+                <Tag color="red" style={{ marginTop: 10, width: "100%" }}>
+                  Logo será removida ao salvar.
+                </Tag>
+              )}
             </Col>
-            <Col span={8}>
-              <Form.Item label="Portfólio (até 4)">
-                <Upload
-                  customRequest={({ onSuccess }) =>
-                    setTimeout(() => onSuccess && onSuccess("ok"), 0)
-                  }
-                  fileList={portfolioFileList}
-                  onChange={handlePortfolioChange}
-                  listType="picture"
-                  multiple
-                  maxCount={4}
-                >
-                  <Button icon={<UploadOutlined />}>Carregar Portfólio</Button>
-                </Upload>
-              </Form.Item>
-            </Col>
-            <Col span={8}>
-              <Form.Item label="CCMEI">
-                <Upload
-                  customRequest={({ onSuccess }) =>
-                    setTimeout(() => onSuccess && onSuccess("ok"), 0)
-                  }
-                  fileList={ccmeiFileList}
-                  onChange={handleCCMEIChange}
-                  listType="picture"
-                  maxCount={1}
-                >
-                  <Button icon={<UploadOutlined />}>Carregar Novo CCMEI</Button>
-                </Upload>
-              </Form.Item>
+            <Col span={12}>
+              <Title level={5} style={{ fontSize: "16px" }}>
+                Imagens do Portfólio (Produtos)
+              </Title>
+              <div style={{ display: "flex", flexWrap: "wrap", gap: "10px" }}>
+                {currentPortfolio.length > 0 ? (
+                  currentPortfolio.map((img: ImagemProduto) => (
+                    <div
+                      key={img.url}
+                      style={{ position: "relative", width: "fit-content" }}
+                    >
+                      <AntdImage
+                        src={getFullImageUrl(img.url)}
+                        alt="Imagem do Portfólio"
+                        style={{
+                          width: 100,
+                          height: 100,
+                          objectFit: "cover",
+                          border: "1px solid #d9d9d9",
+                          borderRadius: "8px",
+                        }}
+                        fallback="/placeholder-logo.png"
+                      />
+                      <Popconfirm
+                        title="Tem certeza que quer remover esta imagem?"
+                        okText="Remover"
+                        cancelText="Cancelar"
+                        okType="danger"
+                        placement="topRight"
+                        icon={
+                          <QuestionCircleOutlined style={{ color: "red" }} />
+                        }
+                        onConfirm={() => {
+                          setPortfolioToDelete((prev) => [...prev, img.url]);
+                          setCurrentPortfolio((prev) =>
+                            prev.filter((i) => i.url !== img.url)
+                          );
+                          message.info("Imagem marcada para remoção.");
+                        }}
+                      >
+                        <Button
+                          type="primary"
+                          danger
+                          icon={<CloseOutlined />}
+                          style={{ position: "absolute", top: 5, right: 5 }}
+                          size="small"
+                          title="Remover Imagem"
+                        />
+                      </Popconfirm>
+                    </div>
+                  ))
+                ) : (
+                  <p>Nenhuma imagem no portfólio.</p>
+                )}
+                {portfolioToDelete.length > 0 && (
+                  <Tag color="red" style={{ marginTop: 10, width: "100%" }}>
+                    {portfolioToDelete.length} imagem(ns) serão removidas.
+                  </Tag>
+                )}
+              </div>
             </Col>
           </Row>
         </Spin>

@@ -43,7 +43,7 @@ const AnimatedLogo = () => {
   useEffect(() => {
     const interval = setInterval(() => {
       setIndex((prevIndex) => (prevIndex + 1) % logos.length);
-    }, 5000); // Alterna a cada 3 segundos
+    }, 5000); // Alterna a cada 5 segundos
 
     return () => clearInterval(interval);
   }, [logos.length]);
@@ -176,6 +176,13 @@ export function Navbar() {
             >
               Espaço MEI
             </Link>
+            {/* --- LINK ADICIONADO --- */}
+            <Link
+              href="/FAQ"
+              className="text-gray-700 hover:text-blue-600 transition-colors"
+            >
+              FAQ
+            </Link>
           </nav>
         </div>
 
@@ -272,6 +279,14 @@ export function Navbar() {
               onClick={() => setIsOpen(false)}
             >
               Espaço MEI
+            </Link>
+            {/* --- LINK ADICIONADO --- */}
+            <Link
+              href="/faq"
+              className="text-gray-700 hover:text-blue-600 transition-colors font-medium"
+              onClick={() => setIsOpen(false)}
+            >
+              FAQ
             </Link>
             <hr className="border-gray-200" />
 

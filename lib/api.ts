@@ -211,7 +211,7 @@ export const adminUpdateEstablishment = (
   token: string
 ) =>
   fetchApi(`/api/admin/estabelecimento/${id}`, {
-    method: "PUT",
+    method: "PATCH",
     headers: {
       Authorization: `Bearer ${token}`,
     },
