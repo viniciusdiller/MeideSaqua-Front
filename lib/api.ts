@@ -2,7 +2,7 @@ const API_URL = process.env.NEXT_PUBLIC_API_URL;
 
 /**
  * Função principal para chamadas de API.
- * Lida com headers, FormData, e tratamento de erros.
+ * Lida com headers, FormData, e tratamento de erros 401.
  */
 async function fetchApi(path: string, options: RequestInit = {}) {
   const headers: Record<string, string> = {
@@ -14,8 +14,7 @@ async function fetchApi(path: string, options: RequestInit = {}) {
     headers["Content-Type"] = "application/json";
   }
 
-  // Remove o Content-Type se for FormData para deixar o navegador definir
-  // o boundary corretamente, PREVENINDO O BUG DE UPLOAD DE ARQUIVOS.
+  // Remove o Content-Type se for FormData (deixa o navegador definir)
   if (options.body instanceof FormData && headers["Content-Type"]) {
     delete headers["Content-Type"];
   }
@@ -38,10 +37,26 @@ async function fetchApi(path: string, options: RequestInit = {}) {
   try {
     data = text ? JSON.parse(text) : {};
   } catch (error) {
+    // Se a resposta não for JSON (ex: só texto "OK"), retorna uma mensagem
     data = { message: text || "Resposta inválida da API" };
   }
 
   if (!response.ok) {
+    // --- LÓGICA DE INTERCEPTAÇÃO 401 (SESSÃO EXPIRADA) ---
+    if (response.status === 401) {
+      // Verifica se estamos no lado do cliente
+      if (typeof window !== "undefined") {
+        // Limpa o usuário do localStorage
+        localStorage.removeItem("user");
+        // Força o redirecionamento para a página de login
+        window.location.href = "/login";
+      }
+
+      // Lança um erro para interromper a execução do código que chamou a API
+      throw new Error("Sessão expirada. Redirecionando para login...");
+    }
+    // --- FIM DA LÓGICA 401 ---
+
     const errorMessage =
       typeof data === "object" && data.message
         ? data.message
@@ -123,7 +138,7 @@ export const resetPassword = (data: { token: string; newPassword: string }) =>
   });
 
 // ==================================================================
-// --- Funções Específicas de ESTABELECIMENTO (MeideSaqua) ---
+// --- Funções Específicas de ESTABELECIMENTO (Público) ---
 // ==================================================================
 
 /**
@@ -141,10 +156,50 @@ export const getEstablishmentById = (id: string) =>
  * Busca avaliações de um ESTABELECIMENTO (Rota Pública).
  */
 export const getReviewsByEstablishment = (id: string) =>
-  fetchApi(`/api/avaliacoes/estabelecimento/${id}`); // Rota que usa no seu Controller
+  fetchApi(`/api/avaliacoes/estabelecimento/${id}`);
 
 // ==================================================================
-// --- Funções de Avaliação (MeideSaqua) - Usuário Comum ---
+// --- Funções do Formulário CADASTRO-MEI (Requer Auth) ---
+// ==================================================================
+
+/**
+ * [Formulário] Envia um novo cadastro de estabelecimento para aprovação.
+ */
+export const cadastrarEstabelecimento = (formData: FormData, token: string) =>
+  fetchApi("/api/estabelecimentos", {
+    method: "POST",
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+    body: formData,
+  });
+
+/**
+ * [Formulário] Envia uma solicitação de atualização para um estabelecimento existente.
+ */
+export const atualizarEstabelecimento = (formData: FormData, token: string) =>
+  fetchApi("/api/estabelecimentos/solicitar-atualizacao", {
+    method: "PUT",
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+    body: formData,
+  });
+
+/**
+ * [Formulário] Envia uma solicitação de exclusão para um estabelecimento.
+ */
+export const excluirEstabelecimento = (formData: FormData, token: string) =>
+  fetchApi("/api/estabelecimentos/solicitar-exclusao", {
+    method: "POST",
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+    body: formData,
+  });
+
+// ==================================================================
+// --- Funções de Avaliação (Usuário Comum - Requer Auth) ---
 // ==================================================================
 
 export const submitReview = (data: any, token: string) =>
@@ -165,7 +220,7 @@ export const deleteReview = (id: number, token: string) =>
   });
 
 // ==================================================================
-// --- Funções de ADMIN (MeideSaqua) ---
+// --- Funções de ADMIN (Requer Auth de Admin) ---
 // ==================================================================
 
 /**
@@ -203,7 +258,6 @@ export const adminDeleteEstablishment = (id: number, token: string) =>
 
 /**
  * [ADMIN] Atualiza um estabelecimento (no modal de Estabelecimentos Ativos).
- * Usa PUT para ser mais semântico para atualização.
  */
 export const adminUpdateEstablishment = (
   id: number,
@@ -220,7 +274,6 @@ export const adminUpdateEstablishment = (
 
 /**
  * [ADMIN] Atualiza/Aprova um estabelecimento pendente (no Dashboard).
- * Mantém POST para o endpoint de aprovação.
  */
 export const adminEditAndApproveEstablishment = (
   id: number,
@@ -235,13 +288,8 @@ export const adminEditAndApproveEstablishment = (
     body: data,
   });
 
-// --- NOVAS FUNÇÕES DE ADMIN (GERENCIAMENTO DE REVIEWS) ---
-
 /**
  * [ADMIN] Busca todas as avaliações de um estabelecimento específico.
- * ROTA NOVA DE ADMIN (Sugestão para isolamento de rota)
- * @param id ID do estabelecimento.
- * @param token Token de autenticação do Admin.
  */
 export const adminGetReviewsByEstablishment = (id: string, token: string) =>
   fetchApi(`/api/admin/avaliacoes/estabelecimento/${id}`, {
@@ -253,9 +301,6 @@ export const adminGetReviewsByEstablishment = (id: string, token: string) =>
 
 /**
  * [ADMIN] Deleta uma avaliação específica.
- * ROTA NOVA DE ADMIN (Sugestão para isolamento de rota)
- * @param id ID da avaliação.
- * @param token Token de autenticação do Admin.
  */
 export const adminDeleteReview = (id: number, token: string) =>
   fetchApi(`/api/admin/avaliacoes/${id}`, {

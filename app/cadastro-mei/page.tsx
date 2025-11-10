@@ -1,7 +1,7 @@
-// app/cadastro-mei/page.tsx
+// app/cadastro-mei/page.tsx (Refatorado e Corrigido com Token)
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useRef } from "react";
 import {
   Form,
   Input,
@@ -21,8 +21,14 @@ import { useAuth } from "@/context/AuthContext";
 import { useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
+import {
+  cadastrarEstabelecimento,
+  atualizarEstabelecimento,
+  excluirEstabelecimento,
+} from "@/lib/api";
+import { categories as categoryObjects } from "../page";
 
-// --- FUNÇÕES DE MÁSCARA (Mantidas) ---
+// --- FUNÇÕES DE MÁSCARA ---
 const maskCNAE = (value: string) => {
   return value
     .replace(/\D/g, "")
@@ -58,54 +64,16 @@ const maskPhone = (value: string) => {
     .replace(/(-\d{4})\d+?$/, "$1");
 };
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL;
-
-// --- API (Mantida do original MeideSaquá) ---
-const api = {
-  cadastrarEstabelecimento: async (formData: FormData) => {
-    const response = await fetch(`${API_URL}/api/estabelecimentos`, {
-      method: "POST",
-      body: formData,
-    });
-    if (!response.ok) {
-      const errorData = await response.json();
-      throw new Error(errorData.message || "Falha ao cadastrar.");
-    }
-    return response.json();
-  },
-
-  atualizarEstabelecimento: async (formData: FormData) => {
-    const response = await fetch(
-      `${API_URL}/api/estabelecimentos/solicitar-atualizacao`,
-      {
-        method: "PUT",
-        body: formData,
-      }
-    );
-    if (!response.ok) {
-      const errorData = await response.json();
-      throw new Error(errorData.message || "Falha ao enviar atualização.");
-    }
-    return response.json();
-  },
-
-  excluirEstabelecimento: async (formData: FormData) => {
-    const response = await fetch(
-      `${API_URL}/api/estabelecimentos/solicitar-exclusao`,
-      {
-        method: "POST",
-        body: formData, // Enviar como FormData para suportar o anexo
-      }
-    );
-    if (!response.ok) {
-      const errorData = await response.json();
-      throw new Error(errorData.message || "Falha ao solicitar exclusão.");
-    }
-    return response.json();
-  },
+// Função para remover emojis (do projeto ODS)
+const stripEmojis = (value: string) => {
+  if (!value) return "";
+  return value.replace(
+    /([\u2700-\u27BF]|[\uE000-\uF8FF]|\uD83C[\uDC00-\uDFFF]|\uD83D[\uDC00-\uDFFF]|[\u2011-\u26FF]|\uD83E[\uDD10-\uDDFF])/g,
+    ""
+  );
 };
 
-// --- DADOS (Mantidos do original MeideSaquá) ---
+// --- DADOS (Movidos para fora do componente) ---
 export const areasAtuacao = [
   "Entrega",
   "Retirada",
@@ -156,20 +124,8 @@ export const areasAtuacao = [
   "Vilatur",
   "Outro município",
 ];
-export const categorias = [
-  "Artesanato e Criação Manual",
-  "Beleza, Moda e Estética",
-  "Comércio Local e Vendas",
-  "Construção, Reforma e Manutenção",
-  "Festas e Eventos",
-  "Gastronomia e Alimentação",
-  "Saúde, Bem-estar e Fitness",
-  "Serviços Administrativos e Apoio",
-  "Serviços Automotivos e Reparos",
-  "Tecnologia e Serviços Digitais",
-  "Turismo, Cultura e Lazer",
-  "Produtores Rurais e Atividades Agrícolas",
-];
+
+export const categorias = categoryObjects.map((cat) => cat.title);
 
 export const tagsPorCategoria: { [key: string]: string[] } = {
   "Artesanato e Criação Manual": [
@@ -329,7 +285,7 @@ const CadastroMEIPage: React.FC = () => {
   const [loading, setLoading] = useState(false);
   const [logoFileList, setLogoFileList] = useState<UploadFile[]>([]);
   const [portfolioFileList, setPortfolioFileList] = useState<UploadFile[]>([]);
-  const [ccmeiFileList, setCcmeiFileList] = useState<UploadFile[]>([]); // Específico do MEI
+  const [ccmeiFileList, setCcmeiFileList] = useState<UploadFile[]>([]);
   const [flowStep, setFlowStep] = useState<FlowStep>("initial");
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
   const [submittedMessage, setSubmittedMessage] = useState({
@@ -338,59 +294,88 @@ const CadastroMEIPage: React.FC = () => {
   });
   const { user, isLoading } = useAuth();
   const router = useRouter();
+  const toastShownRef = useRef(false);
 
   const handleLogoChange = ({ fileList }: { fileList: UploadFile[] }) =>
     setLogoFileList(fileList);
   const handlePortfolioChange = ({ fileList }: { fileList: UploadFile[] }) =>
     setPortfolioFileList(fileList);
   const handleCCMEIChange = ({ fileList }: { fileList: UploadFile[] }) =>
-    setCcmeiFileList(fileList); // Específico do MEI
+    setCcmeiFileList(fileList);
 
   useEffect(() => {
     if (isLoading) {
       return;
     }
     if (!user) {
-      toast.error("Você precisa estar logado para cadastrar um MEI.");
+      if (!toastShownRef.current) {
+        toast.error("Você precisa estar logado para cadastrar um MEI.");
+        toastShownRef.current = true;
+      }
       router.push("/login");
     }
   }, [user, isLoading, router]);
 
   if (isLoading || !user) {
     return (
-      <div className="flex justify-center items-center min-h-screen">
-        <p>Verificando autenticação...</p>
+      <div className="flex justify-center items-center min-h-screen bg-gray-50">
+        <div className="flex items-center space-x-3">
+          <p className="text-xl font-medium text-gray-700">
+            Verificando autenticação
+          </p>
+          <div className="flex space-x-1.5">
+            <span className="h-2.5 w-2.5 bg-blue-600 rounded-full animate-bounce [animation-delay:-0.3s]"></span>
+            <span className="h-2.5 w-2.5 bg-blue-600 rounded-full animate-bounce [animation-delay:-0.15s]"></span>
+            <span className="h-2.5 w-2.5 bg-blue-600 rounded-full animate-bounce"></span>
+          </div>
+        </div>
       </div>
     );
   }
+
+  // Handler centralizado para limpeza de Emojis
+  const handleStripEmojiChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+  ) => {
+    const { name, value } = e.target;
+    form.setFieldsValue({ [name]: stripEmojis(value) });
+  };
 
   const handleMaskChange = (
     e: React.ChangeEvent<HTMLInputElement>,
     maskFn: (value: string) => string
   ) => {
     const { name, value } = e.target;
-    form.setFieldsValue({ [name]: maskFn(value) });
+    const cleanedValue = stripEmojis(value);
+    form.setFieldsValue({ [name]: maskFn(cleanedValue) });
   };
 
   const resetAll = () => {
     form.resetFields();
     setLogoFileList([]);
     setPortfolioFileList([]);
-    setCcmeiFileList([]); // Específico do MEI
+    setCcmeiFileList([]);
     setFlowStep("initial");
   };
 
-  // --- Funções de Submissão (Mantidas do original MeideSaquá) ---
+  // --- Funções de Submissão (Handlers) ---
 
   const handleRegisterSubmit = async (values: any) => {
     setLoading(true);
+    if (!user?.token) {
+      message.error("Sessão inválida. Por favor, faça login novamente.");
+      setLoading(false);
+      router.push("/login");
+      return;
+    }
+
     try {
       const formData = new FormData();
 
       Object.entries(values).forEach(([key, value]) => {
         if (
           value &&
-          key !== "ccmeiFile" && // Específico do MEI
+          key !== "ccmeiFile" &&
           key !== "logo" &&
           key !== "produtos"
         ) {
@@ -408,18 +393,16 @@ const CadastroMEIPage: React.FC = () => {
       if (logoFileList.length > 0 && logoFileList[0].originFileObj) {
         formData.append("logo", logoFileList[0].originFileObj);
       }
-
       portfolioFileList.forEach((file) => {
         if (file.originFileObj) {
-          formData.append("produtos", file.originFileObj); // Nome do campo 'produtos'
+          formData.append("produtos", file.originFileObj);
         }
       });
-
       if (ccmeiFileList.length > 0 && ccmeiFileList[0].originFileObj) {
-        formData.append("ccmei", ccmeiFileList[0].originFileObj); // Específico do MEI
+        formData.append("ccmei", ccmeiFileList[0].originFileObj);
       }
 
-      await api.cadastrarEstabelecimento(formData);
+      await cadastrarEstabelecimento(formData, user.token);
 
       setSubmittedMessage({
         title: "Cadastro realizado com sucesso!",
@@ -436,28 +419,39 @@ const CadastroMEIPage: React.FC = () => {
     }
   };
 
-  // NENHUMA MUDANÇA NECESSÁRIA AQUI
-  // O loop "Object.entries" já pega o novo campo 'outrasAlteracoes'
   const handleUpdateSubmit = async (values: any) => {
     setLoading(true);
+    if (!user?.token) {
+      message.error("Sessão inválida. Por favor, faça login novamente.");
+      setLoading(false);
+      router.push("/login");
+      return;
+    }
+
     try {
+      // **NOVO**: Verifica se nomeFantasia (campo de identificação) foi preenchido
+      const { nomeFantasia } = values;
+      if (!nomeFantasia) {
+        message.error("O Nome Fantasia é obrigatório para identificação.");
+        setLoading(false);
+        return;
+      }
+      
       const formData = new FormData();
 
       Object.entries(values).forEach(([key, value]) => {
         if (
           value &&
-          key !== "ccmeiFile" && // Específico do MEI
-          key !== "portfolio" && // 'portfolio' é o nome do campo no formulário de update
+          key !== "ccmeiFile" &&
+          key !== "portfolio" &&
           key !== "logo"
         ) {
           if (key === "locais" && Array.isArray(value)) {
-            // 'locais' é o nome do campo no formulário de update
             formData.append("areasAtuacao", value.join(", "));
           } else if (key === "tagsInvisiveis" && Array.isArray(value)) {
             formData.append(key, value.join(", "));
           } else {
             formData.append(key, value as string);
-            // O campo 'outrasAlteracoes' será pego aqui
           }
         }
       });
@@ -465,18 +459,16 @@ const CadastroMEIPage: React.FC = () => {
       if (logoFileList.length > 0 && logoFileList[0].originFileObj) {
         formData.append("logo", logoFileList[0].originFileObj);
       }
-
       portfolioFileList.forEach((file) => {
         if (file.originFileObj) {
-          formData.append("produtos", file.originFileObj); // Backend espera 'produtos'
+          formData.append("produtos", file.originFileObj);
         }
       });
-
       if (ccmeiFileList.length > 0 && ccmeiFileList[0].originFileObj) {
-        formData.append("ccmei", ccmeiFileList[0].originFileObj); // Específico do MEI
+        formData.append("ccmei", ccmeiFileList[0].originFileObj);
       }
 
-      await api.atualizarEstabelecimento(formData);
+      await atualizarEstabelecimento(formData, user.token);
 
       setSubmittedMessage({
         title: "Atualização enviada com sucesso!",
@@ -495,9 +487,34 @@ const CadastroMEIPage: React.FC = () => {
 
   const handleDeleteSubmit = async (values: any) => {
     setLoading(true);
-    try {
-      const formData = new FormData();
+    if (!user?.token) {
+      message.error("Sessão inválida. Por favor, faça login novamente.");
+      setLoading(false);
+      router.push("/login");
+      return;
+    }
 
+    try {
+      const {
+        nome_responsavel,
+        cpf_responsavel,
+        cnpj,
+        emailEstabelecimento,
+        // 'motivo' é opcional e não precisa ser verificado aqui
+      } = values;
+
+      if (
+        !nome_responsavel ||
+        !cpf_responsavel ||
+        !cnpj ||
+        !emailEstabelecimento
+      ) {
+        message.error("Todos os campos de identificação são obrigatórios.");
+        setLoading(false);
+        return;
+      }
+
+      const formData = new FormData();
       Object.entries(values).forEach(([key, value]) => {
         if (value && key !== "confirmacao" && key !== "ccmeiFile") {
           formData.append(key, value as string);
@@ -505,10 +522,10 @@ const CadastroMEIPage: React.FC = () => {
       });
 
       if (ccmeiFileList.length > 0 && ccmeiFileList[0].originFileObj) {
-        formData.append("ccmei", ccmeiFileList[0].originFileObj); // Específico do MEI
+        formData.append("ccmei", ccmeiFileList[0].originFileObj);
       }
 
-      await api.excluirEstabelecimento(formData);
+      await excluirEstabelecimento(formData, user.token);
 
       setSubmittedMessage({
         title: "Solicitação de exclusão recebida!",
@@ -525,7 +542,7 @@ const CadastroMEIPage: React.FC = () => {
     }
   };
 
-  // --- Funções de Renderização (Mantidas do original MeideSaquá) ---
+  // --- Funções de Renderização ---
 
   const customUploadAction = async (options: any) => {
     const { onSuccess, onError, file } = options;
@@ -542,7 +559,7 @@ const CadastroMEIPage: React.FC = () => {
     <h2
       className="relative text-2xl font-semibold text-gray-800 mb-6 pl-4 
         before:content-[''] before:absolute before:left-0 before:top-0 before:h-full before:w-1 
-        before:bg-gradient-to-t from-[#017DB9] to-[#22c362]" // Estilo MeideSaquá
+        before:bg-gradient-to-t from-[#017DB9] to-[#22c362]"
     >
       {title}
     </h2>
@@ -550,7 +567,6 @@ const CadastroMEIPage: React.FC = () => {
 
   const renderInitialChoice = () => (
     <>
-      {/* Textos e Estilos do MeideSaquá */}
       <h1 className="text-4xl font-extrabold mb-6 inline-block pb-2 bg-gradient-to-r from-[#017DB9] to-[#22c362] bg-no-repeat [background-position:0_100%] [background-size:100%_4px]">
         <span className="bg-gradient-to-r from-[#017DB9] to-[#22c362] bg-clip-text text-transparent">
           PORTAL DO MEI
@@ -592,7 +608,6 @@ const CadastroMEIPage: React.FC = () => {
       onFinish={handleRegisterSubmit}
       autoComplete="off"
     >
-      {/* Campos Específicos do MEI (Mantidos) */}
       <section className="mb-8 border-t pt-4">
         {commonTitle("Informações do Responsável")}
         <Row gutter={24}>
@@ -604,7 +619,11 @@ const CadastroMEIPage: React.FC = () => {
                 { required: true, message: "Insira o nome do responsável!" },
               ]}
             >
-              <Input placeholder="Ex: João da Silva" />
+              <Input
+                name="nome_responsavel"
+                placeholder="Ex: João da Silva"
+                onChange={handleStripEmojiChange}
+              />
             </Form.Item>
           </Col>
           <Col xs={24} md={12}>
@@ -638,11 +657,14 @@ const CadastroMEIPage: React.FC = () => {
             },
           ]}
         >
-          <Input placeholder="contato@email.com" />
+          <Input
+            name="emailEstabelecimento"
+            placeholder="contato@email.com"
+            onChange={handleStripEmojiChange}
+          />
         </Form.Item>
       </section>
 
-      {/* Campos Específicos do MEI (Mantidos) */}
       <section className="mb-8 border-t pt-4">
         {commonTitle("Informações do Negócio")}
         <Row gutter={24}>
@@ -654,7 +676,11 @@ const CadastroMEIPage: React.FC = () => {
                 { required: true, message: "Insira o nome do seu negócio!" },
               ]}
             >
-              <Input placeholder="Ex: Salão da Maria" />
+              <Input
+                name="nomeFantasia"
+                placeholder="Ex: Salão da Maria"
+                onChange={handleStripEmojiChange}
+              />
             </Form.Item>
           </Col>
           <Col xs={24} md={12}>
@@ -785,7 +811,6 @@ const CadastroMEIPage: React.FC = () => {
         </Form.Item>
       </section>
 
-      {/* Campos Específicos do MEI (Mantidos) */}
       <section className="mb-8 border-t pt-4">
         {commonTitle("Contato e Localização")}
         <Form.Item
@@ -806,7 +831,11 @@ const CadastroMEIPage: React.FC = () => {
           />
         </Form.Item>
         <Form.Item name="endereco" label="Endereço Físico (se houver)">
-          <Input placeholder="Rua, Bairro, Nº" />
+          <Input
+            name="endereco"
+            placeholder="Rua, Bairro, Nº"
+            onChange={handleStripEmojiChange}
+          />
         </Form.Item>
         <Form.Item
           name="areasAtuacao"
@@ -829,7 +858,6 @@ const CadastroMEIPage: React.FC = () => {
         </Form.Item>
       </section>
 
-      {/* Campos Específicos do MEI (Mantidos) */}
       <section className="mb-8 border-t pt-5">
         {commonTitle("Detalhes e Mídia")}
         <Form.Item
@@ -843,8 +871,12 @@ const CadastroMEIPage: React.FC = () => {
           ]}
         >
           <TextArea
+            name="descricao"
             rows={4}
+            showCount
+            maxLength={500}
             placeholder="Fale um pouco sobre o que você faz, quais produtos você vende ou tipo de serviço que realiza. Essa é a informação que os seus futuros clientes irão ver."
+            onChange={handleStripEmojiChange}
           />
         </Form.Item>
         <Form.Item
@@ -858,19 +890,31 @@ const CadastroMEIPage: React.FC = () => {
           ]}
         >
           <TextArea
+            name="descricaoDiferencial"
             rows={2}
+            showCount
+            maxLength={130}
             placeholder="Descreva brevemente qual é o atrativo do seu produto ou serviço. (Em até 150 caracteres)"
+            onChange={handleStripEmojiChange}
           />
         </Form.Item>
         <Row gutter={24}>
           <Col xs={24} md={12}>
             <Form.Item name="website" label="Website (Opcional)">
-              <Input placeholder="Cole o link da sua página" />
+              <Input
+                name="website"
+                placeholder="Cole o link da sua página"
+                onChange={handleStripEmojiChange}
+              />
             </Form.Item>
           </Col>
           <Col xs={24} md={12}>
             <Form.Item name="instagram" label="Instagram (Opcional)">
-              <Input placeholder="Cole o link do seu perfil" />
+              <Input
+                name="instagram"
+                placeholder="Cole o link do seu perfil"
+                onChange={handleStripEmojiChange}
+              />
             </Form.Item>
           </Col>
         </Row>
@@ -952,7 +996,6 @@ const CadastroMEIPage: React.FC = () => {
       onFinish={handleUpdateSubmit}
       autoComplete="off"
     >
-      {/* Campos Específicos do MEI (Mantidos) */}
       <section className="mb-8 border-t pt-4">
         {commonTitle("Identificação do Negócio")}
         <p className="text-gray-600 mb-6 -mt-4">
@@ -960,6 +1003,7 @@ const CadastroMEIPage: React.FC = () => {
           negócio e do responsável.
         </p>
 
+        {/* --- INÍCIO DA ALTERAÇÃO --- */}
         <Row gutter={24}>
           <Col xs={24} md={12}>
             <Form.Item
@@ -972,7 +1016,11 @@ const CadastroMEIPage: React.FC = () => {
                 },
               ]}
             >
-              <Input placeholder="Nome Completo" />
+              <Input
+                name="nome_responsavel"
+                placeholder="Nome Completo"
+                onChange={handleStripEmojiChange}
+              />
             </Form.Item>
           </Col>
           <Col xs={24} md={12}>
@@ -999,7 +1047,26 @@ const CadastroMEIPage: React.FC = () => {
           </Col>
         </Row>
 
+        {/* CAMPO ADICIONADO AQUI */}
         <Row gutter={24}>
+          <Col xs={24} md={12}>
+            <Form.Item
+              name="nomeFantasia"
+              label="Nome Fantasia do Negócio"
+              rules={[
+                {
+                  required: true,
+                  message: "O Nome Fantasia é obrigatório para identificação!",
+                },
+              ]}
+            >
+              <Input
+                name="nomeFantasia"
+                placeholder="Nome Fantasia"
+                onChange={handleStripEmojiChange}
+              />
+            </Form.Item>
+          </Col>
           <Col xs={24} md={12}>
             <Form.Item
               name="cnpj"
@@ -1019,6 +1086,31 @@ const CadastroMEIPage: React.FC = () => {
                 placeholder="00.000.000/0001-00"
                 name="cnpj"
                 onChange={(e) => handleMaskChange(e, maskCNPJ)}
+              />
+            </Form.Item>
+          </Col>
+        </Row>
+
+        <Row gutter={24}>
+          <Col xs={24} md={12}>
+            <Form.Item
+              name="emailEstabelecimento"
+              label="E-mail de Contato Principal"
+              rules={[
+                {
+                  required: true,
+                  message: "O e-mail é obrigatório para identificação!",
+                },
+                {
+                  pattern: /^[^\s@]+@[^\s@]+\.[^\s@]+$/,
+                  message: "E-mail inválido!",
+                },
+              ]}
+            >
+              <Input
+                name="emailEstabelecimento"
+                placeholder="contato@email.com"
+                onChange={handleStripEmojiChange}
               />
             </Form.Item>
           </Col>
@@ -1058,25 +1150,9 @@ const CadastroMEIPage: React.FC = () => {
             </Form.Item>
           </Col>
         </Row>
-        <Form.Item
-          name="emailEstabelecimento"
-          label="E-mail de Contato Principal"
-          rules={[
-            {
-              required: true,
-              message: "O e-mail é obrigatório para identificação!",
-            },
-            {
-              pattern: /^[^\s@]+@[^\s@]+\.[^\s@]+$/,
-              message: "E-mail inválido!",
-            },
-          ]}
-        >
-          <Input placeholder="contato@email.com" />
-        </Form.Item>
+        {/* --- FIM DA ALTERAÇÃO --- */}
       </section>
 
-      {/* --- INÍCIO DA REFATORAÇÃO --- */}
       <section className="mb-8 border-t pt-4">
         {commonTitle("Informações para Atualizar")}
         <p className="text-gray-600 mb-6 -mt-4">
@@ -1130,34 +1206,41 @@ const CadastroMEIPage: React.FC = () => {
           </Select>
         </Form.Item>
 
-        {/* CAMPO ADICIONADO DO REFACTOR (Briefing -> Diferencial) */}
         <Form.Item
           name="descricaoDiferencial"
           label="Novo Diferencial (Resumo)"
         >
           <TextArea
+            name="descricaoDiferencial"
             rows={2}
+            showCount
+            maxLength={130}
             placeholder="Descreva brevemente qual é o atrativo do seu produto ou serviço."
+            onChange={handleStripEmojiChange}
           />
         </Form.Item>
 
-        {/* CAMPO ADICIONADO DO REFACTOR */}
         <Form.Item name="descricao" label="Nova Descrição do Serviço/Produto">
           <TextArea
+            name="descricao"
             rows={4}
+            showCount
+            maxLength={500}
             placeholder="Fale um pouco sobre o que você faz, quais produtos você vende ou tipo de serviço que realiza. (Em até 500 caracteres)"
+            onChange={handleStripEmojiChange}
           />
         </Form.Item>
 
-        {/* CAMPO ADICIONADO DO REFACTOR */}
         <Form.Item
           name="outrasAlteracoes"
           label="Outras Alterações (Opcional)"
           help="Se precisar alterar algo que não está no formulário (ex: Categoria, Endereço, Instagram, etc.), descreva aqui."
         >
           <TextArea
+            name="outrasAlteracoes"
             rows={3}
             placeholder="Ex: Por favor, alterar o Instagram para @novo_mei e o endereço para Rua Nova, 123."
+            onChange={handleStripEmojiChange}
           />
         </Form.Item>
 
@@ -1180,7 +1263,6 @@ const CadastroMEIPage: React.FC = () => {
             placeholder="Selecione as tags"
             maxTagCount={5}
           >
-            {/* Mapeia todas as tags possíveis */}
             {[...new Set(Object.values(tagsPorCategoria).flat())].map((tag) => (
               <Option key={tag} value={tag}>
                 {tag}
@@ -1189,7 +1271,7 @@ const CadastroMEIPage: React.FC = () => {
           </Select>
         </Form.Item>
         <Form.Item
-          name="portfolio" // Nome do campo no formulário
+          name="portfolio"
           label="Novas Fotos do Portfólio (até 4)"
           help="As imagens enviadas aqui irão substituir as atuais."
         >
@@ -1227,7 +1309,6 @@ const CadastroMEIPage: React.FC = () => {
           </Checkbox>
         </Form.Item>
       </section>
-      {/* --- FIM DA REFATORAÇÃO --- */}
 
       <Form.Item>
         <Button
@@ -1243,7 +1324,6 @@ const CadastroMEIPage: React.FC = () => {
     </Form>
   );
 
-  //PÁGINA DE FORMULÁRIO DE EXCLUSÃO
   const renderDeleteForm = () => (
     <Form
       form={form}
@@ -1251,7 +1331,6 @@ const CadastroMEIPage: React.FC = () => {
       onFinish={handleDeleteSubmit}
       autoComplete="off"
     >
-      {/* Campos Específicos do MEI (Mantidos) */}
       <section className="mb-8 border-t pt-4">
         {commonTitle("Exclusão de Cadastro MEI")}
         <p className="text-red-700 bg-red-50 p-4 rounded-md mb-6 -mt-2">
@@ -1272,7 +1351,11 @@ const CadastroMEIPage: React.FC = () => {
                 },
               ]}
             >
-              <Input placeholder="Nome Completo" />
+              <Input
+                name="nome_responsavel"
+                placeholder="Nome Completo"
+                onChange={handleStripEmojiChange}
+              />
             </Form.Item>
           </Col>
           <Col xs={24} md={12}>
@@ -1373,13 +1456,19 @@ const CadastroMEIPage: React.FC = () => {
             },
           ]}
         >
-          <Input placeholder="contato@email.com" />
+          <Input
+            name="emailEstabelecimento"
+            placeholder="contato@email.com"
+            onChange={handleStripEmojiChange}
+          />
         </Form.Item>
 
         <Form.Item name="motivo" label="Motivo da exclusão (Opcional)">
           <TextArea
+            name="motivo"
             rows={3}
             placeholder="Sua opinião é importante para nós. Se puder, nos diga por que está saindo."
+            onChange={handleStripEmojiChange}
           />
         </Form.Item>
         <Form.Item
@@ -1447,7 +1536,6 @@ const CadastroMEIPage: React.FC = () => {
   };
 
   return (
-    // Estilo MeideSaquá
     <div className="min-h-screen bg-gradient-to-br from-blue-300 to-blue-800 py-20 px-6 sm:px-12">
       <div className="max-w-5xl mx-auto bg-white rounded-3xl shadow-lg p-10 sm:p-16">
         <Spin spinning={loading} tip="A processar...">
