@@ -18,7 +18,7 @@ const poppins = Poppins({
 export const metadata: Metadata = {
   title: "MeideSaquá - Descubra os MEIs Saquarema",
   icons: {
-    icon: "/favicon.ico",
+    icon: "/logomeidesaqua.png",
   },
   openGraph: {
     title: "MeideSaquá",

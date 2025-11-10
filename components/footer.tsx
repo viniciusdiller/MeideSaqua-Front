@@ -14,7 +14,7 @@ const Footer = () => {
           <div className=" text-center">
             <Link href="/" className="inline-block mb-4">
               <Image
-                src="/LogoExploraMonocromática.png"
+                src="/LogoMeiMonocromática.png"
                 alt="Logo MeideSaqua"
                 width={160}
                 height={57}
