@@ -17,11 +17,14 @@ import { categories } from "@/app/page";
 import Image from "next/image";
 import {
   getEstablishmentById,
-  getReviewsByEstablishment,
   deleteReview,
   formatarDataParaMesAno,
 } from "@/lib/api";
-import AvaliacaoModalButton from "@/components/Pop-up Coments";
+
+import AvaliacaoModal from "@/components/Pop-up Coments";
+
+import { ReviewComment } from "@/components/ReviewComments";
+
 import {
   Pagination,
   PaginationContent,
@@ -85,7 +88,8 @@ const CustomStarIcon = ({
   );
 };
 
-const StarRating = ({ rating }: { rating: number }) => {
+// 4. ADICIONE 'export' aqui para que o ReviewComment possa importar
+export const StarRating = ({ rating }: { rating: number }) => {
   const totalStars = 5;
 
   return (
@@ -180,6 +184,12 @@ export default function MeiDetailPage({
   const [reviewToDelete, setReviewToDelete] = useState<number | null>(null);
   const [portfolioImages, setPortfolioImages] = useState<any[]>([]);
 
+  // 5. ADICIONE O ESTADO PARA CONTROLAR O MODAL (lógica do outro projeto)
+  const [modalState, setModalState] = useState<{
+    open: boolean;
+    parentId: number | null;
+  }>({ open: false, parentId: null });
+
   const fetchMeiData = async () => {
     const meiId = params.slug;
 
@@ -187,11 +197,18 @@ export default function MeiDetailPage({
 
     try {
       const detailsData = await getEstablishmentById(meiId);
-      const reviewsData = await getReviewsByEstablishment(meiId);
+
+      // 6. REMOVA a chamada separada
+      // const reviewsData = await getReviewsByEstablishment(meiId); // <-- REMOVIDO
 
       setMeiDetails(detailsData);
-      setReviews(reviewsData);
+
+      // 7. POPULE os reviews a partir dos dados principais (eles vêm aninhados)
+      setReviews(detailsData.avaliacoes || []); // <-- ALTERADO
+
       setRating(detailsData.media || 0);
+
+      // ... (O resto da sua lógica de fetchMeiData está perfeita)
       if (detailsData.produtosImg && Array.isArray(detailsData.produtosImg)) {
         const portfolioItems = detailsData.produtosImg.map(
           (image: any, index: number) => {
@@ -215,6 +232,15 @@ export default function MeiDetailPage({
     }
   };
 
+  // 8. CRIE O HANDLER PARA O BOTÃO "NOVO COMENTÁRIO" (lógica do outro projeto)
+  const handleNewReviewClick = () => {
+    if (!user) {
+      toast.error("Você precisa estar logado para avaliar.");
+      return;
+    }
+    setModalState({ open: true, parentId: null });
+  };
+
   useEffect(() => {
     const initialFetch = async () => {
       setIsLoading(true);
@@ -233,6 +259,7 @@ export default function MeiDetailPage({
   }, [currentPage]);
 
   if (isLoading) {
+    // ... (Seu código de Loading)
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4">
         <div className="text-center p-8 bg-white rounded-2xl shadow-lg max-w-md w-full">
@@ -249,6 +276,7 @@ export default function MeiDetailPage({
   }
 
   if (!meiDetails) {
+    // ... (Seu código de Não Encontrado)
     return (
       <div className="flex flex-col items-center justify-center min-h-[70vh] text-center p-4 bg-gray-50">
         <div className="bg-white p-8 rounded-2xl shadow-md">
@@ -297,7 +325,7 @@ export default function MeiDetailPage({
     setIsDeleteDialogOpen(true);
   };
 
-  // Função que executa a exclusão após a confirmação
+  // 9. ATUALIZE O 'handleConfirmDelete' PARA RECARREGAR OS DADOS (lógica do outro projeto)
   const handleConfirmDelete = async () => {
     if (!reviewToDelete || !user?.token) {
       setIsDeleteDialogOpen(false);
@@ -307,7 +335,8 @@ export default function MeiDetailPage({
     try {
       await deleteReview(reviewToDelete, user.token);
       toast.success("Comentário excluído com sucesso!");
-      setReviews(reviews.filter((r) => r.avaliacoesId !== reviewToDelete));
+      // setReviews(reviews.filter((r) => r.avaliacoesId !== reviewToDelete)); // [ANTES]
+      fetchMeiData(); // [DEPOIS] - Isso recarrega toda a árvore de comentários
     } catch (error: any) {
       console.error("Erro ao excluir avaliação:", error);
       toast.error(error.message || "Não foi possível excluir o comentário.");
@@ -317,6 +346,25 @@ export default function MeiDetailPage({
     }
   };
 
+  // 10. ADICIONE AS FUNÇÕES DE CONTROLE DO MODAL (lógica do outro projeto)
+  const handleReplyClick = (parentId: number) => {
+    if (!user) {
+      toast.error("Você precisa estar logado para responder.");
+      return;
+    }
+    setModalState({ open: true, parentId: parentId });
+  };
+
+  const closeModal = () => {
+    setModalState({ open: false, parentId: null });
+  };
+
+  const handleReviewSubmit = () => {
+    fetchMeiData(); // Recarrega os dados
+    closeModal(); // Fecha o modal
+  };
+
+  // ... (Sua lógica de 'areasAtuacao' e 'tagsList' está perfeita) ...
   const linhasVisiveis = 3;
   const colunas = 4;
   const limite = linhasVisiveis * colunas;
@@ -345,6 +393,7 @@ export default function MeiDetailPage({
         .map((tag) => tag.trim())
         .filter((tag) => tag.length > 0)
     : [];
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-[#017DB9] to-[#22c362]">
       <motion.header
@@ -377,10 +426,13 @@ export default function MeiDetailPage({
         transition={{ delay: 0.4 }}
       >
         <div className="space-y-8">
+          {/* ... (Suas seções de Detalhes, Portfólio, Área de Atuação - TUDO CERTO) ... */}
+
           <motion.section
             className="bg-white p-6 rounded-3xl shadow-lg md:mx-auto md:max-w-[85%]"
             variants={itemVariants}
           >
+            {" "}
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4 items-center">
               <div className="md:col-span-2 flex flex-col">
                 <div className="mb-6 text-center md:text-left">
@@ -579,10 +631,15 @@ export default function MeiDetailPage({
               <h3 className="text-2xl font-bold text-gray-900 mb-6 border-l-4 border-[#017DB9] pl-3">
                 Avaliações
               </h3>
-              <AvaliacaoModalButton
-                estabelecimentoId={meiDetails.estabelecimentoId}
-                onReviewSubmit={fetchMeiData}
-              />
+
+              {/* 11. SUBSTITUA o 'AvaliacaoModalButton' por um 'Button' simples */}
+              <Button
+                onClick={handleNewReviewClick} // <-- Chama o novo handler
+                className="rounded-full px-6 hover:cursor-pointer hover:text-white bg-gradient-to-br from-[#017DB9] to-[#22c362] text-white font-semibold shadow-md hover:scale-105 hover:shadow-lg active:scale-95 transition-all mb-4"
+              >
+                Deixe sua avaliação
+              </Button>
+
               <div className="space-y-4">
                 {reviews.length > 0 ? (
                   <>
@@ -590,55 +647,24 @@ export default function MeiDetailPage({
                       {paginatedReviews
                         .slice()
                         .reverse()
+                        // 12. SUBSTITUA O MAP INLINE PELO COMPONENTE
                         .map((review, index) => (
-                          <div
+                          // Este é o componente que você me enviou
+                          <ReviewComment
                             key={review.avaliacoesId}
-                            className={`flex gap-4 py-2 items-start border bt-1px rounded-3xl shadow-lg transition-all duration-500 ease-out ${
-                              animateReviews
-                                ? "opacity-100 translate-y-0"
-                                : "opacity-0 translate-y-4"
-                            }`}
-                            style={{ transitionDelay: `${index * 50}ms` }}
-                          >
-                            <div className="w-12 h-12 bg-gray-200 rounded-full flex-shrink-0 my-auto ml-4">
-                              <Image
-                                src="/avatars/default-avatar.png"
-                                alt={`Avatar de ${review.usuario.nomeCompleto}`}
-                                width={48}
-                                height={48}
-                                className="rounded-full w-full h-full object-cover"
-                              />
-                            </div>
-
-                            <div>
-                              <div className="flex items-center gap-2">
-                                <p className="font-semibold text-gray-800 ">
-                                  {review.usuario.nomeCompleto}
-                                  {user &&
-                                    user.usuarioId === review.usuarioId && (
-                                      <button
-                                        // Altere esta linha
-                                        onClick={() =>
-                                          handleDeleteClick(review.avaliacoesId)
-                                        }
-                                        className="ml-3 text-sm text-red-500 hover:text-red-700"
-                                        aria-label="Excluir seu comentário"
-                                      >
-                                        <Trash2 className="w-4 h-4" />
-                                      </button>
-                                    )}
-                                </p>
-                              </div>
-                              <div className="flex items-center gap-1 my-1">
-                                <StarRating rating={review.nota} />
-                              </div>
-                              <p className="text-gray-600 break-words">
-                                {review.comentario}
-                              </p>
-                            </div>
-                          </div>
+                            review={review}
+                            // 13. PASSE AS PROPS CORRETAS
+                            onReplyClick={handleReplyClick} // <--- PASSE A FUNÇÃO
+                            onDeleteClick={handleDeleteClick}
+                            currentUser={
+                              user ? { usuarioId: user.usuarioId } : null
+                            }
+                            allowReply={true} // <-- Permite que este nível tenha "Responder"
+                          />
                         ))}
                     </div>
+
+                    {/* ... (Paginação continua perfeita) ... */}
                     {totalPages > 1 && (
                       <div className="pt-4 flex justify-end rounded-lg">
                         <Pagination>
@@ -671,11 +697,13 @@ export default function MeiDetailPage({
                     )}
                   </>
                 ) : (
-                  <p className="text-gray-500">
+                  <p className="text-gray-500 text-center py-4">
                     Ainda não há avaliações para este local.
                   </p>
                 )}
               </div>
+
+              {/* ... (AlertDialog para deletar continua perfeito) ... */}
               <AlertDialog
                 open={isDeleteDialogOpen}
                 onOpenChange={setIsDeleteDialogOpen}
@@ -709,6 +737,19 @@ export default function MeiDetailPage({
           </AnimatedSection>
         </div>
       </motion.main>
+
+      {/* 14. ADICIONE O MODAL DE RESPOSTA (controlado pela página)
+        Este modal será invisível até que 'handleReplyClick' ou 'handleNewReviewClick' sejam chamados
+      */}
+      {meiDetails && (
+        <AvaliacaoModal
+          isOpen={modalState.open}
+          onClose={closeModal}
+          parentId={modalState.parentId}
+          estabelecimentoId={meiDetails.estabelecimentoId} // Use meiDetails
+          onReviewSubmit={handleReviewSubmit}
+        />
+      )}
     </div>
   );
 }

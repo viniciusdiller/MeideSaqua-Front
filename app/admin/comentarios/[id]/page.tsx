@@ -12,45 +12,174 @@ import {
   Empty,
   Avatar,
   Pagination,
-  Grid, // 1. IMPORTADO DO NOVO CÓDIGO
+  Grid,
 } from "antd";
-import { DeleteOutlined, ArrowLeftOutlined } from "@ant-design/icons";
+import {
+  DeleteOutlined,
+  ArrowLeftOutlined,
+  MessageOutlined,
+  DownOutlined,
+  UpOutlined,
+} from "@ant-design/icons";
 import { useRouter, useParams } from "next/navigation";
 import Link from "next/link";
-// 2. FUNÇÕES ADAPTADAS PARA O API.TS DO MEIDESAQUÁ
-import {
-  adminGetReviewsByEstablishment,
-  adminDeleteReview,
-} from "@/lib/api";
+// 1. API REFETORADA
+import { adminGetReviewsByEstablishment, adminDeleteReview } from "@/lib/api";
 
-const { Title, Text } = Typography;
+const { Title, Text, Paragraph } = Typography;
 const { confirm } = Modal;
-const { useBreakpoint } = Grid; // 3. HOOK DE BREAKPOINT MANTIDO
+const { useBreakpoint } = Grid;
 
-const PAGE_SIZE = 5;
+const PAGE_SIZE = 8; // Mantido do seu código de referência
 
-// Interface para a Avaliação (do seu novo código)
+// 2. INTERFACES REFETORADAS
 interface AvaliacaoAdmin {
   avaliacoesId: number;
   comentario: string;
-  nota: number;
+  nota: number | null;
   usuario: {
     usuarioId: number;
     nomeCompleto: string;
     email: string;
   };
+  parentId: number | null; // <-- Corrigido para 'parentId' (camelCase)
+  respostas?: AvaliacaoAdmin[];
 }
 
-// 4. INTERFACE ADAPTADA PARA "ESTABELECIMENTO"
 interface PageData {
+  // Alterado de 'projeto' para 'estabelecimento'
   estabelecimento: {
     estabelecimentoId: number;
-    nomeEstabelecimento: string;
-    categoria: string;
+    nomeFantasia: string; // Alterado de 'nomeProjeto'
+    categoria: string; // Alterado de 'ods'
   };
   avaliacoes: AvaliacaoAdmin[];
 }
 
+// --- COMPONENTE RECURSIVO (Nenhuma mudança de lógica necessária) ---
+interface AdminReviewCommentItemProps {
+  review: AvaliacaoAdmin;
+  handleDelete: (id: number) => void;
+  isReply: boolean;
+  isMobile: boolean;
+  isActionLoading: boolean;
+}
+
+const AdminReviewCommentItem: React.FC<AdminReviewCommentItemProps> = ({
+  review,
+  handleDelete,
+  isReply,
+  isMobile,
+  isActionLoading,
+}) => {
+  const [isExpanded, setIsExpanded] = useState(false);
+  const hasReplies = review.respostas && review.respostas.length > 0;
+  const replyCount = review.respostas?.length ?? 0;
+
+  const deleteButton = (
+    <Button
+      type="primary"
+      danger
+      icon={<DeleteOutlined />}
+      onClick={() => handleDelete(review.avaliacoesId)}
+      loading={isActionLoading}
+      size={isReply || isMobile ? "small" : "middle"}
+      className="ml-auto"
+    >
+      {isMobile ? null : "Excluir"}
+    </Button>
+  );
+
+  const expandButton = !isReply && hasReplies && (
+    <Button
+      icon={isExpanded ? <UpOutlined /> : <DownOutlined />}
+      onClick={() => setIsExpanded(!isExpanded)}
+      size={isMobile ? "small" : "middle"}
+    >
+      {isExpanded
+        ? "Esconder"
+        : `Ver ${replyCount} ${replyCount === 1 ? "Resposta" : "Respostas"}`}
+    </Button>
+  );
+
+  return (
+    <div
+      className={`h-full flex flex-col p-4 border rounded-lg shadow-sm bg-white ${
+        isReply ? "ml-4 md:ml-8" : "" // Indentação de resposta
+      }`}
+    >
+      {/* 1. Meta (Cabeçalho do card) */}
+      <div className="flex gap-3">
+        <Avatar
+          src={"/avatars/default-avatar.png"}
+          size={isReply ? "small" : "default"}
+        />
+        <div className="flex-1">
+          <div className="flex flex-wrap items-center gap-2">
+            <Text strong className={isReply ? "text-sm" : ""}>
+              {review.usuario.nomeCompleto}
+            </Text>
+            {review.nota && ( // Só mostra a nota se existir (comentário pai)
+              <Tag
+                color={
+                  review.nota < 3 ? "red" : review.nota > 3 ? "green" : "blue"
+                }
+              >
+                {review.nota} estrela(s)
+              </Tag>
+            )}
+            {isReply && ( // Mostra a tag "Resposta"
+              <Tag icon={<MessageOutlined />} color="default">
+                Resposta
+              </Tag>
+            )}
+          </div>
+          <Text type="secondary" className={isReply ? "text-xs" : ""}>
+            {review.usuario.email}
+          </Text>
+        </div>
+      </div>
+
+      {/* 2. Conteúdo */}
+      <div
+        className={`mt-3 ${
+          isReply ? "pl-10 text-sm" : "pl-2 text-base"
+        } flex-1`}
+      >
+        <Paragraph>
+          {review.comentario || <Text type="secondary">(Sem comentário)</Text>}
+        </Paragraph>
+      </div>
+
+      {/* 3. Respostas recursivas (se expandido) */}
+      {isExpanded && hasReplies && (
+        <div className="mt-4">
+          <List
+            itemLayout="vertical"
+            dataSource={review.respostas}
+            renderItem={(reply) => (
+              <AdminReviewCommentItem
+                key={reply.avaliacoesId}
+                review={reply}
+                handleDelete={handleDelete}
+                isReply={true}
+                isMobile={isMobile}
+                isActionLoading={isActionLoading}
+              />
+            )}
+          />
+        </div>
+      )}
+
+      {/* 4. Rodapé de Ações */}
+      <div className="flex items-center gap-2 mt-4 pt-4 border-t border-gray-100">
+        {[expandButton, deleteButton].filter(Boolean)}
+      </div>
+    </div>
+  );
+};
+
+// --- 3. COMPONENTE PRINCIPAL (REFETORADO) ---
 const AdminComentariosDoEstabelecimento: React.FC = () => {
   const [pageData, setPageData] = useState<PageData | null>(null);
   const [loading, setLoading] = useState(true);
@@ -58,16 +187,14 @@ const AdminComentariosDoEstabelecimento: React.FC = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const router = useRouter();
   const params = useParams();
-  
-  // 5. VARIÁVEL RENOMEADA PARA CLAREZA
-  const estabelecimentoId = params.id as string;
 
-  const screens = useBreakpoint(); // 6. HOOK DE RESPONSIVIDADE MANTIDO
+  // 3.1 Variável refatorada
+  const estabelecimentoId = params.id as string;
+  const screens = useBreakpoint();
 
   const fetchData = useCallback(async () => {
-    // 7. LÓGICA ATUALIZADA
+    // 3.2 Variável refatorada
     if (!estabelecimentoId) return;
-
     setLoading(true);
     const token = localStorage.getItem("admin_token");
     if (!token) {
@@ -77,8 +204,11 @@ const AdminComentariosDoEstabelecimento: React.FC = () => {
     }
 
     try {
-      // 8. CHAMADA DE API CORRETA DO MEIDESAQUÁ
-      const data = await adminGetReviewsByEstablishment(estabelecimentoId, token);
+      // 3.3 API refatorada
+      const data = await adminGetReviewsByEstablishment(
+        estabelecimentoId,
+        token
+      );
       setPageData(data);
       setCurrentPage(1);
     } catch (error: any) {
@@ -86,18 +216,17 @@ const AdminComentariosDoEstabelecimento: React.FC = () => {
     } finally {
       setLoading(false);
     }
-    // 9. DEPENDÊNCIA ATUALIZADA
-  }, [estabelecimentoId, router]);
+  }, [estabelecimentoId, router]); // router adicionado para consistência
 
   useEffect(() => {
     fetchData();
   }, [fetchData]);
 
-  // A função handleDelete é idêntica e foi mantida
   const handleDelete = (id: number) => {
     confirm({
-      title: "Você tem certeza que quer excluir este comentário?",
-      content: "Esta ação não pode ser desfeita.",
+      title: "Você tem certeza que quer excluir este item?",
+      content:
+        "Se for um comentário pai, todas as suas respostas também serão excluídas. Esta ação não pode ser desfeita.",
       okText: "Sim, excluir",
       okType: "danger",
       cancelText: "Cancelar",
@@ -109,14 +238,13 @@ const AdminComentariosDoEstabelecimento: React.FC = () => {
           setIsActionLoading(false);
           return;
         }
-
         try {
-          // 10. CHAMADA DE API CORRETA DO MEIDESAQUÁ
+          // 3.4 API (já estava correta)
           await adminDeleteReview(id, token);
-          message.success("Comentário excluído com sucesso!");
-          fetchData(); // Recarrega os dados
+          message.success("Item excluído com sucesso!");
+          fetchData(); // Recarrega a árvore de comentários
         } catch (error: any) {
-          message.error(error.message || "Falha ao excluir comentário.");
+          message.error(error.message || "Falha ao excluir item.");
         } finally {
           setIsActionLoading(false);
         }
@@ -124,12 +252,14 @@ const AdminComentariosDoEstabelecimento: React.FC = () => {
     });
   };
 
-  // 11. TÍTULO DA PÁGINA ATUALIZADO
-  const pageTitle = pageData?.estabelecimento?.nomeEstabelecimento
-    ? `Comentários de: ${pageData.estabelecimento.nomeEstabelecimento}`
+  const isMobile = !screens.md;
+
+  // 3.5 Título refatorado
+  const pageTitle = pageData?.estabelecimento?.nomeFantasia
+    ? `Comentários de: ${pageData.estabelecimento.nomeFantasia}`
     : "Carregando comentários...";
 
-  // Lógica de paginação (mantida)
+  // Paginação dos comentários-PAI
   const allAvaliacoes = pageData?.avaliacoes || [];
   const totalCount = allAvaliacoes.length;
   const paginatedAvaliacoes = allAvaliacoes.slice(
@@ -137,20 +267,15 @@ const AdminComentariosDoEstabelecimento: React.FC = () => {
     currentPage * PAGE_SIZE
   );
 
-  // 12. LÓGICA DE RESPONSIVIDADE MANTIDA
-  const isMobile = !screens.md;
-
   return (
-    // 13. PADDING RESPONSIVO MANTIDO
     <div className="p-4 md:p-8">
-      {/* 14. CABEÇALHO RESPONSIVO MANTIDO */}
+      {/* Cabeçalho */}
       <div className="flex flex-col md:flex-row md:justify-between md:items-start gap-4 mb-6">
-        {/* Bloco Título + Tag */}
         <div>
           <Title level={isMobile ? 3 : 2} className="m-0" ellipsis>
             {pageTitle}
           </Title>
-          {/* 15. TAG ATUALIZADA */}
+          {/* 3.6 Tag refatorada */}
           {pageData?.estabelecimento?.categoria && (
             <Tag
               color="blue"
@@ -161,84 +286,50 @@ const AdminComentariosDoEstabelecimento: React.FC = () => {
             </Tag>
           )}
         </div>
-
-        {/* Bloco Botão Voltar */}
         <Link href="/admin/comentarios" passHref>
           <Button
             icon={<ArrowLeftOutlined />}
             size={isMobile ? "middle" : "large"}
-            // 16. BOTÃO RESPONSIVO MANTIDO
             className={isMobile ? "w-full" : ""}
           >
-            {/* 17. TEXTO ATUALIZADO */}
+            {/* 3.7 Texto do botão refatorado */}
             Voltar para Estabelecimentos
           </Button>
         </Link>
       </div>
 
       <Spin spinning={loading}>
+        {/* Layout de Grid (lógica idêntica) */}
         <List
-          className="bg-white p-4 md:p-6 rounded-lg shadow-sm"
-          itemLayout="vertical"
+          grid={{ gutter: 16, xs: 1, sm: 1, md: 2, lg: 2, xl: 2, xxl: 2 }}
           dataSource={paginatedAvaliacoes}
           locale={{
             emptyText: (
-              // 18. TEXTO ATUALIZADO
               <Empty description="Nenhum comentário encontrado para este estabelecimento." />
             ),
           }}
           renderItem={(item: AvaliacaoAdmin) => (
-            <List.Item
-              key={item.avaliacoesId}
-              actions={[
-                // 19. BOTÃO DE EXCLUIR RESPONSIVO MANTIDO
-                <Button
-                  type="primary"
-                  danger
-                  icon={<DeleteOutlined />}
-                  onClick={() => handleDelete(item.avaliacoesId)}
-                  loading={isActionLoading}
-                >
-                  {/* O texto "Excluir" some em telas pequenas */}
-                  {isMobile ? null : "Excluir"}
-                </Button>,
-              ]}
-            >
-              <List.Item.Meta
-                avatar={<Avatar src={"/avatars/default-avatar.png"} />}
-                title={
-                  <div className="flex flex-wrap items-center gap-2">
-                    <Text strong>{item.usuario.nomeCompleto}</Text>
-                    <Tag
-                      color={
-                        item.nota < 3 ? "red" : item.nota > 3 ? "green" : "blue"
-                      }
-                    >
-                      {item.nota} estrela(s)
-                    </Tag>
-                  </div>
-                }
-                description={<Text type="secondary">{item.usuario.email}</Text>}
+            <List.Item key={item.avaliacoesId} style={{ height: "100%" }}>
+              <AdminReviewCommentItem
+                review={item}
+                handleDelete={handleDelete}
+                isReply={false} // Itens no grid principal nunca são respostas
+                isMobile={isMobile}
+                isActionLoading={isActionLoading}
               />
-              <div className="mt-3 pl-2 text-base">
-                {item.comentario || (
-                  <Text type="secondary">(Sem comentário)</Text>
-                )}
-              </div>
             </List.Item>
           )}
         />
 
+        {/* Paginação (lógica idêntica) */}
         {totalCount > PAGE_SIZE && (
           <div className="mt-6 text-center">
-            {/* 20. PAGINAÇÃO RESPONSIVA MANTIDA */}
             <Pagination
               current={currentPage}
               pageSize={PAGE_SIZE}
               total={totalCount}
               onChange={(page) => setCurrentPage(page)}
               showSizeChanger={false}
-              // Usa o modo "simple" em telas pequenas
               simple={isMobile}
             />
           </div>
@@ -248,4 +339,5 @@ const AdminComentariosDoEstabelecimento: React.FC = () => {
   );
 };
 
+// 3.8 Export refatorado
 export default AdminComentariosDoEstabelecimento;

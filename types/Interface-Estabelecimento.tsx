@@ -11,14 +11,11 @@ export interface Estabelecimento {
   categoria: string;
   logoUrl?: string;
   ccmeiUrl?: string;
-  
-  // --- CORREÇÃO AQUI ---
-  // Alterado de 'imagensProduto' para 'produtosImg' para
-  // corresponder ao seu backend
-  produtosImg?: ImagemProduto[]; 
-  // --- FIM DA CORREÇÃO ---
-
+  nomeResponsavel: string;
+  cpfResponsavel: string;
+  produtosImg?: ImagemProduto[];
+  cnae: string;
   dados_atualizacao?: any;
   status: string;
-  [key: string]: any; 
+  [key: string]: any;
 }

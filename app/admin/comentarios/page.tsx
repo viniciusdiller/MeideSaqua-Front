@@ -22,15 +22,6 @@ import { ArrowLeftOutlined, CommentOutlined } from "@ant-design/icons";
 import { getAllActiveEstablishments } from "@/lib/api"; //
 import { Estabelecimento } from "@/types/Interface-Estabelecimento"; //
 
-/* // Interface de fallback
-interface Estabelecimento {
-  estabelecimentoId: number;
-  nomeEstabelecimento: string;
-  categoria: string;
-  logoUrl?: string;
-}
-*/
-
 const { Title, Text } = Typography;
 const { Search } = Input;
 const { TabPane } = Tabs;
@@ -50,7 +41,9 @@ const getFullImageUrl = (path: string): string => {
 
 const AdminGerenciarComentariosPage: React.FC = () => {
   const [loading, setLoading] = useState(true);
-  const [estabelecimentos, setEstabelecimentos] = useState<Estabelecimento[]>([]);
+  const [estabelecimentos, setEstabelecimentos] = useState<Estabelecimento[]>(
+    []
+  );
   const [filteredEstabelecimentos, setFilteredEstabelecimentos] = useState<
     Estabelecimento[]
   >([]);
@@ -63,11 +56,11 @@ const AdminGerenciarComentariosPage: React.FC = () => {
     const token = localStorage.getItem("admin_token");
     if (!token) {
       message.error("Acesso negado.");
-      router.push("/admin/login"); //
+      router.push("/admin/login");
       return;
     }
     try {
-      const data = await getAllActiveEstablishments(token); //
+      const data = await getAllActiveEstablishments(token);
       setEstabelecimentos(data);
       setFilteredEstabelecimentos(data);
     } catch (error: any) {
@@ -81,12 +74,12 @@ const AdminGerenciarComentariosPage: React.FC = () => {
     fetchData();
   }, [fetchData]);
 
-  // A busca usa apenas 'nomeEstabelecimento' e 'categoria'
+  // A busca usa apenas 'nomeFantasia' e 'categoria'
   const handleSearch = (value: string) => {
     const lowerCaseValue = value.toLowerCase();
     const filtered = estabelecimentos.filter(
       (est) =>
-        est.nomeEstabelecimento.toLowerCase().includes(lowerCaseValue) ||
+        est.nomeFantasia.toLowerCase().includes(lowerCaseValue) ||
         est.categoria.toLowerCase().includes(lowerCaseValue)
     );
     setFilteredEstabelecimentos(filtered);
@@ -119,14 +112,17 @@ const AdminGerenciarComentariosPage: React.FC = () => {
 
   return (
     <div className="p-4 md:p-8">
-      <Link href="/admin/dashboard" passHref> {/* */}
+      <Link href="/admin/dashboard" passHref>
+        {" "}
+        {/* */}
         <Button icon={<ArrowLeftOutlined />} type="text" className="mb-4">
           Voltar ao Dashboard
         </Button>
       </Link>
 
       <Title level={2} className="mb-6">
-        Gerenciar Comentários por Estabelecimento ({filteredEstabelecimentos.length})
+        Gerenciar Comentários por Estabelecimento (
+        {filteredEstabelecimentos.length})
       </Title>
 
       <Search
@@ -148,7 +144,8 @@ const AdminGerenciarComentariosPage: React.FC = () => {
             onChange={handleTabChange}
           >
             {sortedCategories.map((categoria) => {
-              const allEstabelecimentosForCat = groupedEstabelecimentos[categoria];
+              const allEstabelecimentosForCat =
+                groupedEstabelecimentos[categoria];
               const totalCount = allEstabelecimentosForCat.length;
               const estabelecimentosToShow = allEstabelecimentosForCat.slice(
                 (currentPage - 1) * PAGE_SIZE,
@@ -167,7 +164,7 @@ const AdminGerenciarComentariosPage: React.FC = () => {
                           hoverable
                           actions={[
                             <Link
-                              href={`/admin/comentarios/${est.estabelecimentoId}`} ///page.tsx]
+                              href={`/admin/comentarios/${est.estabelecimentoId}`}
                               passHref
                               key="comentarios"
                             >
@@ -181,32 +178,28 @@ const AdminGerenciarComentariosPage: React.FC = () => {
                             </Link>,
                           ]}
                         >
-                          {/* --- 
-                            A CORREÇÃO DEFINITIVA ESTÁ AQUI 
-                            --- 
-                          */}
                           <Card.Meta
                             avatar={
                               <Avatar
                                 src={getFullImageUrl(est.logoUrl || "")}
                               />
                             }
-                            title={est.nomeEstabelecimento} // Título
+                            title={est.nomeFantasia}
                             description={
                               <>
                                 <Text>Categoria: {est.categoria}</Text>
-                                
-                                {/* A lógica agora usa 'est.nomeEstabelecimento'
-                                  para o nome do MEI, como você pediu.
-                                */}
+
                                 <br />
                                 <Text type="secondary">
-                                  MEI: {est.nomeEstabelecimento}
+                                  CNAE: {est.cnae} <br />
+                                  Responsável: {est.nomeResponsavel}
+                                  <br />
+                                  CPF do Responsável: {est.cpfResponsavel}
+                                  <br />
                                 </Text>
                               </>
                             }
                           />
-                          {/* --- FIM DA CORREÇÃO --- */}
                         </Card>
                       </Col>
                     ))}
