@@ -479,17 +479,19 @@ export default function MeiDetailPage({
                 />
                 <div className="hidden quinhentos:flex flex-col md:flex-row md:items-center md:justify-between gap-6 mt-6">
                   <div className="flex items-center gap-6 ">
-                    <a
-                      href={meiDetails.instagram}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="flex items-center gap-2 text-gray-600 hover:text-pink-600 transition-colors hover:cursor-pointer"
-                    >
-                      <div className="w-9 h-9 rounded-full bg-pink-100 flex items-center justify-center">
-                        <Instagram size={18} strokeWidth={2} />
-                      </div>
-                      <span className="text-sm font-medium">Instagram</span>
-                    </a>
+                    {meiDetails.instagram && (
+                      <a
+                        href={meiDetails.instagram}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="flex items-center gap-2 text-gray-600 hover:text-pink-600 transition-colors hover:cursor-pointer"
+                      >
+                        <div className="w-9 h-9 rounded-full bg-pink-100 flex items-center justify-center">
+                          <Instagram size={18} strokeWidth={2} />
+                        </div>
+                        <span className="text-sm font-medium">Instagram</span>
+                      </a>
+                    )}
                     <a
                       href={`https://wa.me/55${meiDetails.contatoEstabelecimento.replace(
                         /\D/g,
@@ -585,12 +587,16 @@ export default function MeiDetailPage({
                 <h3 className="text-2xl font-bold text-gray-900 mb-4 border-l-4 border-[#017DB9] pl-3">
                   Área de Atuação
                 </h3>
-                <div className="flex items-start gap-3">
-                  <div className="w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center">
-                    <MapPin className="w-4 h-4 text-[#017DB9]" />
+                {meiDetails.endereco && (
+                  <div className="flex items-start gap-3">
+                    <div className="w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center">
+                      <MapPin className="w-4 h-4 text-[#017DB9]" />
+                    </div>
+                    <span className="leading-relaxed">
+                      {meiDetails.endereco}
+                    </span>
                   </div>
-                  <span className="leading-relaxed">{meiDetails.endereco}</span>
-                </div>
+                )}
                 <div className="flex items-center gap-3">
                   <div className="w-8 h-8 rounded-full bg-green-100 flex items-center justify-center">
                     <Phone className="w-4 h-4 text-green-600" />

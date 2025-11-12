@@ -275,7 +275,7 @@ export default function CategoryPage({ params }: PageProps) {
                         className="object-cover"
                       />
                     </div>
-                    
+
                     {/* 15. Padding 'pr-16' adicionado ao título */}
                     <div className="flex justify-between items-start mb-2">
                       <h3 className="text-lg font-semibold text-gray-800 break-words pr-16">
@@ -297,10 +297,14 @@ export default function CategoryPage({ params }: PageProps) {
                       />
                     </p>
                     <div className="space-y-2 text-sm text-gray-500 mt-auto">
-                      <div className="flex items-start gap-2">
-                        <MapPin className="w-4 h-4 mt-1 flex-shrink-0" />
-                        <span className="break-words">{location.endereco}</span>
-                      </div>
+                      {location.endereco && (
+                        <div className="flex items-start gap-2">
+                          <MapPin className="w-4 h-4 mt-1 flex-shrink-0" />
+                          <span className="break-words">
+                            {location.endereco}
+                          </span>
+                        </div>
+                      )}
                       {location.horarioFuncionamento && (
                         <div className="flex items-start gap-2">
                           <Clock className="w-4 h-4 mt-1 flex-shrink-0" />
@@ -349,14 +353,13 @@ export default function CategoryPage({ params }: PageProps) {
                 />
               </div>
             )}
-            
+
             {/* 17. FEEDBACK DE BUSCA VAZIA ADICIONADO (Nova Feature) */}
-            {filteredLocations.length === 0 &&
-              locations.length > 0 && (
-                <div className="mt-8 text-center">
-                  <Empty description="Nenhum MEI encontrado para a sua busca." />
-                </div>
-              )}
+            {filteredLocations.length === 0 && locations.length > 0 && (
+              <div className="mt-8 text-center">
+                <Empty description="Nenhum MEI encontrado para a sua busca." />
+              </div>
+            )}
           </div>
 
           {/* 18. CORREÇÃO ALTURA DO CARROSSEL */}
@@ -377,7 +380,7 @@ export default function CategoryPage({ params }: PageProps) {
                 clique no botão para explorar outra categoria
               </p>
             </motion.div>
-            
+
             <div className="flex-grow w-full h-full min-h-[500px] rounded-2xl shadow-lg overflow-hidden border border-blue-600">
               <ModernCarousel currentCategoryId={category.id} />
             </div>
