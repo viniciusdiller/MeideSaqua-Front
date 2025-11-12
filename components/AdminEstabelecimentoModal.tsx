@@ -31,6 +31,31 @@ import {
   areasAtuacao,
   tagsPorCategoria,
 } from "@/app/cadastro-mei/page";
+import dynamic from "next/dynamic";
+import "react-quill/dist/quill.snow.css";
+import "@/app/cadastro-mei/quill-styles.css";
+
+const ReactQuill = dynamic(() => import("react-quill"), {
+  ssr: false,
+  loading: () => (
+    <Spin
+      size="large"
+      style={{ display: "block", margin: "20px auto", minHeight: "150px" }}
+    />
+  ),
+});
+
+const quillModules = {
+  toolbar: [
+    [{ header: "1" }, { header: "2" }],
+    [{ list: "ordered" }, { list: "bullet" }],
+    ["bold", "italic", "underline", "strike"],
+    [{ color: [] }, { background: [] }],
+    [{ align: [] }],
+    ["link"],
+    ["clean"],
+  ],
+};
 
 const { Title } = Typography;
 const { TextArea } = Input;
@@ -87,27 +112,28 @@ const AdminEstabelecimentoModal: React.FC<AdminEstabelecimentoModalProps> = ({
     if (estabelecimento) {
       let dataToEdit: any = { ...estabelecimento };
       let finalLogoUrl = estabelecimento.logoUrl || null;
-      
+
       // --- CORREÇÃO AQUI ---
       // Usar 'produtosImg' (do backend/interface) em vez de 'imagensProduto'
-      let finalPortfolioImgs = estabelecimento.produtosImg || []; 
+      let finalPortfolioImgs = estabelecimento.produtosImg || [];
       // --- FIM DA CORREÇÃO ---
 
       if (
         estabelecimento.status === "pendente_atualizacao" &&
         estabelecimento.dados_atualizacao
       ) {
-        dataToEdit = { ...estabelecimento, ...estabelecimento.dados_atualizacao };
+        dataToEdit = {
+          ...estabelecimento,
+          ...estabelecimento.dados_atualizacao,
+        };
         setOutrasAlteracoes(
           estabelecimento.dados_atualizacao.outrasAlteracoes || null
         );
-        finalLogoUrl =
-          estabelecimento.dados_atualizacao.logo || finalLogoUrl;
+        finalLogoUrl = estabelecimento.dados_atualizacao.logo || finalLogoUrl;
         if (estabelecimento.dados_atualizacao.produtos) {
-          finalPortfolioImgs =
-            estabelecimento.dados_atualizacao.produtos.map(
-              (url: string) => ({ url: url })
-            );
+          finalPortfolioImgs = estabelecimento.dados_atualizacao.produtos.map(
+            (url: string) => ({ url: url })
+          );
         }
         delete dataToEdit.outrasAlteracoes;
       } else {
@@ -124,7 +150,7 @@ const AdminEstabelecimentoModal: React.FC<AdminEstabelecimentoModalProps> = ({
       };
 
       const normalizedLogoPath = normalize(finalLogoUrl);
-      
+
       const filteredPortfolio = finalPortfolioImgs.filter((img) => {
         if (!img || !img.url) return false;
         if (normalizedLogoPath === "") return true;
@@ -381,9 +407,16 @@ const AdminEstabelecimentoModal: React.FC<AdminEstabelecimentoModalProps> = ({
             name="descricao"
             label="Descrição Completa"
             rules={[{ required: true }]}
+            className="quill-editor-container"
           >
-            <TextArea rows={5} />
+            <ReactQuill
+              theme="snow"
+              modules={quillModules}
+              placeholder="Descreva o projeto em detalhes, você pode usar negrito, itálico..."
+              style={{ minHeight: "10px" }}
+            />
           </Form.Item>
+
           <Form.Item name="areasAtuacao" label="Áreas de Atuação">
             <Select mode="multiple" placeholder="Selecione as áreas">
               {areasAtuacao.map((area) => (

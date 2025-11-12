@@ -34,9 +34,10 @@ import {
 } from "@ant-design/icons";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { getPendingAdminRequests, adminUpdateEstablishment } from "@/lib/api"; // <-- API do MeideSaquá
-import AdminEstabelecimentoModal from "@/components/AdminEstabelecimentoModal"; // <-- Modal do MeideSaquá
-import { Estabelecimento } from "@/types/Interface-Estabelecimento"; // <-- Interface do MeideSaquá
+import { getPendingAdminRequests, adminUpdateEstablishment } from "@/lib/api";
+import AdminEstabelecimentoModal from "@/components/AdminEstabelecimentoModal";
+import { Estabelecimento } from "@/types/Interface-Estabelecimento";
+import FormattedDescription from "@/components/FormattedDescription";
 
 const { Text, Title } = Typography;
 const { Column } = Table;
@@ -111,7 +112,9 @@ const AdminDashboard: React.FC = () => {
     exclusoes: [],
   });
   const [modalVisible, setModalVisible] = useState(false);
-  const [selectedItem, setSelectedItem] = useState<Estabelecimento | null>(null); // <-- Tipo Corrigido
+  const [selectedItem, setSelectedItem] = useState<Estabelecimento | null>(
+    null
+  ); // <-- Tipo Corrigido
   const router = useRouter();
   const [isActionLoading, setIsActionLoading] = useState(false);
 
@@ -142,8 +145,31 @@ const AdminDashboard: React.FC = () => {
     if (value === null || value === undefined || value === "") {
       return <Text type="secondary">Não informado</Text>;
     }
+    if (key === "descricao") {
+      return (
+        <div
+          className="prose prose-sm max-w-none prose-p:my-1"
+          dangerouslySetInnerHTML={{ __html: value }}
+        />
+      );
+    }
 
-    // Lógica para renderizar CCMEI (PDF ou Imagem)
+    if (key === "descricaoDiferencial") {
+      return <FormattedDescription text={value} />;
+    }
+
+    if (
+      key === "motivo" ||
+      key === "motivoExclusao" ||
+      key === "outrasAlteracoes"
+    ) {
+      return (
+        <Typography.Paragraph style={{ whiteSpace: "pre-wrap", margin: 0 }}>
+          {String(value)}
+        </Typography.Paragraph>
+      );
+    }
+
     if (
       (key === "ccmeiUrl" || key === "ccmei") &&
       typeof value === "string" &&
@@ -324,7 +350,8 @@ const AdminDashboard: React.FC = () => {
     }
   };
 
-  const showModal = (item: Estabelecimento) => { // <-- Tipo Corrigido
+  const showModal = (item: Estabelecimento) => {
+    // <-- Tipo Corrigido
     setSelectedItem(item);
     setModalVisible(true);
   };
@@ -353,7 +380,7 @@ const AdminDashboard: React.FC = () => {
         formData,
         token
       );
-      
+
       // A mensagem de sucesso é mostrada pelo modal
       setIsEditModalVisible(false);
       setModalVisible(false);
@@ -387,8 +414,14 @@ const AdminDashboard: React.FC = () => {
       logo: { oldKey: "logoUrl", labelKey: "logo" },
       produtos: { oldKey: "produtosImg", labelKey: "produtos" }, // 'produtos' em vez de 'imagens'
       ccmei: { oldKey: "ccmeiUrl", labelKey: "ccmei" }, // 'ccmei'
-      nome_responsavel: { oldKey: "nomeResponsavel", labelKey: "nome_responsavel" },
-      cpf_responsavel: { oldKey: "cpfResponsavel", labelKey: "cpf_responsavel" },
+      nome_responsavel: {
+        oldKey: "nomeResponsavel",
+        labelKey: "nome_responsavel",
+      },
+      cpf_responsavel: {
+        oldKey: "cpfResponsavel",
+        labelKey: "cpf_responsavel",
+      },
     };
 
     const diffData = Object.entries(selectedItem.dados_atualizacao)
@@ -636,7 +669,8 @@ const AdminDashboard: React.FC = () => {
             ),
           ]}
         >
-          <Title level={4}>Dados do Estabelecimento</Title> {/* <-- Texto Corrigido */}
+          <Title level={4}>Dados do Estabelecimento</Title>{" "}
+          {/* <-- Texto Corrigido */}
           <Descriptions bordered column={1} size="small">
             {/* Lógica de renderização do MeideSaquá (com logo e portfolio primeiro) */}
             {selectedItem.logoUrl && (
@@ -645,11 +679,12 @@ const AdminDashboard: React.FC = () => {
               </Descriptions.Item>
             )}
 
-            {selectedItem.produtosImg && selectedItem.produtosImg.length > 0 && (
-              <Descriptions.Item label={fieldConfig.produtosImg.label}>
-                {renderValue("produtosImg", selectedItem.produtosImg)}
-              </Descriptions.Item>
-            )}
+            {selectedItem.produtosImg &&
+              selectedItem.produtosImg.length > 0 && (
+                <Descriptions.Item label={fieldConfig.produtosImg.label}>
+                  {renderValue("produtosImg", selectedItem.produtosImg)}
+                </Descriptions.Item>
+              )}
 
             {Object.entries(selectedItem)
               .filter(
@@ -676,14 +711,12 @@ const AdminDashboard: React.FC = () => {
                   )
               )}
           </Descriptions>
-
           {renderDiffTable(
             "pendente_exclusao",
             "error",
             "Solicitação de Exclusão",
             ["estabelecimentoId", "confirmacao"] // <-- Campo Corrigido
           )}
-
           {renderDiffTable(
             "pendente_atualizacao",
             "info",
@@ -697,7 +730,8 @@ const AdminDashboard: React.FC = () => {
       <AdminEstabelecimentoModal // <-- Componente Corrigido
         estabelecimento={selectedItem} // <-- Prop Corrigida
         visible={isEditModalVisible}
-        onClose={(shouldRefresh: boolean) => { // <-- Tipo 'boolean' adicionado
+        onClose={(shouldRefresh: boolean) => {
+          // <-- Tipo 'boolean' adicionado
           setIsEditModalVisible(false);
           if (shouldRefresh) {
             setModalVisible(false);
