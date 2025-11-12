@@ -8,13 +8,11 @@ import {
   Phone,
   PhoneForwarded,
   Instagram,
-  Trash2,
 } from "lucide-react";
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect, useRef, Suspense, useMemo } from "react";
 import { TiltImage } from "@/components/ui/TiltImage";
 import "leaflet/dist/leaflet.css";
 import { categories } from "@/app/page";
-import Image from "next/image";
 import {
   getEstablishmentById,
   deleteReview,
@@ -49,6 +47,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { SearchX, CalendarDays } from "lucide-react";
 import FormattedDescription from "@/components/FormattedDescription";
+import DOMPurify from "dompurify";
 
 const CustomStarIcon = ({
   fillPercentage = "100%",
@@ -257,6 +256,13 @@ export default function MeiDetailPage({
     }, 50);
     return () => clearTimeout(timer);
   }, [currentPage]);
+
+  const cleanHtmlDescricao = useMemo(() => {
+    if (typeof window !== "undefined" && meiDetails?.descricao) {
+      return DOMPurify.sanitize(meiDetails.descricao);
+    }
+    return "";
+  }, [meiDetails?.descricao]);
 
   if (isLoading) {
     // ... (Seu código de Loading)
@@ -467,9 +473,10 @@ export default function MeiDetailPage({
                     </div>
                   )}
                 </div>
-                <p className="text-gray-700 leading-relaxed md:pl-2">
-                  <FormattedDescription text={meiDetails.descricao} />
-                </p>
+                <div
+                  className="prose prose-sm md:prose-base max-w-none text-gray-700 leading-relaxed md:pl-2 break-words prose-p:my-0"
+                  dangerouslySetInnerHTML={{ __html: cleanHtmlDescricao }}
+                />
                 <div className="hidden quinhentos:flex flex-col md:flex-row md:items-center md:justify-between gap-6 mt-6">
                   <div className="flex items-center gap-6 ">
                     <a

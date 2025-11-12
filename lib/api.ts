@@ -37,25 +37,17 @@ async function fetchApi(path: string, options: RequestInit = {}) {
   try {
     data = text ? JSON.parse(text) : {};
   } catch (error) {
-    // Se a resposta não for JSON (ex: só texto "OK"), retorna uma mensagem
     data = { message: text || "Resposta inválida da API" };
   }
 
   if (!response.ok) {
-    // --- LÓGICA DE INTERCEPTAÇÃO 401 (SESSÃO EXPIRADA) ---
     if (response.status === 401) {
-      // Verifica se estamos no lado do cliente
-      if (typeof window !== "undefined") {
-        // Limpa o usuário do localStorage
+      if (path !== "/api/auth/login") {
         localStorage.removeItem("user");
-        // Força o redirecionamento para a página de login
         window.location.href = "/login";
+        throw new Error("Sessão expirada. Redirecionando para login...");
       }
-
-      // Lança um erro para interromper a execução do código que chamou a API
-      throw new Error("Sessão expirada. Redirecionando para login...");
     }
-    // --- FIM DA LÓGICA 401 ---
 
     const errorMessage =
       typeof data === "object" && data.message

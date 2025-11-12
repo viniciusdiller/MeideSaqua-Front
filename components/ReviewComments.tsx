@@ -91,7 +91,7 @@ export const ReviewComment = ({
           {allowReply && (
             <button
               onClick={() => onReplyClick(review.avaliacoesId)}
-              className="text-sm font-medium text-[#3C6AB2] hover:text-[#D7386E] flex items-center gap-1"
+              className="text-sm font-medium text-[#3C6AB2] hover:text-[#22c362] flex items-center gap-1"
             >
               Responder
             </button>

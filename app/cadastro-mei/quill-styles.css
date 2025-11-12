@@ -1,0 +1,58 @@
+/* app/cadastro-projeto/quill-styles.css */
+
+/* Importa os estilos padrão do react-quill */
+@import "react-quill/dist/quill.snow.css";
+
+/* * Ajustes para o editor se parecer com um 
+ * campo do Ant Design (antd) 
+ */
+
+/* Arredonda a barra de ferramentas (topo) */
+.ql-toolbar {
+  border-top-left-radius: 6px !important;
+  border-top-right-radius: 6px !important;
+  border-color: #d9d9d9 !important;
+  background-color: #fafafa;
+}
+
+/* Arredonda o container (baixo) */
+.ql-container {
+  border-bottom-left-radius: 6px !important;
+  border-bottom-right-radius: 6px !important;
+  border-color: #d9d9d9 !important;
+  font-size: 14px; /* Combina com o input do antd */
+}
+
+/* Cor do placeholder */
+.ql-editor.ql-blank::before {
+  color: #bfbfbf !important;
+  font-style: normal !important;
+  opacity: 1 !important;
+}
+
+/* * Adiciona a borda de foco azul do antd quando 
+ * o Form.Item está focado 
+ */
+.ant-form-item-has-focus .ql-toolbar {
+  border-color: #4096ff !important;
+  box-shadow: 0 0 0 2px rgba(5, 145, 255, 0.1);
+}
+.ant-form-item-has-focus .ql-container {
+  border-color: #4096ff !important;
+  box-shadow: 0 0 0 2px rgba(5, 145, 255, 0.1);
+  /* Mantém a separação da barra */
+  border-top: 1px solid #d9d9d9 !important;
+}
+
+/* * Mostra a borda de erro vermelha do antd
+ */
+.ant-form-item-has-error .ql-toolbar,
+.ant-form-item-has-error .ql-container {
+  border-color: #ff4d4f !important;
+}
+
+/* Ajusta o foco quando está com erro */
+.ant-form-item-has-error.ant-form-item-has-focus .ql-toolbar,
+.ant-form-item-has-error.ant-form-item-has-focus .ql-container {
+  box-shadow: 0 0 0 2px rgba(255, 77, 79, 0.1);
+}

@@ -27,6 +27,9 @@ import {
   excluirEstabelecimento,
 } from "@/lib/api";
 import { categories as categoryObjects } from "../page";
+import dynamic from "next/dynamic";
+const ReactQuill = dynamic(() => import("react-quill"), { ssr: false });
+import "./quill-styles.css";
 
 // --- FUNÇÕES DE MÁSCARA ---
 const maskCNAE = (value: string) => {
@@ -279,6 +282,16 @@ const { Option } = Select;
 const { TextArea } = Input;
 
 type FlowStep = "initial" | "register" | "update" | "delete" | "submitted";
+const quillModules = {
+  toolbar: [
+    [{ header: [1, 2, 3, false] }],
+    ["bold", "italic", "underline", "strike"],
+    [{ list: "ordered" }, { list: "bullet" }],
+    [{ align: [] }],
+    ["link"],
+    ["clean"],
+  ],
+};
 
 const CadastroMEIPage: React.FC = () => {
   const [form] = Form.useForm();
@@ -295,6 +308,24 @@ const CadastroMEIPage: React.FC = () => {
   const { user, isLoading } = useAuth();
   const router = useRouter();
   const toastShownRef = useRef(false);
+  const [quillTextLength, setQuillTextLength] = useState(0);
+  const MAX_QUILL_LENGTH = 5000;
+
+  const getQuillTextLength = (value: string) => {
+    if (typeof window === "undefined" || !value || value === "<p><br></p>")
+      return 0;
+
+    const tempDiv = document.createElement("div");
+    tempDiv.innerHTML = value;
+    return (tempDiv.textContent || tempDiv.innerText || "").trim().length;
+  };
+
+  const handleFormValuesChange = (changedValues: any) => {
+    if (changedValues.hasOwnProperty("descricao")) {
+      const length = getQuillTextLength(changedValues.descricao);
+      setQuillTextLength(length);
+    }
+  };
 
   const handleLogoChange = ({ fileList }: { fileList: UploadFile[] }) =>
     setLogoFileList(fileList);
@@ -315,6 +346,70 @@ const CadastroMEIPage: React.FC = () => {
       router.push("/login");
     }
   }, [user, isLoading, router]);
+
+  useEffect(() => {
+    if (flowStep === "register" || flowStep === "update") {
+      const translateQuillToolbar = () => {
+        const toolbar = document.querySelector(".ql-toolbar");
+        if (!toolbar) return false;
+
+        const boldButton = toolbar.querySelector(".ql-bold") as HTMLElement;
+        if (boldButton && boldButton.title === "Negrito") {
+          return true;
+        }
+
+        const translations: { [key: string]: string } = {
+          ".ql-bold": "Negrito",
+          ".ql-italic": "Itálico",
+          ".ql-underline": "Sublinhado",
+          ".ql-strike": "Riscado",
+          '.ql-list[value="ordered"]': "Lista ordenada",
+          '.ql-list[value="bullet"]': "Lista com marcadores",
+          ".ql-link": "Inserir link",
+          ".ql-clean": "Remover formatação",
+          ".ql-header .ql-picker-label": "Normal",
+        };
+
+        Object.entries(translations).forEach(([selector, title]) => {
+          const el = toolbar.querySelector(selector) as HTMLElement;
+          if (el) {
+            // Botões usam 'title'
+            if (el.tagName === "BUTTON") {
+              el.title = title;
+            }
+            // O seletor de Header usa 'data-label'
+            else if (el.classList.contains("ql-picker-label")) {
+              el.setAttribute("data-label", title);
+            }
+          }
+        });
+
+        toolbar
+          .querySelectorAll(".ql-header .ql-picker-item")
+          .forEach((item) => {
+            const value = item.getAttribute("data-value");
+            if (value === "1") item.setAttribute("data-label", "Título 1");
+            else if (value === "2") item.setAttribute("data-label", "Título 2");
+            else if (value === "3") item.setAttribute("data-label", "Título 3");
+            else item.setAttribute("data-label", "Normal");
+          });
+
+        return (
+          (toolbar.querySelector(".ql-bold") as HTMLElement)?.title ===
+          "Negrito"
+        );
+      };
+
+      const intervalId = setInterval(() => {
+        const success = translateQuillToolbar();
+        if (success) {
+          clearInterval(intervalId);
+        }
+      }, 200);
+
+      return () => clearInterval(intervalId);
+    }
+  }, [flowStep]);
 
   if (isLoading || !user) {
     return (
@@ -356,6 +451,7 @@ const CadastroMEIPage: React.FC = () => {
     setPortfolioFileList([]);
     setCcmeiFileList([]);
     setFlowStep("initial");
+    setQuillTextLength(0);
   };
 
   // --- Funções de Submissão (Handlers) ---
@@ -373,6 +469,9 @@ const CadastroMEIPage: React.FC = () => {
       const formData = new FormData();
 
       Object.entries(values).forEach(([key, value]) => {
+        if (key === "descricao" && (value === "<p><br></p>" || value === "")) {
+          return;
+        }
         if (
           value &&
           key !== "ccmeiFile" &&
@@ -436,10 +535,13 @@ const CadastroMEIPage: React.FC = () => {
         setLoading(false);
         return;
       }
-      
+
       const formData = new FormData();
 
       Object.entries(values).forEach(([key, value]) => {
+        if (key === "descricao" && (value === "<p><br></p>" || value === "")) {
+          return;
+        }
         if (
           value &&
           key !== "ccmeiFile" &&
@@ -589,7 +691,12 @@ const CadastroMEIPage: React.FC = () => {
         >
           <Select
             placeholder="Selecione uma ação"
-            onChange={(value) => setFlowStep(value as FlowStep)}
+            onChange={(value) => {
+              setSelectedCategory(null);
+              form.resetFields();
+              setQuillTextLength(0);
+              setFlowStep(value as FlowStep);
+            }}
             size="large"
           >
             <Option value="register">Cadastrar meu MEI na plataforma</Option>
@@ -601,11 +708,37 @@ const CadastroMEIPage: React.FC = () => {
     </>
   );
 
+  // --- INÍCIO DA MODIFICAÇÃO (validateQuill) ---
+  /**
+   * Valida o conteúdo do ReactQuill, verificando o 'required' e o 'maxLength'.
+   * @param required
+   */
+  const validateQuill = (required: boolean) => (_: any, value: string) => {
+    // Usa a nova função auxiliar
+    const textContentLength = getQuillTextLength(value);
+
+    if (required && textContentLength === 0) {
+      return Promise.reject(new Error("Por favor, descreva seu projeto!"));
+    }
+
+    // Usa a nova constante
+    if (textContentLength > MAX_QUILL_LENGTH) {
+      return Promise.reject(
+        new Error(
+          `A descrição não pode ter mais de ${MAX_QUILL_LENGTH} caracteres (atualmente com ${textContentLength}).`
+        )
+      );
+    }
+
+    return Promise.resolve();
+  };
+
   const renderRegisterForm = () => (
     <Form
       form={form}
       layout="vertical"
       onFinish={handleRegisterSubmit}
+      onValuesChange={handleFormValuesChange}
       autoComplete="off"
     >
       <section className="mb-8 border-t pt-4">
@@ -863,22 +996,30 @@ const CadastroMEIPage: React.FC = () => {
         <Form.Item
           name="descricao"
           label="Descrição do seu Serviço/Produto"
-          rules={[
-            {
-              required: true,
-              message: "Por favor, descreva seu produto ou serviço!",
-            },
-          ]}
+          rules={[{ validator: validateQuill(true) }]}
+          // A prop 'help' foi substituída por este JSX:
+          help={
+            <div className="flex justify-end w-full">
+              <span
+                className={
+                  quillTextLength > MAX_QUILL_LENGTH
+                    ? "text-red-500 font-medium"
+                    : "text-gray-500"
+                }
+              >
+                {quillTextLength}/{MAX_QUILL_LENGTH}
+              </span>
+            </div>
+          }
         >
-          <TextArea
-            name="descricao"
-            rows={4}
-            showCount
-            maxLength={500}
-            placeholder="Fale um pouco sobre o que você faz, quais produtos você vende ou tipo de serviço que realiza. Essa é a informação que os seus futuros clientes irão ver."
-            onChange={handleStripEmojiChange}
+          <ReactQuill
+            theme="snow"
+            modules={quillModules}
+            placeholder="Fale um pouco mais detalhadamente sobre o que o seu projeto faz, como ele agrega para a sociedade. (Em até 5000 caracteres)"
+            style={{ minHeight: "10px" }}
           />
         </Form.Item>
+
         <Form.Item
           name="descricaoDiferencial"
           label="Qual o seu diferencial?"
@@ -1220,14 +1361,31 @@ const CadastroMEIPage: React.FC = () => {
           />
         </Form.Item>
 
-        <Form.Item name="descricao" label="Nova Descrição do Serviço/Produto">
-          <TextArea
-            name="descricao"
-            rows={4}
-            showCount
-            maxLength={500}
-            placeholder="Fale um pouco sobre o que você faz, quais produtos você vende ou tipo de serviço que realiza. (Em até 500 caracteres)"
-            onChange={handleStripEmojiChange}
+        <Form.Item
+          name="descricao"
+          label="Nova Descrição do projeto"
+          rules={[{ validator: validateQuill(false) }]}
+          // A prop 'help' foi substituída por este JSX:
+          help={
+            <div className="flex justify-between w-full">
+              <span>Se preenchido, substituirá a descrição atual.</span>
+              <span
+                className={
+                  quillTextLength > MAX_QUILL_LENGTH
+                    ? "text-red-500 font-medium"
+                    : "text-gray-500"
+                }
+              >
+                {quillTextLength}/{MAX_QUILL_LENGTH}
+              </span>
+            </div>
+          }
+        >
+          <ReactQuill
+            theme="snow"
+            modules={quillModules}
+            placeholder="Fale um pouco mais detalhadamente sobre o que o seu projeto faz..."
+            style={{ minHeight: "10px" }}
           />
         </Form.Item>
 
