@@ -371,25 +371,47 @@ export default function MeiDetailPage({
   };
 
   // ... (Sua lógica de 'areasAtuacao' e 'tagsList' está perfeita) ...
-  const linhasVisiveis = 3;
-  const colunas = 4;
-  const limite = linhasVisiveis * colunas;
+
+  // ====================================================================
+  //               ⬇️ INÍCIO DA MODIFICAÇÃO DE LÓGICA ⬇️
+  // ====================================================================
 
   const areasAtuacaoString = meiDetails.areasAtuacao || "";
-
-  const areasAtuacaoList: string[] = areasAtuacaoString
+  const allAreas: string[] = areasAtuacaoString
     ? (areasAtuacaoString as string)
         .split(",")
         .map((area) => area.trim())
         .filter((area) => area.length > 0)
     : [];
 
-  let areasVisiveis = areasAtuacaoList;
+  // 1. Define as palavras-chave de entrega
+  const deliveryKeywords = ["Entrega", "Retirada", "Entrega e Retirada", "Atendimento no Local", "Atendimento Online", "Atendimento Domiciliar"];
 
-  if (!locaisExpandidos && areasAtuacaoList.length > limite) {
-    areasVisiveis = areasAtuacaoList.slice(0, limite - 1);
+  // 2. Cria a lista SÓ com as opções de entrega
+  const deliveryOptionsToShow = allAreas.filter((area) =>
+    deliveryKeywords.includes(area)
+  );
+
+  // 3. Cria a lista SÓ com os bairros (removendo as opções de entrega)
+  const bairrosToShow = allAreas.filter(
+    (area) => !deliveryKeywords.includes(area)
+  );
+
+  // 4. Aplica a lógica de "Ver Mais" APENAS na lista de bairros
+  const linhasVisiveis = 3;
+  const colunas = 4;
+  const limite = linhasVisiveis * colunas;
+
+  let areasVisiveis = bairrosToShow; // Usa a nova lista de bairros
+
+  if (!locaisExpandidos && bairrosToShow.length > limite) {
+    areasVisiveis = bairrosToShow.slice(0, limite - 1); // Usa a nova lista de bairros
     areasVisiveis.push("SHOW_MORE_BUTTON");
   }
+
+  // ====================================================================
+  //               ⬆️ FIM DA MODIFICAÇÃO DE LÓGICA ⬆️
+  // ====================================================================
 
   const tagsInvisiveisString = meiDetails.tagsInvisiveis || "";
 
@@ -603,9 +625,44 @@ export default function MeiDetailPage({
                   </div>
                   <span>{meiDetails.contatoEstabelecimento}</span>
                 </div>
+
+                {/* ==================================
+                       ⬇️ NOVO BLOCO ADICIONADO ⬇️
+                    ================================== */}
+                {deliveryOptionsToShow.length > 0 && (
+                  <div className="pt-4">
+                    <h4 className="text-sm font-semibold text-gray-500 mb-2">
+                      Opções de Atendimento:
+                    </h4>
+                    <div className="flex flex-wrap gap-2">
+                      {deliveryOptionsToShow.map((option, index) => (
+                        <span
+                          key={index}
+                          className="px-3 py-1 rounded-full bg-green-100 text-green-800 text-sm font-medium border border-green-200 shadow-sm"
+                        >
+                          {option}
+                        </span>
+                      ))}
+                    </div>
+                  </div>
+                )}
+                {/* ==================================
+                       ⬆️ FIM DO NOVO BLOCO ⬆️
+                    ================================== */}
               </div>
               <div className="w-full h-fit bg-gray-50 rounded-3xl border border-gray-200 overflow-hidden milecem:col-span-3">
                 <div className="p-5 md:p-8 text-gray-700">
+                  {/* ==================================
+                         ⬇️ TÍTULO ADICIONADO ⬇️
+                      ================================== */}
+                  {bairrosToShow.length > 0 && (
+                    <h4 className="text-lg font-semibold text-gray-800 mb-4">
+                      Bairros Atendidos:
+                    </h4>
+                  )}
+                  {/* ==================================
+                         ⬆️ FIM DA ADIÇÃO ⬆️
+                      ================================== */}
                   <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
                     {areasVisiveis.map((area, index) =>
                       area === "SHOW_MORE_BUTTON" ? (
@@ -752,7 +809,7 @@ export default function MeiDetailPage({
       </motion.main>
 
       {/* 14. ADICIONE O MODAL DE RESPOSTA (controlado pela página)
-        Este modal será invisível até que 'handleReplyClick' ou 'handleNewReviewClick' sejam chamados
+          Este modal será invisível até que 'handleReplyClick' ou 'handleNewReviewClick' sejam chamados
       */}
       {meiDetails && (
         <AvaliacaoModal

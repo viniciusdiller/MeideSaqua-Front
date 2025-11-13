@@ -1,4 +1,3 @@
-// app/admin/dashboard/page.tsx
 "use client";
 
 import React, { useState, useEffect, useCallback } from "react";
@@ -72,38 +71,42 @@ interface PendingData {
 
 // fieldConfig ORIGINAL do MeideSaquá
 const fieldConfig: { [key: string]: { label: string; order: number } } = {
-  estabelecimentoId: { label: "ID", order: 10 },
+
+// dados do responsável
+  nomeResponsavel: { label: "Nome do Responsável", order: 1 },
+  cpfResponsavel: { label: "CPF do Responsável", order: 2 },
+  emailEstabelecimento: { label: "Email", order: 3 },
+  
+// dados do MEI
+  estabelecimentoId: { label: "ID", order: 1 },
   nomeFantasia: { label: "Nome Fantasia", order: 2 },
   cnpj: { label: "CNPJ", order: 3 },
   categoria: { label: "Categoria", order: 4 },
-  status: { label: "Status Atual", order: 5 },
+  tagsInvisiveis: { label: "Tags", order: 5 },
   cnae: { label: "CNAE", order: 6 },
-  nomeResponsavel: { label: "Nome do Responsável", order: 1 },
-  nome_responsavel: { label: "Nome do Responsável", order: 10 },
-  cpfResponsavel: { label: "CPF do Responsável", order: 11 },
-  cpf_responsavel: { label: "CPF do Responsável", order: 11 },
-  emailEstabelecimento: { label: "Email", order: 20 },
-  contatoEstabelecimento: { label: "Contato", order: 21 },
-  endereco: { label: "Endereço", order: 22 },
-  areasAtuacao: { label: "Áreas de Atuação", order: 23 },
-  descricao: { label: "Descrição", order: 30 },
-  descricaoDiferencial: { label: "Diferencial", order: 31 },
-  outrasAlteracoes: { label: "Outras Alterações", order: 32 }, // <-- Feature nova
-  website: { label: "Website", order: 40 },
-  instagram: { label: "Instagram", order: 41 },
-  logoUrl: { label: "Logo Atual", order: 42 },
-  logo: { label: "Nova Logo", order: 42 },
-  ccmeiUrl: { label: "CCMEI Atual", order: 43 },
-  ccmei: { label: "Novo CCMEI", order: 43 },
-  produtosImg: { label: "Portfólio Atual", order: 44 },
-  produtos: { label: "Novo Portfólio", order: 44 },
-  tagsInvisiveis: { label: "Tags", order: 50 },
+  venda: { label: "Canais de Venda", order: 7 },
+  escala: { label: "Escala de Impacto", order: 8 },
+  contatoEstabelecimento: { label: "Contato", order: 9 },
+  endereco: { label: "Endereço", order: 10 },
+  areasAtuacao: { label: "Áreas de Atuação", order: 11 },
+  descricao: { label: "Descrição", order: 12 },
+  descricaoDiferencial: { label: "Diferencial", order: 13 },
+  website: { label: "Website", order: 14 },
+  instagram: { label: "Instagram", order: 15 },
+  ccmeiUrl: { label: "CCMEI Atual", order: 16 },
+  logoUrl: { label: "Logo Atual", order: 17 },
+  produtosImg: { label: "Portfólio Atual", order: 18 },
+
+  //atualização
+  status: { label: "Status Atual", order: 5 },
+  outrasAlteracoes: { label: "Outras Alterações", order: 6 }, // <-- Feature nova
+  logo: { label: "Nova Logo", order: 17 },
+  ccmei: { label: "Novo CCMEI", order: 16 },
+  produtos: { label: "Novo Portfólio", order: 18 },
   motivo: { label: "Motivo da Exclusão", order: 1000 },
-  motivoExclusao: { label: "Motivo da Exclusão", order: 6 },
+  motivoExclusao: { label: "Motivo da Exclusão", order: 15 },
   createdAt: { label: "Data de Criação", order: 100 },
   updatedAt: { label: "Última Atualização", order: 101 },
-  venda: { label: "Canais de Venda", order: 60 },
-  escala: { label: "Escala de Impacto", order: 61 },
 };
 
 const AdminDashboard: React.FC = () => {
@@ -575,6 +578,99 @@ const AdminDashboard: React.FC = () => {
     );
   };
 
+  // ====================================================================
+  //               ⬇️ INÍCIO DA MODIFICAÇÃO DO MODAL ⬇️
+  // ====================================================================
+
+  /**
+   * Função auxiliar para renderizar um grupo de descrições dentro de um Card.
+   * Agrupa os campos com base nas chaves fornecidas.
+   */
+  const renderDescriptionGroup = (
+    title: string,
+    entries: [string, any][]
+  ) => {
+    // Não renderiza o card se não houver campos para exibir
+    const visibleEntries = entries.filter(([key]) => fieldConfig[key]);
+    if (visibleEntries.length === 0) return null;
+
+    return (
+      <Card type="inner" title={title} className="mb-4">
+        <Descriptions bordered column={1} size="small">
+          {visibleEntries.map(
+            ([key, value]) =>
+              fieldConfig[key] && (
+                <Descriptions.Item
+                  key={key}
+                  label={fieldConfig[key]?.label ?? key}
+                >
+                  {renderValue(key, value)}
+                </Descriptions.Item>
+              )
+          )}
+        </Descriptions>
+      </Card>
+    );
+  };
+
+  /**
+   * Função para preparar os dados agrupados para o modal.
+   * Esta função será chamada dentro do componente Modal.
+   */
+  const getGroupedEntries = (item: Estabelecimento) => {
+    // 1. Define as chaves para cada seção, conforme a imagem
+    const keysResponsavel = ["nomeResponsavel", "cpfResponsavel", "emailEstabelecimento",];
+    const keysMei = [
+      "estabelecimentoId",
+      "nomeFantasia",
+      "cnpj",
+      "cnae",
+      "categoria",
+      "contatoEstabelecimento",
+      "endereco",
+      "website",
+      "instagram",
+      "tagsInvisiveis",
+      "descricao",
+      "descricaoDiferencial",
+      "areasAtuacao",
+      "logoUrl",
+      "produtosImg",
+      "ccmeiUrl",
+      "venda",
+      "escala",
+    ];
+
+    // 2. Obtém todas as entradas válidas e ordenadas (lógica original)
+    const allEntries = Object.entries(item)
+      .filter(
+        ([key]) =>
+          key !== "dados_atualizacao" &&
+          key !== "status"
+      )
+      .sort(
+        ([keyA], [keyB]) =>
+          (fieldConfig[keyA]?.order ?? 999) -
+          (fieldConfig[keyB]?.order ?? 999)
+      );
+
+    // 3. Filtra as entradas para cada grupo
+    const entriesResponsavel = allEntries.filter(([key]) =>
+      keysResponsavel.includes(key)
+    );
+    const entriesMei = allEntries.filter(([key]) => keysMei.includes(key));
+    const entriesMetadados = allEntries.filter(
+      ([key]) =>
+        !keysResponsavel.includes(key) && !keysMei.includes(key)
+    );
+
+    return { entriesResponsavel, entriesMei, entriesMetadados };
+  };
+
+  // ====================================================================
+  //               ⬆️ FIM DA MODIFICAÇÃO DO MODAL ⬆️
+  // ====================================================================
+
   return (
     <div className="p-8">
       <Spin spinning={loading}>
@@ -671,59 +767,57 @@ const AdminDashboard: React.FC = () => {
             ),
           ]}
         >
-          <Title level={4}>Dados do Estabelecimento</Title>{" "}
-          {/* <-- Texto Corrigido */}
-          <Descriptions bordered column={1} size="small">
-            {/* Lógica de renderização do MeideSaquá (com logo e portfolio primeiro) */}
-            {selectedItem.logoUrl && (
-              <Descriptions.Item label={fieldConfig.logoUrl.label}>
-                {renderValue("logoUrl", selectedItem.logoUrl)}
-              </Descriptions.Item>
-            )}
+          {/* ====================================================================
+                            ⬇️ ÁREA DO MODAL MODIFICADA ⬇️
+            ====================================================================
+          */}
 
-            {selectedItem.produtosImg &&
-              selectedItem.produtosImg.length > 0 && (
-                <Descriptions.Item label={fieldConfig.produtosImg.label}>
-                  {renderValue("produtosImg", selectedItem.produtosImg)}
-                </Descriptions.Item>
-              )}
+          {/* Prepara os dados agrupados */}
+          {(() => {
+            const { entriesResponsavel, entriesMei, entriesMetadados } =
+              getGroupedEntries(selectedItem);
 
-            {Object.entries(selectedItem)
-              .filter(
-                ([key]) =>
-                  key !== "dados_atualizacao" &&
-                  key !== "logoUrl" &&
-                  key !== "produtosImg" && // <-- Campo Corrigido
-                  key !== "status"
-              )
-              .sort(
-                ([keyA], [keyB]) =>
-                  (fieldConfig[keyA]?.order ?? 999) -
-                  (fieldConfig[keyB]?.order ?? 999)
-              )
-              .map(
-                ([key, value]) =>
-                  fieldConfig[key] && (
-                    <Descriptions.Item
-                      key={key}
-                      label={fieldConfig[key]?.label ?? key}
-                    >
-                      {renderValue(key, value)}
-                    </Descriptions.Item>
-                  )
-              )}
-          </Descriptions>
+            return (
+              <>
+                <Title level={4} className="mb-4">
+                  Dados do Estabelecimento
+                </Title>
+
+                {/* Grupo 1: Identificação do Responsável */}
+                {renderDescriptionGroup(
+                  "1. Identificação do Responsável",
+                  entriesResponsavel
+                )}
+
+                {/* Grupo 2: Identificação do Mei */}
+                {renderDescriptionGroup(
+                  "2. Identificação do Mei",
+                  entriesMei
+                )}
+
+                {/* Grupo 3: Metadados */}
+                {renderDescriptionGroup("3. Metadados", entriesMetadados)}
+              </>
+            );
+          })()}
+
+          {/* ====================================================================
+                            ⬆️ ÁREA DO MODAL MODIFICADA ⬆️
+            ====================================================================
+          */}
+
+          {/* As tabelas de Diffs (atualização/exclusão) permanecem abaixo dos dados */}
           {renderDiffTable(
             "pendente_exclusao",
             "error",
             "Solicitação de Exclusão",
-            ["estabelecimentoId", "confirmacao"] // <-- Campo Corrigido
+            ["estabelecimentoId", "confirmacao"] 
           )}
           {renderDiffTable(
             "pendente_atualizacao",
             "info",
             "Dados para Atualizar",
-            ["motivoExclusao"]
+            ["motivoExclusao", "venda", "escala"]
           )}
         </Modal>
       )}
