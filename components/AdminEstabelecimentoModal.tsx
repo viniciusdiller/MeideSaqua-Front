@@ -16,6 +16,7 @@ import {
   Image as AntdImage,
   Tag,
   Popconfirm,
+  Rate,
 } from "antd";
 import { CloseOutlined, QuestionCircleOutlined } from "@ant-design/icons";
 import {
@@ -30,6 +31,7 @@ import {
   categorias,
   areasAtuacao,
   tagsPorCategoria,
+  canaisDeVendaOpcoes
 } from "@/app/cadastro-mei/page";
 import dynamic from "next/dynamic";
 import "react-quill/dist/quill.snow.css";
@@ -170,6 +172,11 @@ const AdminEstabelecimentoModal: React.FC<AdminEstabelecimentoModalProps> = ({
       }
       if (typeof dataToEdit.tagsInvisiveis === "string") {
         dataToEdit.tagsInvisiveis = dataToEdit.tagsInvisiveis
+          .split(",")
+          .map((s: string) => s.trim());
+      }
+      if (typeof dataToEdit.venda === "string") {
+        dataToEdit.venda = dataToEdit.venda
           .split(",")
           .map((s: string) => s.trim());
       }
@@ -435,6 +442,30 @@ const AdminEstabelecimentoModal: React.FC<AdminEstabelecimentoModalProps> = ({
               ))}
             </Select>
           </Form.Item>
+
+          <Form.Item name="venda" label="Canais de Venda">
+          <Select 
+            mode="multiple" 
+            placeholder="Selecione os canais de venda"
+            allowClear
+          >
+            {/* Usamos a constante importada */}
+            {canaisDeVendaOpcoes.map((opt) => (
+              <Option key={opt.value} value={opt.value}>
+                {opt.label}
+              </Option>
+            ))}
+          </Select>
+        </Form.Item>
+
+        <Form.Item 
+          name="escala" 
+          label="Nota de Impacto (0-10)"
+          help="Nota que o usuário deu sobre o impacto da plataforma."
+        >
+          {/* Usamos o Rate (estrelas) da antd com 10 estrelas */}
+          <Rate count={10} />
+        </Form.Item>
 
           <Title level={5} className="mt-4">
             Gerenciamento de Imagens

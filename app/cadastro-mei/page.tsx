@@ -26,6 +26,7 @@ import {
   atualizarEstabelecimento,
   excluirEstabelecimento,
 } from "@/lib/api";
+import { Slider } from "@/components/ui/slider";
 import { categories as categoryObjects } from "../page";
 import dynamic from "next/dynamic";
 const ReactQuill = dynamic(() => import("react-quill"), { ssr: false });
@@ -276,7 +277,16 @@ export const tagsPorCategoria: { [key: string]: string[] } = {
     "Ovos Caipiras",
   ],
 };
-// --- FIM DOS DADOS ---
+export const canaisDeVendaOpcoes = [
+  { label: "Redes Sociais (Instagram, Facebook, WhatsApp)", value: "Redes Sociais" },
+  { label: "Marketplaces (Mercado Livre, Shopee, Amazon, etc.)", value: "Marketplaces" },
+  { label: "Plataformas de serviços (GetNinjas, Workana, etc.)", value: "Plataformas de serviços" },
+  { label: "Feiras e eventos (artesanato, gastronômicas, etc.)", value: "Feiras e eventos" },
+  { label: "Loja própria / ponto fixo", value: "Loja própria / ponto fixo" },
+  { label: "Atendimento em domicílio", value: "Atendimento em domicílio" },
+  { label: "Boca a boca (recomendação)", value: "Boca a boca" },
+  { label: "Outra forma", value: "Outra forma" },
+];
 
 const { Option } = Select;
 const { TextArea } = Input;
@@ -309,7 +319,16 @@ const CadastroMEIPage: React.FC = () => {
   const router = useRouter();
   const toastShownRef = useRef(false);
   const [quillTextLength, setQuillTextLength] = useState(0);
-  const MAX_QUILL_LENGTH = 5000;
+  const MAX_QUILL_LENGTH = 500;
+
+  const [sliderValue, setSliderValue] = useState(5); 
+  const escalaValue = Form.useWatch('escala', form); 
+
+  useEffect(() => {
+    if (escalaValue !== undefined) {
+      setSliderValue(escalaValue);
+    }
+  }, [escalaValue]);
 
   const getQuillTextLength = (value: string) => {
     if (typeof window === "undefined" || !value || value === "<p><br></p>")
@@ -479,7 +498,7 @@ const CadastroMEIPage: React.FC = () => {
           key !== "produtos"
         ) {
           if (
-            (key === "areasAtuacao" || key === "tagsInvisiveis") &&
+            (key === "areasAtuacao" || key === "tagsInvisiveis"|| key === "venda") &&
             Array.isArray(value)
           ) {
             formData.append(key, value.join(", "));
@@ -942,6 +961,41 @@ const CadastroMEIPage: React.FC = () => {
             onChange={(e) => handleMaskChange(e, maskCNAE)}
           />
         </Form.Item>
+              <Form.Item
+        name="venda"
+        label="Como você vende ou divulga seus produtos ou serviços?"
+        className="mb-10"
+        rules={[{ required: true, message: "Selecione pelo menos um canal." }]}
+
+        help="Selecione todas as opções que se aplicam."
+      >
+        <Checkbox.Group options={canaisDeVendaOpcoes} className="flex flex-col space-y-1 ml-4" />
+      </Form.Item>
+
+      {/* Pergunta 2: Escala (Slider) - A "Boa Ideia" */}
+<Form.Item
+  rules={[{ required: true, message: "Por favor, avalie o impacto!" }]}
+  name="escala"
+  label="Diga o quanto você acredita que ter seu perfil no MEIdeSaquá irá impulsionar seu negócio."
+  className="mt-10"
+  help="Em uma escala de 0 a 10, onde 0 = nenhum impacto e 10 = impacto muito positivo"
+>
+  <>
+    <Slider
+      value={[sliderValue]}
+      max={10}
+      step={1}
+      onValueChange={(value) => {
+        setSliderValue(value[0]);
+        form.setFieldsValue({ escala: value[0] }); 
+      }}
+    />
+    {/* Mostrador numérico */}
+    <div className="text-center font-bold text-lg text-primary mt-2">
+      {sliderValue}
+    </div>
+  </>
+</Form.Item>
       </section>
 
       <section className="mb-8 border-t pt-4">
@@ -973,6 +1027,7 @@ const CadastroMEIPage: React.FC = () => {
         <Form.Item
           name="areasAtuacao"
           label="Áreas de Atuação"
+          className="mt-10"
           rules={[
             { required: true, message: "Selecione pelo menos uma área!" },
           ]}
@@ -996,8 +1051,7 @@ const CadastroMEIPage: React.FC = () => {
         <Form.Item
           name="descricao"
           label="Descrição do seu Serviço/Produto"
-          rules={[{ validator: validateQuill(true) }]}
-          // A prop 'help' foi substituída por este JSX:
+          rules={[{ validator: validateQuill(true), required: true, message: "Por favor, descreva seu projeto!" }]}
           help={
             <div className="flex justify-end w-full">
               <span
@@ -1015,7 +1069,7 @@ const CadastroMEIPage: React.FC = () => {
           <ReactQuill
             theme="snow"
             modules={quillModules}
-            placeholder="Fale um pouco mais detalhadamente sobre o que o seu projeto faz, como ele agrega para a sociedade. (Em até 5000 caracteres)"
+            placeholder="Conte um pouco sobre o seu negócio! Descreva os principais produtos que você oferece ou os serviços que realiza."
             style={{ minHeight: "10px" }}
           />
         </Form.Item>
@@ -1035,7 +1089,7 @@ const CadastroMEIPage: React.FC = () => {
             rows={2}
             showCount
             maxLength={130}
-            placeholder="Descreva brevemente qual é o atrativo do seu produto ou serviço. (Em até 150 caracteres)"
+            placeholder="Descreva brevemente qual é o atrativo do seu produto ou serviço. (Em até 130 caracteres)"
             onChange={handleStripEmojiChange}
           />
         </Form.Item>

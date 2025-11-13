@@ -72,13 +72,13 @@ interface PendingData {
 
 // fieldConfig ORIGINAL do MeideSaquá
 const fieldConfig: { [key: string]: { label: string; order: number } } = {
-  estabelecimentoId: { label: "ID", order: 1 },
+  estabelecimentoId: { label: "ID", order: 10 },
   nomeFantasia: { label: "Nome Fantasia", order: 2 },
   cnpj: { label: "CNPJ", order: 3 },
   categoria: { label: "Categoria", order: 4 },
   status: { label: "Status Atual", order: 5 },
   cnae: { label: "CNAE", order: 6 },
-  nomeResponsavel: { label: "Nome do Responsável", order: 10 },
+  nomeResponsavel: { label: "Nome do Responsável", order: 1 },
   nome_responsavel: { label: "Nome do Responsável", order: 10 },
   cpfResponsavel: { label: "CPF do Responsável", order: 11 },
   cpf_responsavel: { label: "CPF do Responsável", order: 11 },
@@ -102,6 +102,8 @@ const fieldConfig: { [key: string]: { label: string; order: number } } = {
   motivoExclusao: { label: "Motivo da Exclusão", order: 6 },
   createdAt: { label: "Data de Criação", order: 100 },
   updatedAt: { label: "Última Atualização", order: 101 },
+  venda: { label: "Canais de Venda", order: 60 },
+  escala: { label: "Escala de Impacto", order: 61 },
 };
 
 const AdminDashboard: React.FC = () => {

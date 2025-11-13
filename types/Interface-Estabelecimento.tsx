@@ -17,5 +17,7 @@ export interface Estabelecimento {
   cnae: string;
   dados_atualizacao?: any;
   status: string;
+  venda?: string;
+  escala?: number;
   [key: string]: any;
 }
