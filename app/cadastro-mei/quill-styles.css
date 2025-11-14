@@ -23,6 +23,28 @@
   font-size: 14px; /* Combina com o input do antd */
 }
 
+.ql-editor {
+  min-height: 60px; /* Um valor menor para telas pequenas */
+}
+
+/* Quando a tela tiver 768px de LARGURA ou mais... */
+@media (min-width: 768px) {
+  .ql-editor {
+    min-height: 10px; /* ...aplica uma altura mínima maior */
+  }
+}
+/* Cor do placeholder */
+.ql-editor.ql-blank::before {
+  color: #bfbfbf !important;
+  font-style: normal !important;
+  opacity: 1 !important;
+  position: relative !important;
+  white-space: normal !important;
+  pointer-events: none !important;
+  top: 0 !important;
+  left: 0 !important;
+}
+
 /* Cor do placeholder */
 .ql-editor.ql-blank::before {
   color: #bfbfbf !important;
