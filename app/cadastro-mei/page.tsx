@@ -31,6 +31,7 @@ import { categories as categoryObjects } from "../page";
 import dynamic from "next/dynamic";
 const ReactQuill = dynamic(() => import("react-quill"), { ssr: false });
 import "./quill-styles.css";
+import { set } from "date-fns";
 
 // --- FUNÇÕES DE MÁSCARA ---
 const maskCNAE = (value: string) => {
@@ -68,6 +69,32 @@ const maskPhone = (value: string) => {
     .replace(/(-\d{4})\d+?$/, "$1");
 };
 
+ const onFinishFailed = (errorInfo: any) => {
+    if (!errorInfo.errorFields || errorInfo.errorFields.length === 0) {
+      return;
+    }
+
+    const labelsComErro = errorInfo.errorFields
+      .map((field: any) => {
+        const fieldName = field.name[0];
+        return campoLabels[fieldName] || fieldName;
+      })
+      .filter(
+        (value: string, index: number, self: string[]) =>
+          self.indexOf(value) === index
+      );
+
+    if (labelsComErro.length > 0) {
+      const plural = labelsComErro.length > 1;
+      const mensagem = `Por favor, preencha ${
+        plural ? "os campos obrigatórios" : "o campo obrigatório"
+      }: ${labelsComErro.join(", ")}.`;
+
+      toast.error(mensagem);
+    } else {
+      toast.error("Por favor, verifique os campos obrigatórios.");
+    }
+  };
 // Função para remover emojis (do projeto ODS)
 const stripEmojis = (value: string) => {
   if (!value) return "";
@@ -290,6 +317,37 @@ export const canaisDeVendaOpcoes = [
   { label: "Boca a boca (recomendação)", value: "Boca a boca" },
   { label: "Outra forma", value: "Outra forma" },
 ];
+const campoLabels: { [key: string]: string } = {
+  nome_responsavel: "Nome Completo do Responsável",
+  cpf_responsavel: "CPF do Responsável",
+  emailEstabelecimento: "E-mail de Contato Principal",
+
+  // Seção "Informações do Negócio"
+  nomeFantasia: "Nome Fantasia",
+  cnpj: "CNPJ",
+  categoria: "Categoria Principal",
+  ccmei: "Certificado CCMEI",
+  tagsInvisiveis: "Tags de Busca Sugeridas",
+  cnae: "CNAE (Atividade Principal)",
+  venda: "Canais de Venda",
+  escala: "Avaliação de Impacto (Escala)",
+
+  // Seção "Contato e Localização"
+  contatoEstabelecimento: "Telefone / WhatsApp do Estabelecimento",
+  endereco: "Endereço Físico (se houver)",
+  areasAtuacao: "Áreas de Atuação",
+
+  // Seção "Detalhes e Mídia"
+  descricao: "Descrição do seu Serviço/Produto",
+  descricaoDiferencial: "Qual o seu diferencial?",
+  website: "Website (Opcional)",
+  instagram: "Instagram (Opcional)",
+  logo: "Sua Logo",
+  produtos: "Imagens do seu Produto ou Serviço",
+  
+  // Seção Final
+  confirmacao: "Confirmação de Veracidade e LGPD"
+};
 
 const { Option } = Select;
 const { TextArea } = Input;
@@ -474,6 +532,7 @@ const CadastroMEIPage: React.FC = () => {
     setCcmeiFileList([]);
     setFlowStep("initial");
     setQuillTextLength(0);
+    setSliderValue(0);
   };
 
   // --- Funções de Submissão (Handlers) ---
@@ -762,6 +821,7 @@ const CadastroMEIPage: React.FC = () => {
       onFinish={handleRegisterSubmit}
       onValuesChange={handleFormValuesChange}
       autoComplete="off"
+      onFinishFailed={onFinishFailed}
     >
       <section className="mb-8 border-t pt-4">
         {commonTitle("Informações do Responsável")}
@@ -1054,7 +1114,13 @@ const CadastroMEIPage: React.FC = () => {
         <Form.Item
           name="descricao"
           label="Descrição do seu Serviço/Produto"
-          rules={[{ validator: validateQuill(true), required: true, message: "Por favor, descreva seu projeto!" }]}
+          rules={[
+            {
+              validator: validateQuill(true),
+              required: true,
+              message: "Por favor, descreva seu projeto!",
+            },
+          ]}
           help={
             <div className="flex justify-end w-full">
               <span
@@ -1193,6 +1259,7 @@ const CadastroMEIPage: React.FC = () => {
       layout="vertical"
       onFinish={handleUpdateSubmit}
       autoComplete="off"
+      onFinishFailed={onFinishFailed}
     >
       <section className="mb-8 border-t pt-4">
         {commonTitle("Identificação do Negócio")}
@@ -1545,6 +1612,7 @@ const CadastroMEIPage: React.FC = () => {
       layout="vertical"
       onFinish={handleDeleteSubmit}
       autoComplete="off"
+      onFinishFailed={onFinishFailed}
     >
       <section className="mb-8 border-t pt-4">
         {commonTitle("Exclusão de Cadastro MEI")}

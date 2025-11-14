@@ -8,6 +8,7 @@ import { Toaster } from "@/components/ui/sonner";
 import {ConditionalFooter} from "@/components/ConditionalFooter";
 import { ConditionalAccessibility } from "@/components/ConditionalAccessibility";
 import AccessibilityStyles from "@/components/AccessibilityStyles";
+import ConditionalFaleConosco from "@/components/ConditionalFaleConosco";
 
 const poppins = Poppins({
   subsets: ["latin"],
@@ -57,6 +58,7 @@ export default function RootLayout({
           <ConditionalFooter />
           <Toaster richColors />
           <ConditionalAccessibility />
+          <ConditionalFaleConosco />
         </AuthProvider>
       </body>
     </html>
