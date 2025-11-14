@@ -116,8 +116,8 @@ export default function LoginPage() {
             <CardHeader className="text-center">
               <CardTitle className="text-2xl">Efetue o Login</CardTitle>
               <CardDescription>
-                Entre com suas credenciais para ter a possibilidade de avaliar
-                os estabelecimentos.
+                Entre com sua credencial para avaliar o perfil de um MEI ou cadastrar
+                seu negócio na plataforma.
               </CardDescription>
             </CardHeader>
             <form onSubmit={handleLogin}>

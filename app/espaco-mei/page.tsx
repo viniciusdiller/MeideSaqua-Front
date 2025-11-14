@@ -267,7 +267,7 @@ export default function SobrePage() {
                     rel="noopener noreferrer"
                     className="text-gray-700 hover:underline hover:text-blue-600"
                   >
-                    22 92005-2534
+                    (22) 92005-2534
                   </a>
                 </li>
                 <li>
@@ -306,8 +306,7 @@ export default function SobrePage() {
                     rel="noopener noreferrer"
                     className="text-gray-700 hover:underline hover:text-blue-600"
                   >
-                    Av. Saquarema, 5483 - Porto da Roça, Saquarema - RJ,
-                    28994-711 (2° andar)
+                    Avenida Saquarema, 5.481, Bacaxá - Saquarema - RJ, 28994-711 (Central do Cidadão)
                   </a>
                 </li>
               </ul>

@@ -152,7 +152,8 @@ export default function Cadastro() {
             <CardHeader className="text-center">
               <CardTitle className="text-2xl">Crie seu Cadastro</CardTitle>
               <CardDescription>
-                Insira suas credenciais para poder avaliar os estabelecimentos.
+                Crie sua credenciai para avaliar o perfil de um MEI ou cadastrar
+                seu negócio na plataforma.
               </CardDescription>
             </CardHeader>
             <form onSubmit={handleRegister}>

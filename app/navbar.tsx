@@ -27,7 +27,7 @@ const AnimatedLogo = () => {
       className: "h-12 w-auto",
     },
     {
-      src: "/Logo-lab-ISA.png",
+      src: "/Logo-Lab-ISA.png",
       alt: "Logo Laboratório de Inovação e Sustentabilidade Aplicada - LabISA",
       className: "h-12 w-auto",
     },

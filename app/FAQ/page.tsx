@@ -119,7 +119,7 @@ export default function FAQPage() {
         <section className="mb-8 border-t-2 pt-8">
           <h2 className="text-3xl font-bold text-left mb-10">
             <span className="bg-gradient-to-r from-[#017DB9] to-[#22c362] bg-clip-text text-transparent">
-              Cadastro e Gestão do MEI
+              Sobre o Cadastro de MEI's
             </span>
           </h2>
 
@@ -132,7 +132,7 @@ export default function FAQPage() {
                 A plataforma é destinada exclusivamente para{" "}
                 <strong>
                   Microempreendedores Individuais (MEI’s) que estejam com o
-                  cadastro cadastrado e regularizado no município de Saquarema
+                  cadastro regularizado e registrado no município de Saquarema
                 </strong>
                 .
               </AccordionContent>
