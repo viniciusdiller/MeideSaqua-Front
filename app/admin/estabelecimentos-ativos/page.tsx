@@ -1,4 +1,3 @@
-// app/admin/estabelecimentos-ativos/page.tsx
 "use client";
 
 import React, { useState, useEffect, useCallback } from "react";
@@ -184,13 +183,123 @@ const EstabelecimentosAtivosPage: React.FC = () => {
           <Empty description="Nenhum estabelecimento ativo encontrado." />
         ) : (
           <Tabs
-            defaultActiveKey={sortedCategories[0]} // Inicia na primeira categoria
+            defaultActiveKey="todos" // Inicia na aba "Todos"
             tabPosition={tabPosition}
             onChange={handleTabChange}
           >
+            {/* ==================================
+                  ⬇️ ABA "TODOS" ⬇️
+                ================================== */}
+            <TabPane
+              tab={`Todos (${filteredEstabelecimentos.length})`}
+              key="todos"
+            >
+              {(() => {
+                // Lógica de paginação para a aba "Todos"
+                const totalCount = filteredEstabelecimentos.length;
+                const estabelecimentosToShow = filteredEstabelecimentos.slice(
+                  (currentPage - 1) * PAGE_SIZE,
+                  currentPage * PAGE_SIZE
+                );
+
+                return (
+                  <>
+                    <Row gutter={[16, 16]}>
+                      {estabelecimentosToShow.map((est) => (
+                        <Col xs={24} md={12} lg={8} key={est.estabelecimentoId}>
+                          <Card
+                            hoverable
+                            actions={[
+                              <Button
+                                type="text"
+                                icon={<EditOutlined />}
+                                onClick={() => openEditModal(est)}
+                                className="hover:!bg-blue-500 hover:!text-white"
+                              >
+                                Editar
+                              </Button>,
+                              <Popconfirm
+                                key="delete"
+                                title="Excluir Estabelecimento"
+                                description="Tem certeza que deseja excluir este MEI? Esta ação não pode ser desfeita."
+                                onConfirm={() =>
+                                  handleDelete(est.estabelecimentoId)
+                                }
+                                okText="Sim, Excluir"
+                                cancelText="Não"
+                                okButtonProps={{ danger: true }}
+                              >
+                                <Button
+                                  type="text"
+                                  danger
+                                  icon={<DeleteOutlined />}
+                                  className="hover:!bg-red-500 hover:!text-white"
+                                >
+                                  Excluir
+                                </Button>
+                              </Popconfirm>,
+                            ]}
+                          >
+                            <Card.Meta
+                              avatar={
+                                <Avatar
+                                  src={getFullImageUrl(est.logoUrl || "")}
+                                />
+                              }
+                              title={est.nomeFantasia}
+                              // ==================================
+                              //   ⬇️ 1. ALTERAÇÃO AQUI (ABA TODOS) ⬇️
+                              // ==================================
+                              description={
+                                <>
+                                  <Text>
+                                    <strong>ID:</strong> {est.estabelecimentoId}
+                                  </Text>
+                                  <br />
+                                  <Text>
+                                    <strong>CNPJ:</strong> {est.cnpj}
+                                  </Text>
+                                  <br />
+                                  <Text>
+                                    <strong>Responsável:</strong>{" "}
+                                    {est.nomeResponsavel}
+                                  </Text>
+                                  <br />
+                                  <Text>
+                                    <strong>Categoria:</strong> {est.categoria}
+                                  </Text>
+                                </>
+                              }
+                            />
+                          </Card>
+                        </Col>
+                      ))}
+                    </Row>
+
+                    {/* Renderiza o componente de paginação da aba "Todos" */}
+                    {totalCount > PAGE_SIZE && (
+                      <div className="mt-6 text-center">
+                        <Pagination
+                          current={currentPage}
+                          pageSize={PAGE_SIZE}
+                          total={totalCount}
+                          onChange={(page) => setCurrentPage(page)}
+                          showSizeChanger={false}
+                        />
+                      </div>
+                    )}
+                  </>
+                );
+              })()}
+            </TabPane>
+
+            {/* ==================================
+                  ⬇️ ABAS DE CATEGORIA ⬇️
+                ================================== */}
             {sortedCategories.map((categoria) => {
               // Lógica de paginação por aba
-              const allEstabelecimentosForCat = groupedEstabelecimentos[categoria];
+              const allEstabelecimentosForCat =
+                groupedEstabelecimentos[categoria];
               const totalCount = allEstabelecimentosForCat.length;
               const estabelecimentosToShow = allEstabelecimentosForCat.slice(
                 (currentPage - 1) * PAGE_SIZE,
@@ -245,6 +354,9 @@ const EstabelecimentosAtivosPage: React.FC = () => {
                               />
                             }
                             title={est.nomeFantasia}
+                            // ==================================
+                            //   ⬇️ 2. ALTERAÇÃO AQUI (ABAS DE CATEGORIA) ⬇️
+                            // ==================================
                             description={
                               <>
                                 <Text>
@@ -258,6 +370,10 @@ const EstabelecimentosAtivosPage: React.FC = () => {
                                 <Text>
                                   <strong>Responsável:</strong>{" "}
                                   {est.nomeResponsavel}
+                                </Text>
+                                <br />
+                                <Text>
+                                  <strong>Categoria:</strong> {est.categoria}
                                 </Text>
                               </>
                             }

@@ -139,10 +139,97 @@ const AdminGerenciarComentariosPage: React.FC = () => {
           <Empty description="Nenhum estabelecimento ativo encontrado." />
         ) : (
           <Tabs
-            defaultActiveKey={sortedCategories[0]}
+            // ==================================
+            //   ⬇️ 1. ALTERAÇÃO AQUI ⬇️
+            // ==================================
+            defaultActiveKey="todos" // Inicia na aba "Todos"
             tabPosition={tabPosition}
             onChange={handleTabChange}
           >
+            {/* ==================================
+                  ⬇️ 2. NOVA ABA "TODOS" ⬇️
+                ================================== */}
+            <TabPane
+              tab={`Todos (${filteredEstabelecimentos.length})`}
+              key="todos"
+            >
+              {(() => {
+                // Lógica de paginação para a aba "Todos"
+                const totalCount = filteredEstabelecimentos.length;
+                const estabelecimentosToShow = filteredEstabelecimentos.slice(
+                  (currentPage - 1) * PAGE_SIZE,
+                  currentPage * PAGE_SIZE
+                );
+
+                return (
+                  <>
+                    <Row gutter={[16, 16]}>
+                      {estabelecimentosToShow.map((est) => (
+                        <Col xs={24} md={12} lg={8} key={est.estabelecimentoId}>
+                          <Card
+                            hoverable
+                            actions={[
+                              <Link
+                                href={`/admin/comentarios/${est.estabelecimentoId}`}
+                                passHref
+                                key="comentarios"
+                              >
+                                <Button
+                                  type="text"
+                                  icon={<CommentOutlined />}
+                                  className="hover:!bg-blue-500 hover:!text-white"
+                                >
+                                  Ver Comentários
+                                </Button>
+                              </Link>,
+                            ]}
+                          >
+                            <Card.Meta
+                              avatar={
+                                <Avatar
+                                  src={getFullImageUrl(est.logoUrl || "")}
+                                />
+                              }
+                              title={est.nomeFantasia}
+                              description={
+                                <>
+                                  <Text>Categoria: {est.categoria}</Text>
+                                  <br />
+                                  <Text type="secondary">
+                                    CNAE: {est.cnae} <br />
+                                    Responsável: {est.nomeResponsavel}
+                                    <br />
+                                    CPF do Responsável: {est.cpfResponsavel}
+                                    <br />
+                                  </Text>
+                                </>
+                              }
+                            />
+                          </Card>
+                        </Col>
+                      ))}
+                    </Row>
+
+                    {/* Renderiza o componente de paginação da aba "Todos" */}
+                    {totalCount > PAGE_SIZE && (
+                      <div className="mt-6 text-center">
+                        <Pagination
+                          current={currentPage}
+                          pageSize={PAGE_SIZE}
+                          total={totalCount}
+                          onChange={(page) => setCurrentPage(page)}
+                          showSizeChanger={false}
+                        />
+                      </div>
+                    )}
+                  </>
+                );
+              })()}
+            </TabPane>
+
+            {/* ==================================
+                  ⬇️ 3. ABAS DE CATEGORIA (COMO ANTES) ⬇️
+                ================================== */}
             {sortedCategories.map((categoria) => {
               const allEstabelecimentosForCat =
                 groupedEstabelecimentos[categoria];

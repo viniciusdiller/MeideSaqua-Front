@@ -17,16 +17,6 @@ import { useAuth } from "@/context/AuthContext";
 const AnimatedLogo = () => {
   const logos = [
     {
-      src: "/LogoMeideSaqua.png",
-      alt: "Logo MeideSaqua",
-      className: "h-10 w-auto",
-    },
-    {
-      src: "/Sala-do-Empreendedor.png",
-      alt: "Logo Sala do Empreendedor",
-      className: "h-12 w-auto",
-    },
-    {
       src: "/logo2sq.png",
       alt: "Logo Prefeitura de Saquarema",
       className: "h-12 w-auto",
@@ -34,6 +24,21 @@ const AnimatedLogo = () => {
     {
       src: "/logoSMGS.png",
       alt: "Logo Secretaria Municipal de Governança e Sustentabilidade",
+      className: "h-12 w-auto",
+    },
+    {
+      src: "/Logo-lab-ISA.png",
+      alt: "Logo Laboratório de Inovação e Sustentabilidade Aplicada - LabISA",
+      className: "h-12 w-auto",
+    },
+    {
+      src: "/LogoMeideSaqua.png",
+      alt: "Logo MeideSaqua",
+      className: "h-10 w-auto",
+    },
+    {
+      src: "/Sala-do-Empreendedor.png",
+      alt: "Logo Sala do Empreendedor",
       className: "h-12 w-auto",
     },
   ];
