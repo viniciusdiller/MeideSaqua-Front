@@ -91,8 +91,8 @@ export default function FAQPage() {
                     município.
                   </li>
                   <li>
-                    Criar um canal moderno, intuitivo e gratuito de
-                    visibilidade para os MEI's.
+                    Criar um canal moderno, intuitivo e gratuito de visibilidade
+                    para os MEI's.
                   </li>
                 </ul>
               </AccordionContent>
@@ -151,6 +151,24 @@ export default function FAQPage() {
               </AccordionContent>
             </AccordionItem>
 
+            <AccordionItem value="item-8">
+              <AccordionTrigger className="text-lg text-left font-semibold">
+                Desejo obter mais informações sobre MEI’s, como faço?
+              </AccordionTrigger>
+              <AccordionContent className="text-gray-700 leading-relaxed text-base">
+                Você pode acessar o portal nacional de MEI’s no endereço
+                eletrônico:{" "}
+                <Link
+                  href="https://www.gov.br/empresas-e-negocios/pt-br/empreendedor"
+                  className="text-blue-600 underline"
+                >
+                  https://www.gov.br/empresas-e-negocios/pt-br/empreendedor
+                </Link>{" "}
+                ou buscar atendimento por meio da nossa Sala do Empreendedor de
+                Saquarema, nos canais de atendimento a seguir:
+              </AccordionContent>
+            </AccordionItem>
+
             <AccordionItem value="item-4">
               <AccordionTrigger className="text-lg text-left font-semibold">
                 Como faço para CADASTRAR meu MEI na plataforma?
@@ -164,10 +182,7 @@ export default function FAQPage() {
                 .
                 <br />
                 2. Acesse a página{" "}
-                <Link
-                  href="/cadastro-mei"
-                  className="text-blue-600 underline"
-                >
+                <Link href="/cadastro-mei" className="text-blue-600 underline">
                   "Cadastro MEIdeSaquá"
                 </Link>{" "}
                 no menu.
@@ -190,10 +205,7 @@ export default function FAQPage() {
               </AccordionTrigger>
               <AccordionContent className="text-gray-700 leading-relaxed text-base">
                 1. Acesse a página{" "}
-                <Link
-                  href="/cadastro-mei"
-                  className="text-blue-600 underline"
-                >
+                <Link href="/cadastro-mei" className="text-blue-600 underline">
                   "Cadastro MEIdeSaquá"
                 </Link>
                 .
@@ -218,10 +230,7 @@ export default function FAQPage() {
               </AccordionTrigger>
               <AccordionContent className="text-gray-700 leading-relaxed text-base">
                 1. Acesse a página{" "}
-                <Link
-                  href="/cadastro-mei"
-                  className="text-blue-600 underline"
-                >
+                <Link href="/cadastro-mei" className="text-blue-600 underline">
                   "Cadastro MEIdeSaquá"
                 </Link>
                 .

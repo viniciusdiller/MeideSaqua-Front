@@ -45,6 +45,26 @@ export default function SobrePage() {
             negócios.
           </p>
           <p className="text-gray-700 leading-relaxed text-lg mt-4">
+            O{" "}
+            <span className=" bg-gradient-to-r from-[#017DB9] to-[#22c362] bg-clip-text text-transparent">
+              MEIdeSaquá
+            </span>{" "}
+            também se consolida como uma{" "}
+            <strong>
+              estratégia de fortalecimento da Sala do Empreendedor de Saquarema
+            </strong>
+            , ampliando o alcance das ações de apoio, capacitação e
+            formalização. O projeto busca{" "}
+            <strong>ornar os MEIs mais sustentáveis e competitivos</strong>,
+            reduzindo o número de empreendimentos que encerram suas atividades
+            por não conseguirem alcançar seu público. Essa atuação integrada
+            reforça o compromisso da Prefeitura com a melhoria contínua da
+            política de atendimento ao empreendedor, reconhecida nacionalmente
+            pelo{" "}
+            <strong>Selo Ouro de Referência em Atendimento do Sebrae</strong>,
+            que certifica a excelência da Sala do Empreendedor de Saquarema.
+          </p>
+          <p className="text-gray-700 leading-relaxed text-lg mt-4">
             Além disso, o{" "}
             <span className=" bg-gradient-to-r from-[#017DB9] to-[#22c362] bg-clip-text text-transparent">
               MEIdeSaquá
@@ -95,24 +115,83 @@ export default function SobrePage() {
           </ul>
           <h2 className="text-2xl font-semibold text-[#007a73] mb-3 mt-10">
             <span className=" bg-gradient-to-r from-[#017DB9] to-[#22c362] bg-clip-text text-transparent">
-              Por que a Secretaria de Governança e Sustentabilidade desenvolveu esse
-              projeto?
+              Por que a Secretaria de Governança e Sustentabilidade desenvolveu
+              esse projeto?
             </span>
           </h2>
           <p className="text-gray-700 leading-relaxed text-lg">
-            A Secretaria Municipal de Governança e Sustentabilidade de Saquarema tem entre suas atribuições formular, coordenar e implementar políticas voltadas ao desenvolvimento sustentável, à inovação na gestão pública e à promoção da governança colaborativa. Nesse contexto, o desenvolvimento do projeto <span className=" bg-gradient-to-r from-[#017DB9] to-[#22c362] bg-clip-text text-transparent">
+            A Secretaria Municipal de Governança e Sustentabilidade de Saquarema
+            tem entre suas atribuições formular, coordenar e implementar
+            políticas voltadas ao desenvolvimento sustentável, à inovação na
+            gestão pública e à promoção da governança colaborativa. Nesse
+            contexto, o desenvolvimento do projeto{" "}
+            <span className=" bg-gradient-to-r from-[#017DB9] to-[#22c362] bg-clip-text text-transparent">
               MEIdeSaquá
             </span>{" "}
-            está diretamente alinhado à sua missão institucional de integrar os aspectos sociais, econômicos e tecnológicos do desenvolvimento local
+            está diretamente alinhado à sua missão institucional de integrar os
+            aspectos sociais, econômicos e tecnológicos do desenvolvimento local
             <br></br>
-            <p className="text-gray-700 leading-relaxed text-lg mt-4"></p>
-            O <span className=" bg-gradient-to-r from-[#017DB9] to-[#22c362] bg-clip-text text-transparent">
-            MEIdeSaquá
+            <p className="text-gray-700 leading-relaxed text-lg mt-4"></p>O{" "}
+            <span className=" bg-gradient-to-r from-[#017DB9] to-[#22c362] bg-clip-text text-transparent">
+              MEIdeSaquá
             </span>{" "}
-            representa um exemplo concreto de inovação aplicada à administração pública, concebido dentro da metodologia do <strong>Laboratório de Inovação em Sustentabilidade Aplicada (LAB ISA)</strong> — espaço criado para fomentar a cultura de inovação, experimentação e co-criação de soluções para os desafios públicos. O projeto foi desenvolvido por <strong>estagiários do Programa Jovem Cidadão</strong>, estudantes vinculados ao <strong>Programa Conexão Universitária</strong>, demonstrando o potencial transformador da integração entre governo, academia e nova geração na construção de políticas públicas inovadoras.
+            representa um exemplo concreto de inovação aplicada à administração
+            pública, concebido dentro da metodologia do{" "}
+            <strong>
+              Laboratório de Inovação em Sustentabilidade Aplicada (LAB ISA)
+            </strong>{" "}
+            — espaço criado para fomentar a cultura de inovação, experimentação
+            e co-criação de soluções para os desafios públicos. O projeto foi
+            desenvolvido por{" "}
+            <strong>estagiários do Programa Jovem Cidadão</strong>, estudantes
+            vinculados ao <strong>Programa Conexão Universitária</strong>,
+            demonstrando o potencial transformador da integração entre governo,
+            academia e nova geração na construção de políticas públicas
+            inovadoras.
             <br></br>
             <p className="text-gray-700 leading-relaxed text-lg mt-4"></p>
-            Ao desenvolver essa iniciativa, a Secretaria de Governança e Sustentabilidade reforça o compromisso da Prefeitura de Saquarema com a <strong>Agenda 2030 da ONU </strong>e com a implementação dos <strong>Objetivos de Desenvolvimento Sustentável (ODS)</strong>, especialmente aqueles relacionados a trabalho decente e crescimento econômico (ODS 8), inovação e infraestrutura (ODS 9) e cidades e comunidades sustentáveis (ODS 11). O projeto não apenas fortalece o ecossistema empreendedor local, como também evidencia o papel do município como um território de aprendizagem e inovação governamental, onde o conhecimento acadêmico se transforma em impacto social e desenvolvimento econômico sustentável.
+            Ao desenvolver essa iniciativa, a Secretaria de Governança e
+            Sustentabilidade reforça o compromisso da Prefeitura de Saquarema
+            com a <strong>Agenda 2030 da ONU </strong>e com a implementação dos{" "}
+            <strong>Objetivos de Desenvolvimento Sustentável (ODS)</strong>
+            <h2 className="text-2xl font-semibold text-[#007a73] mb-3 mt-10">
+              <span className=" bg-gradient-to-r from-[#017DB9] to-[#22c362] bg-clip-text text-transparent">
+                ODS Relacionados
+              </span>
+            </h2>
+            <p className="text-gray-700 leading-relaxed text-lg">
+              O projeto contribui diretamente com:
+            </p>
+            <ul className=" mt-3 list-disc list-inside text-gray-700 leading-relaxed text-lg space-y-2">
+              <li>
+                {" "}
+                <span className="text-[#A11C9A] font-semibold">ODS 8</span>
+                <strong>
+                  {" "}
+                  — Trabalho Decente e Crescimento Econômico:
+                </strong>{" "}
+                apoio ao empreendedorismo local e geração de emprego.
+              </li>
+              <li>
+                {" "}
+                <span className="text-[#FF6A39] font-semibold">ODS 9</span>{" "}
+                <strong>— Indústria, Inovação e Infraestrutura:</strong> fomento
+                à inovação e ao desenvolvimento sustentável.
+              </li>
+              <li>
+                {" "}
+                <span className="text-[#FD9D24] font-semibold">
+                  ODS 11
+                </span>{" "}
+                <strong>— Cidades e Comunidades Sustentáveis:</strong>{" "}
+                planejamento urbano e qualidade de vida.
+              </li>
+              <li>
+                <span className="text-[#BF8B2E] font-semibold">ODS 12</span>
+                <strong> — Consumo e Produção Responsáveis:</strong> promoção de
+                práticas sustentáveis.
+              </li>
+            </ul>
           </p>
         </section>
       </div>
