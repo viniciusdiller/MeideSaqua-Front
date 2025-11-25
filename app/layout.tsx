@@ -5,7 +5,7 @@ import "./globals.css";
 import { ConditionalNavbar } from "@/components/ConditionalNavbar";
 import { AuthProvider } from "@/context/AuthContext";
 import { Toaster } from "@/components/ui/sonner";
-import {ConditionalFooter} from "@/components/ConditionalFooter";
+import { ConditionalFooter } from "@/components/ConditionalFooter";
 import { ConditionalAccessibility } from "@/components/ConditionalAccessibility";
 import AccessibilityStyles from "@/components/AccessibilityStyles";
 import ConditionalFaleConosco from "@/components/ConditionalFaleConosco";
@@ -17,6 +17,8 @@ const poppins = Poppins({
 });
 
 export const metadata: Metadata = {
+  metadataBase: new URL("https://meidesaqua.saquarema.rj.gov.br"),
+
   title: "MeideSaquá - Descubra os MEIs Saquarema",
   icons: {
     icon: "/FAVICON_MEIDESAQUA.png",
@@ -25,7 +27,7 @@ export const metadata: Metadata = {
     title: "MeideSaquá",
     description:
       "Seu guia completo para explorar e conhecer os MEIs que movimentam a economia de Saquarema.",
-    url: "https://aquitemods.saquarema.rj.gov.br/",
+    url: "https://meidesaqua.saquarema.rj.gov.br/",
     siteName: "MeideSaquá",
     images: [
       {
@@ -58,7 +60,7 @@ export default function RootLayout({
           <ConditionalFooter />
           <Toaster richColors />
           <ConditionalAccessibility />
-          <ConditionalFaleConosco />  
+          <ConditionalFaleConosco />
         </AuthProvider>
       </body>
     </html>
