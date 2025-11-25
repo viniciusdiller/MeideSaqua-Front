@@ -8,7 +8,7 @@ const baseUrl = "https://meidesaqua.saquarema.rj.gov.br";
 // 2. URL INTERNA (para o Next.js buscar os dados no backend)
 // Em produção, ambos rodam no mesmo servidor, então o Next.js
 // pode acessar o backend via localhost:3301.
-const backendApiUrl = "http://localhost:3301";
+const backendApiUrl = "https://meidesaqua.saquarema.rj.gov.br/api";
 
 const slugify = (text: string) => {
   if (!text) return "";
