@@ -17,8 +17,6 @@ const poppins = Poppins({
 });
 
 export const metadata: Metadata = {
-  metadataBase: new URL("https://meidesaqua.saquarema.rj.gov.br"),
-
   title: "MeideSaquá - Descubra os MEIs Saquarema",
   icons: {
     icon: "/FAVICON_MEIDESAQUA.png",
