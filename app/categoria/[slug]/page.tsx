@@ -291,7 +291,7 @@ export default function CategoryPage({ params }: PageProps) {
                       )}
                     </div>
                     {/* Resto do card (lógica original) */}
-                    <p className="text-gray-600 mb-4 text-sm break-words">
+                    <p className="text-gray-600 my-2 mt-6 text-sm break-words flex-grow line-clamp-3 pr-4">
                       <FormattedDescription
                         text={location.descricaoDiferencial}
                       />

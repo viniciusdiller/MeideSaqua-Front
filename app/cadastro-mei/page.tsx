@@ -69,32 +69,32 @@ const maskPhone = (value: string) => {
     .replace(/(-\d{4})\d+?$/, "$1");
 };
 
- const onFinishFailed = (errorInfo: any) => {
-    if (!errorInfo.errorFields || errorInfo.errorFields.length === 0) {
-      return;
-    }
+const onFinishFailed = (errorInfo: any) => {
+  if (!errorInfo.errorFields || errorInfo.errorFields.length === 0) {
+    return;
+  }
 
-    const labelsComErro = errorInfo.errorFields
-      .map((field: any) => {
-        const fieldName = field.name[0];
-        return campoLabels[fieldName] || fieldName;
-      })
-      .filter(
-        (value: string, index: number, self: string[]) =>
-          self.indexOf(value) === index
-      );
+  const labelsComErro = errorInfo.errorFields
+    .map((field: any) => {
+      const fieldName = field.name[0];
+      return campoLabels[fieldName] || fieldName;
+    })
+    .filter(
+      (value: string, index: number, self: string[]) =>
+        self.indexOf(value) === index
+    );
 
-    if (labelsComErro.length > 0) {
-      const plural = labelsComErro.length > 1;
-      const mensagem = `Por favor, preencha ${
-        plural ? "os campos obrigatórios" : "o campo obrigatório"
-      }: ${labelsComErro.join(", ")}.`;
+  if (labelsComErro.length > 0) {
+    const plural = labelsComErro.length > 1;
+    const mensagem = `Por favor, preencha ${
+      plural ? "os campos obrigatórios" : "o campo obrigatório"
+    }: ${labelsComErro.join(", ")}.`;
 
-      toast.error(mensagem);
-    } else {
-      toast.error("Por favor, verifique os campos obrigatórios.");
-    }
-  };
+    toast.error(mensagem);
+  } else {
+    toast.error("Por favor, verifique os campos obrigatórios.");
+  }
+};
 // Função para remover emojis (do projeto ODS)
 const stripEmojis = (value: string) => {
   if (!value) return "";
@@ -112,6 +112,7 @@ export const areasAtuacao = [
   "Atendimento no Local",
   "Atendimento Online",
   "Atendimento Domiciliar",
+  "Atendo todos os bairros de Saquarema",
   "Água Branca",
   "Alvorada",
   "Areal",
@@ -308,10 +309,22 @@ export const tagsPorCategoria: { [key: string]: string[] } = {
   ],
 };
 export const canaisDeVendaOpcoes = [
-  { label: "Redes Sociais (Instagram, Facebook, WhatsApp)", value: "Redes Sociais" },
-  { label: "Marketplaces (Mercado Livre, Shopee, Amazon, etc.)", value: "Marketplaces" },
-  { label: "Plataformas de serviços (GetNinjas, Workana, etc.)", value: "Plataformas de serviços" },
-  { label: "Feiras e eventos (artesanato, gastronômicas, etc.)", value: "Feiras e eventos" },
+  {
+    label: "Redes Sociais (Instagram, Facebook, WhatsApp)",
+    value: "Redes Sociais",
+  },
+  {
+    label: "Marketplaces (Mercado Livre, Shopee, Amazon, etc.)",
+    value: "Marketplaces",
+  },
+  {
+    label: "Plataformas de serviços (GetNinjas, Workana, etc.)",
+    value: "Plataformas de serviços",
+  },
+  {
+    label: "Feiras e eventos (artesanato, gastronômicas, etc.)",
+    value: "Feiras e eventos",
+  },
   { label: "Loja própria / ponto fixo", value: "Loja própria / ponto fixo" },
   { label: "Atendimento em domicílio", value: "Atendimento em domicílio" },
   { label: "Boca a boca (recomendação)", value: "Boca a boca" },
@@ -344,9 +357,9 @@ const campoLabels: { [key: string]: string } = {
   instagram: "Instagram (Opcional)",
   logo: "Sua Logo",
   produtos: "Imagens do seu Produto ou Serviço",
-  
+
   // Seção Final
-  confirmacao: "Confirmação de Veracidade e LGPD"
+  confirmacao: "Confirmação de Veracidade e LGPD",
 };
 
 const { Option } = Select;
@@ -382,8 +395,8 @@ const CadastroMEIPage: React.FC = () => {
   const [quillTextLength, setQuillTextLength] = useState(0);
   const MAX_QUILL_LENGTH = 500;
 
-  const [sliderValue, setSliderValue] = useState(5); 
-  const escalaValue = Form.useWatch('escala', form); 
+  const [sliderValue, setSliderValue] = useState(0);
+  const escalaValue = Form.useWatch("escala", form);
 
   useEffect(() => {
     if (escalaValue !== undefined) {
@@ -560,7 +573,9 @@ const CadastroMEIPage: React.FC = () => {
           key !== "produtos"
         ) {
           if (
-            (key === "areasAtuacao" || key === "tagsInvisiveis"|| key === "venda") &&
+            (key === "areasAtuacao" ||
+              key === "tagsInvisiveis" ||
+              key === "venda") &&
             Array.isArray(value)
           ) {
             formData.append(key, value.join(", "));
@@ -1024,41 +1039,45 @@ const CadastroMEIPage: React.FC = () => {
             onChange={(e) => handleMaskChange(e, maskCNAE)}
           />
         </Form.Item>
-              <Form.Item
-        name="venda"
-        label="Como você vende ou divulga seus produtos ou serviços?"
-        className="mb-10"
-        rules={[{ required: true, message: "Selecione pelo menos um canal." }]}
+        <Form.Item
+          name="venda"
+          label="Como você vende ou divulga seus produtos ou serviços?"
+          className="mb-10"
+          rules={[
+            { required: true, message: "Selecione pelo menos um canal." },
+          ]}
+          help="Selecione todas as opções que se aplicam."
+        >
+          <Checkbox.Group
+            options={canaisDeVendaOpcoes}
+            className="flex flex-col space-y-1 ml-4"
+          />
+        </Form.Item>
 
-        help="Selecione todas as opções que se aplicam."
-      >
-        <Checkbox.Group options={canaisDeVendaOpcoes} className="flex flex-col space-y-1 ml-4" />
-      </Form.Item>
-
-      {/* Pergunta 2: Escala (Slider) - A "Boa Ideia" */}
-<Form.Item
-  rules={[{ required: true, message: "Por favor, avalie o impacto!" }]}
-  name="escala"
-  label="Diga o quanto você acredita que ter seu perfil no MEIdeSaquá irá impulsionar seu negócio."
-  className="mt-10"
-  help="Em uma escala de 0 a 10, onde 0 = nenhum impacto e 10 = impacto muito positivo"
->
-  <>
-    <Slider
-      value={[sliderValue]}
-      max={10}
-      step={1}
-      onValueChange={(value) => {
-        setSliderValue(value[0]);
-        form.setFieldsValue({ escala: value[0] }); 
-      }}
-    />
-    {/* Mostrador numérico */}
-    <div className="text-center font-bold text-lg text-primary mt-2">
-      {sliderValue}
-    </div>
-  </>
-</Form.Item>
+        {/* Pergunta 2: Escala (Slider) - A "Boa Ideia" */}
+        <Form.Item
+          rules={[{ required: true, message: "Por favor, avalie o impacto!" }]}
+          name="escala"
+          label="Diga o quanto você acredita que ter seu perfil no MEIdeSaquá irá impulsionar seu negócio."
+          className="mt-10"
+          help="Em uma escala de 0 a 10, onde 0 = nenhum impacto e 10 = impacto muito positivo"
+        >
+          <>
+            <Slider
+              value={[sliderValue]}
+              max={10}
+              step={1}
+              onValueChange={(value) => {
+                setSliderValue(value[0]);
+                form.setFieldsValue({ escala: value[0] });
+              }}
+            />
+            {/* Mostrador numérico */}
+            <div className="text-center font-bold text-lg text-primary mt-2">
+              {sliderValue}
+            </div>
+          </>
+        </Form.Item>
       </section>
 
       <section className="mb-8 border-t pt-4">
@@ -1083,7 +1102,7 @@ const CadastroMEIPage: React.FC = () => {
         <Form.Item name="endereco" label="Endereço Físico (se houver)">
           <Input
             name="endereco"
-            placeholder="Rua, Bairro, Nº"
+            placeholder="Este endereço aparecerá no perfil do seu negócio, para o público."
             onChange={handleStripEmojiChange}
           />
         </Form.Item>

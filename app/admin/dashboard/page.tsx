@@ -71,13 +71,12 @@ interface PendingData {
 
 // fieldConfig ORIGINAL do MeideSaquá
 const fieldConfig: { [key: string]: { label: string; order: number } } = {
-
-// dados do responsável
+  // dados do responsável
   nomeResponsavel: { label: "Nome do Responsável", order: 1 },
   cpfResponsavel: { label: "CPF do Responsável", order: 2 },
   emailEstabelecimento: { label: "Email", order: 3 },
-  
-// dados do MEI
+
+  // dados do MEI
   estabelecimentoId: { label: "ID", order: 1 },
   nomeFantasia: { label: "Nome Fantasia", order: 2 },
   cnpj: { label: "CNPJ", order: 3 },
@@ -99,7 +98,7 @@ const fieldConfig: { [key: string]: { label: string; order: number } } = {
 
   //atualização
   status: { label: "Status Atual", order: 5 },
-  outrasAlteracoes: { label: "Outras Alterações", order: 6 }, // <-- Feature nova
+  outrasAlteracoes: { label: "Outras Alterações", order: 6 },
   logo: { label: "Nova Logo", order: 17 },
   ccmei: { label: "Novo CCMEI", order: 16 },
   produtos: { label: "Novo Portfólio", order: 18 },
@@ -119,7 +118,7 @@ const AdminDashboard: React.FC = () => {
   const [modalVisible, setModalVisible] = useState(false);
   const [selectedItem, setSelectedItem] = useState<Estabelecimento | null>(
     null
-  ); // <-- Tipo Corrigido
+  );
   const router = useRouter();
   const [isActionLoading, setIsActionLoading] = useState(false);
 
@@ -145,11 +144,57 @@ const AdminDashboard: React.FC = () => {
     return `${API_URL}/${cleanPath}`;
   };
 
-  // renderValue ORIGINAL do MeideSaquá
+  // renderValue MODIFICADO
   const renderValue = (key: string, value: any): React.ReactNode => {
     if (value === null || value === undefined || value === "") {
       return <Text type="secondary">Não informado</Text>;
     }
+
+    // --- LÓGICA PARA TORNAR LINKS CLICÁVEIS ---
+    if (key === "website") {
+      const urlString = String(value);
+      let href = urlString;
+      if (!/^https?:\/\//i.test(href)) {
+        href = `https://${href}`;
+      }
+      return (
+        <a
+          href={href}
+          target="_blank"
+          rel="noopener noreferrer"
+          style={{ color: "#1890ff", textDecoration: "underline" }}
+        >
+          {urlString}
+        </a>
+      );
+    }
+
+    if (key === "instagram") {
+      const val = String(value).trim();
+      let href = val;
+
+      if (val.includes("instagram.com") || /^https?:\/\//i.test(val)) {
+        if (!/^https?:\/\//i.test(href)) {
+          href = `https://${href}`;
+        }
+      } else {
+        const handle = val.replace(/^@/, "");
+        href = `https://www.instagram.com/${handle}`;
+      }
+
+      return (
+        <a
+          href={href}
+          target="_blank"
+          rel="noopener noreferrer"
+          style={{ color: "#1890ff", textDecoration: "underline" }}
+        >
+          {val}
+        </a>
+      );
+    }
+    // -------------------------------------------
+
     if (key === "descricao") {
       return (
         <div
@@ -198,7 +243,6 @@ const AdminDashboard: React.FC = () => {
       return <Image src={fileUrl} alt={`CCMEI`} width={150} />;
     }
 
-    // Lógica para renderizar Portfólio (produtosImg)
     if (
       (key === "produtosImg" || key === "produtos") &&
       Array.isArray(value) &&
@@ -233,7 +277,6 @@ const AdminDashboard: React.FC = () => {
     if (typeof value === "object" && value !== null)
       return JSON.stringify(value);
 
-    // Lógica para tags/areas (que são arrays)
     if (
       (key === "tagsInvisiveis" || key === "areasAtuacao") &&
       Array.isArray(value)
@@ -298,7 +341,6 @@ const AdminDashboard: React.FC = () => {
         });
       }
 
-      // Endpoint corrigido para estabelecimentoId
       const response = await fetch(
         `${API_URL}/api/admin/${action}/${selectedItem.estabelecimentoId}`,
         fetchOptions
@@ -323,7 +365,6 @@ const AdminDashboard: React.FC = () => {
       setData((prevData) => {
         const newData = { ...prevData };
         (Object.keys(newData) as Array<keyof PendingData>).forEach((key) => {
-          // ID corrigido para estabelecimentoId
           newData[key] = newData[key].filter(
             (item) => item.estabelecimentoId !== selectedItem.estabelecimentoId
           );
@@ -331,7 +372,6 @@ const AdminDashboard: React.FC = () => {
         return newData;
       });
 
-      // Lógica de paginação adaptada
       if (selectedItem.status === StatusEstabelecimento.PENDENTE_APROVACAO) {
         handlePageChange("cadastros")(1);
       } else if (
@@ -356,7 +396,6 @@ const AdminDashboard: React.FC = () => {
   };
 
   const showModal = (item: Estabelecimento) => {
-    // <-- Tipo Corrigido
     setSelectedItem(item);
     setModalVisible(true);
   };
@@ -366,7 +405,6 @@ const AdminDashboard: React.FC = () => {
     setIsEditModalVisible(true);
   };
 
-  // handleEditAndApproveSubmit adaptado para FormData
   const handleEditAndApproveSubmit = async (formData: FormData) => {
     if (!selectedItem) return;
 
@@ -379,27 +417,24 @@ const AdminDashboard: React.FC = () => {
     }
 
     try {
-      // Usa a função da API já corrigida, que envia FormData
       await adminUpdateEstablishment(
         selectedItem.estabelecimentoId,
         formData,
         token
       );
 
-      // A mensagem de sucesso é mostrada pelo modal
       setIsEditModalVisible(false);
       setModalVisible(false);
       setSelectedItem(null);
-      fetchData(); // Recarrega os dados
+      fetchData();
     } catch (error: any) {
       setIsActionLoading(false);
-      throw error; // Lança o erro para o modal tratar
+      throw error;
     } finally {
       setIsActionLoading(false);
     }
   };
 
-  // renderDiffTable adaptado
   const renderDiffTable = (
     status: "pendente_atualizacao" | "pendente_exclusao",
     alertType: "info" | "error",
@@ -414,11 +449,10 @@ const AdminDashboard: React.FC = () => {
       return null;
     }
 
-    // Mapa de chaves do MeideSaquá
     const keyMap: { [newKey: string]: { oldKey: string; labelKey: string } } = {
       logo: { oldKey: "logoUrl", labelKey: "logo" },
-      produtos: { oldKey: "produtosImg", labelKey: "produtos" }, // 'produtos' em vez de 'imagens'
-      ccmei: { oldKey: "ccmeiUrl", labelKey: "ccmei" }, // 'ccmei'
+      produtos: { oldKey: "produtosImg", labelKey: "produtos" },
+      ccmei: { oldKey: "ccmeiUrl", labelKey: "ccmei" },
       nome_responsavel: {
         oldKey: "nomeResponsavel",
         labelKey: "nome_responsavel",
@@ -509,10 +543,9 @@ const AdminDashboard: React.FC = () => {
     }));
   };
 
-  // renderList adaptado
   const renderList = (
     title: string,
-    listData: Estabelecimento[], // <-- Tipo Corrigido
+    listData: Estabelecimento[],
     listKey: keyof PendingData
   ) => {
     const totalCount = listData.length;
@@ -551,8 +584,8 @@ const AdminDashboard: React.FC = () => {
                           icon={listIcons[title]}
                         />
                       }
-                      title={item.nomeFantasia} // <-- Campo Corrigido
-                      description={`CNPJ: ${item.cnpj}`} // <-- Campo Corrigido
+                      title={item.nomeFantasia}
+                      description={`CNPJ: ${item.cnpj}`}
                     />
                   </List.Item>
                 )}
@@ -578,19 +611,7 @@ const AdminDashboard: React.FC = () => {
     );
   };
 
-  // ====================================================================
-  //               ⬇️ INÍCIO DA MODIFICAÇÃO DO MODAL ⬇️
-  // ====================================================================
-
-  /**
-   * Função auxiliar para renderizar um grupo de descrições dentro de um Card.
-   * Agrupa os campos com base nas chaves fornecidas.
-   */
-  const renderDescriptionGroup = (
-    title: string,
-    entries: [string, any][]
-  ) => {
-    // Não renderiza o card se não houver campos para exibir
+  const renderDescriptionGroup = (title: string, entries: [string, any][]) => {
     const visibleEntries = entries.filter(([key]) => fieldConfig[key]);
     if (visibleEntries.length === 0) return null;
 
@@ -613,13 +634,12 @@ const AdminDashboard: React.FC = () => {
     );
   };
 
-  /**
-   * Função para preparar os dados agrupados para o modal.
-   * Esta função será chamada dentro do componente Modal.
-   */
   const getGroupedEntries = (item: Estabelecimento) => {
-    // 1. Define as chaves para cada seção, conforme a imagem
-    const keysResponsavel = ["nomeResponsavel", "cpfResponsavel", "emailEstabelecimento",];
+    const keysResponsavel = [
+      "nomeResponsavel",
+      "cpfResponsavel",
+      "emailEstabelecimento",
+    ];
     const keysMei = [
       "estabelecimentoId",
       "nomeFantasia",
@@ -641,35 +661,23 @@ const AdminDashboard: React.FC = () => {
       "escala",
     ];
 
-    // 2. Obtém todas as entradas válidas e ordenadas (lógica original)
     const allEntries = Object.entries(item)
-      .filter(
-        ([key]) =>
-          key !== "dados_atualizacao" &&
-          key !== "status"
-      )
+      .filter(([key]) => key !== "dados_atualizacao" && key !== "status")
       .sort(
         ([keyA], [keyB]) =>
-          (fieldConfig[keyA]?.order ?? 999) -
-          (fieldConfig[keyB]?.order ?? 999)
+          (fieldConfig[keyA]?.order ?? 999) - (fieldConfig[keyB]?.order ?? 999)
       );
 
-    // 3. Filtra as entradas para cada grupo
     const entriesResponsavel = allEntries.filter(([key]) =>
       keysResponsavel.includes(key)
     );
     const entriesMei = allEntries.filter(([key]) => keysMei.includes(key));
     const entriesMetadados = allEntries.filter(
-      ([key]) =>
-        !keysResponsavel.includes(key) && !keysMei.includes(key)
+      ([key]) => !keysResponsavel.includes(key) && !keysMei.includes(key)
     );
 
     return { entriesResponsavel, entriesMei, entriesMetadados };
   };
-
-  // ====================================================================
-  //               ⬆️ FIM DA MODIFICAÇÃO DO MODAL ⬆️
-  // ====================================================================
 
   return (
     <div className="p-8">
@@ -683,7 +691,6 @@ const AdminDashboard: React.FC = () => {
           </Title>
 
           <div className="flex flex-col md:flex-row gap-2 w-full md:w-auto">
-            {/* Link Corrigido */}
             <Link href="/admin/estabelecimentos-ativos" passHref>
               <Button
                 type="primary"
@@ -699,7 +706,7 @@ const AdminDashboard: React.FC = () => {
               <Button
                 icon={<CommentOutlined />}
                 size="large"
-                style={{ backgroundColor: "#3C6AB2", color: "#fff" }} // Pode ajustar a cor
+                style={{ backgroundColor: "#3C6AB2", color: "#fff" }}
                 className={isMobile ? "w-full" : ""}
               >
                 Gerenciar Comentários
@@ -717,7 +724,7 @@ const AdminDashboard: React.FC = () => {
 
       {selectedItem && (
         <Modal
-          title={`Detalhes de ${selectedItem.nomeFantasia}`} // <-- Campo Corrigido
+          title={`Detalhes de ${selectedItem.nomeFantasia}`}
           open={modalVisible}
           onCancel={() => setModalVisible(false)}
           width={1000}
@@ -767,12 +774,6 @@ const AdminDashboard: React.FC = () => {
             ),
           ]}
         >
-          {/* ====================================================================
-                            ⬇️ ÁREA DO MODAL MODIFICADA ⬇️
-            ====================================================================
-          */}
-
-          {/* Prepara os dados agrupados */}
           {(() => {
             const { entriesResponsavel, entriesMei, entriesMetadados } =
               getGroupedEntries(selectedItem);
@@ -783,35 +784,23 @@ const AdminDashboard: React.FC = () => {
                   Dados do Estabelecimento
                 </Title>
 
-                {/* Grupo 1: Identificação do Responsável */}
                 {renderDescriptionGroup(
                   "1. Identificação do Responsável",
                   entriesResponsavel
                 )}
 
-                {/* Grupo 2: Identificação do Mei */}
-                {renderDescriptionGroup(
-                  "2. Identificação do Mei",
-                  entriesMei
-                )}
+                {renderDescriptionGroup("2. Identificação do Mei", entriesMei)}
 
-                {/* Grupo 3: Metadados */}
                 {renderDescriptionGroup("3. Metadados", entriesMetadados)}
               </>
             );
           })()}
 
-          {/* ====================================================================
-                            ⬆️ ÁREA DO MODAL MODIFICADA ⬆️
-            ====================================================================
-          */}
-
-          {/* As tabelas de Diffs (atualização/exclusão) permanecem abaixo dos dados */}
           {renderDiffTable(
             "pendente_exclusao",
             "error",
             "Solicitação de Exclusão",
-            ["estabelecimentoId", "confirmacao"] 
+            ["estabelecimentoId", "confirmacao"]
           )}
           {renderDiffTable(
             "pendente_atualizacao",
@@ -822,12 +811,10 @@ const AdminDashboard: React.FC = () => {
         </Modal>
       )}
 
-      {/* ---MODAL DE EDIÇÃO --- */}
-      <AdminEstabelecimentoModal // <-- Componente Corrigido
-        estabelecimento={selectedItem} // <-- Prop Corrigida
+      <AdminEstabelecimentoModal
+        estabelecimento={selectedItem}
         visible={isEditModalVisible}
         onClose={(shouldRefresh: boolean) => {
-          // <-- Tipo 'boolean' adicionado
           setIsEditModalVisible(false);
           if (shouldRefresh) {
             setModalVisible(false);
@@ -838,7 +825,6 @@ const AdminDashboard: React.FC = () => {
         mode="edit-and-approve"
         onEditAndApprove={handleEditAndApproveSubmit}
       />
-      {/* --- MODAL DE REJEIÇÃO --- */}
       <Modal
         title="Confirmar Rejeição"
         open={isRejectModalVisible}
@@ -859,7 +845,7 @@ const AdminDashboard: React.FC = () => {
           rows={4}
           value={rejectionReason}
           onChange={(e) => setRejectionReason(e.target.value)}
-          placeholder="O cadastro foi rejeitado pois..." // <-- Texto Corrigido
+          placeholder="O cadastro foi rejeitado pois..."
         />
       </Modal>
     </div>

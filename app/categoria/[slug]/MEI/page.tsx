@@ -18,11 +18,8 @@ import {
   deleteReview,
   formatarDataParaMesAno,
 } from "@/lib/api";
-
 import AvaliacaoModal from "@/components/Pop-up Coments";
-
 import { ReviewComment } from "@/components/ReviewComments";
-
 import {
   Pagination,
   PaginationContent,
@@ -46,7 +43,6 @@ import {
 } from "@/components/ui/alert-dialog";
 import { Button } from "@/components/ui/button";
 import { SearchX, CalendarDays } from "lucide-react";
-import FormattedDescription from "@/components/FormattedDescription";
 import DOMPurify from "dompurify";
 
 const CustomStarIcon = ({
@@ -87,7 +83,6 @@ const CustomStarIcon = ({
   );
 };
 
-// 4. ADICIONE 'export' aqui para que o ReviewComment possa importar
 export const StarRating = ({ rating }: { rating: number }) => {
   const totalStars = 5;
 
@@ -183,7 +178,6 @@ export default function MeiDetailPage({
   const [reviewToDelete, setReviewToDelete] = useState<number | null>(null);
   const [portfolioImages, setPortfolioImages] = useState<any[]>([]);
 
-  // 5. ADICIONE O ESTADO PARA CONTROLAR O MODAL (lógica do outro projeto)
   const [modalState, setModalState] = useState<{
     open: boolean;
     parentId: number | null;
@@ -197,17 +191,12 @@ export default function MeiDetailPage({
     try {
       const detailsData = await getEstablishmentById(meiId);
 
-      // 6. REMOVA a chamada separada
-      // const reviewsData = await getReviewsByEstablishment(meiId); // <-- REMOVIDO
-
       setMeiDetails(detailsData);
 
-      // 7. POPULE os reviews a partir dos dados principais (eles vêm aninhados)
-      setReviews(detailsData.avaliacoes || []); // <-- ALTERADO
+      setReviews(detailsData.avaliacoes || []);
 
       setRating(detailsData.media || 0);
 
-      // ... (O resto da sua lógica de fetchMeiData está perfeita)
       if (detailsData.produtosImg && Array.isArray(detailsData.produtosImg)) {
         const portfolioItems = detailsData.produtosImg.map(
           (image: any, index: number) => {
@@ -231,7 +220,6 @@ export default function MeiDetailPage({
     }
   };
 
-  // 8. CRIE O HANDLER PARA O BOTÃO "NOVO COMENTÁRIO" (lógica do outro projeto)
   const handleNewReviewClick = () => {
     if (!user) {
       toast.error("Você precisa estar logado para avaliar.");
@@ -265,7 +253,6 @@ export default function MeiDetailPage({
   }, [meiDetails?.descricao]);
 
   if (isLoading) {
-    // ... (Seu código de Loading)
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4">
         <div className="text-center p-8 bg-white rounded-2xl shadow-lg max-w-md w-full">
@@ -282,7 +269,6 @@ export default function MeiDetailPage({
   }
 
   if (!meiDetails) {
-    // ... (Seu código de Não Encontrado)
     return (
       <div className="flex flex-col items-center justify-center min-h-[70vh] text-center p-4 bg-gray-50">
         <div className="bg-white p-8 rounded-2xl shadow-md">
@@ -331,7 +317,6 @@ export default function MeiDetailPage({
     setIsDeleteDialogOpen(true);
   };
 
-  // 9. ATUALIZE O 'handleConfirmDelete' PARA RECARREGAR OS DADOS (lógica do outro projeto)
   const handleConfirmDelete = async () => {
     if (!reviewToDelete || !user?.token) {
       setIsDeleteDialogOpen(false);
@@ -341,8 +326,7 @@ export default function MeiDetailPage({
     try {
       await deleteReview(reviewToDelete, user.token);
       toast.success("Comentário excluído com sucesso!");
-      // setReviews(reviews.filter((r) => r.avaliacoesId !== reviewToDelete)); // [ANTES]
-      fetchMeiData(); // [DEPOIS] - Isso recarrega toda a árvore de comentários
+      fetchMeiData();
     } catch (error: any) {
       console.error("Erro ao excluir avaliação:", error);
       toast.error(error.message || "Não foi possível excluir o comentário.");
@@ -352,7 +336,6 @@ export default function MeiDetailPage({
     }
   };
 
-  // 10. ADICIONE AS FUNÇÕES DE CONTROLE DO MODAL (lógica do outro projeto)
   const handleReplyClick = (parentId: number) => {
     if (!user) {
       toast.error("Você precisa estar logado para responder.");
@@ -366,15 +349,9 @@ export default function MeiDetailPage({
   };
 
   const handleReviewSubmit = () => {
-    fetchMeiData(); // Recarrega os dados
-    closeModal(); // Fecha o modal
+    fetchMeiData();
+    closeModal();
   };
-
-  // ... (Sua lógica de 'areasAtuacao' e 'tagsList' está perfeita) ...
-
-  // ====================================================================
-  //               ⬇️ INÍCIO DA MODIFICAÇÃO DE LÓGICA ⬇️
-  // ====================================================================
 
   const areasAtuacaoString = meiDetails.areasAtuacao || "";
   const allAreas: string[] = areasAtuacaoString
@@ -384,34 +361,45 @@ export default function MeiDetailPage({
         .filter((area) => area.length > 0)
     : [];
 
-  // 1. Define as palavras-chave de entrega
-  const deliveryKeywords = ["Entrega", "Retirada", "Entrega e Retirada", "Atendimento no Local", "Atendimento Online", "Atendimento Domiciliar"];
+  const deliveryKeywords = [
+    "Entrega",
+    "Retirada",
+    "Entrega e Retirada",
+    "Atendimento no Local",
+    "Atendimento Online",
+    "Atendimento Domiciliar",
+  ];
 
-  // 2. Cria a lista SÓ com as opções de entrega
   const deliveryOptionsToShow = allAreas.filter((area) =>
     deliveryKeywords.includes(area)
   );
 
-  // 3. Cria a lista SÓ com os bairros (removendo as opções de entrega)
   const bairrosToShow = allAreas.filter(
     (area) => !deliveryKeywords.includes(area)
   );
 
-  // 4. Aplica a lógica de "Ver Mais" APENAS na lista de bairros
+  const formatInstagramUrl = (handleOrUrl: string) => {
+    if (!handleOrUrl) return "#";
+    const val = handleOrUrl.trim();
+    if (val.includes("instagram.com") || /^https?:\/\//i.test(val)) {
+      if (!/^https?:\/\//i.test(val)) {
+        return `https://${val}`;
+      }
+      return val;
+    }
+    return `https://www.instagram.com/${val.replace(/^@/, "")}`;
+  };
+
   const linhasVisiveis = 3;
   const colunas = 4;
   const limite = linhasVisiveis * colunas;
 
-  let areasVisiveis = bairrosToShow; // Usa a nova lista de bairros
+  let areasVisiveis = bairrosToShow;
 
   if (!locaisExpandidos && bairrosToShow.length > limite) {
-    areasVisiveis = bairrosToShow.slice(0, limite - 1); // Usa a nova lista de bairros
+    areasVisiveis = bairrosToShow.slice(0, limite - 1);
     areasVisiveis.push("SHOW_MORE_BUTTON");
   }
-
-  // ====================================================================
-  //               ⬆️ FIM DA MODIFICAÇÃO DE LÓGICA ⬆️
-  // ====================================================================
 
   const tagsInvisiveisString = meiDetails.tagsInvisiveis || "";
 
@@ -454,13 +442,10 @@ export default function MeiDetailPage({
         transition={{ delay: 0.4 }}
       >
         <div className="space-y-8">
-          {/* ... (Suas seções de Detalhes, Portfólio, Área de Atuação - TUDO CERTO) ... */}
-
           <motion.section
             className="bg-white p-6 rounded-3xl shadow-lg md:mx-auto md:max-w-[85%]"
             variants={itemVariants}
           >
-            {" "}
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4 items-center">
               <div className="md:col-span-2 flex flex-col">
                 <div className="mb-6 text-center md:text-left">
@@ -503,7 +488,7 @@ export default function MeiDetailPage({
                   <div className="flex items-center gap-6 ">
                     {meiDetails.instagram && (
                       <a
-                        href={meiDetails.instagram}
+                        href={formatInstagramUrl(meiDetails.instagram)}
                         target="_blank"
                         rel="noopener noreferrer"
                         className="flex items-center gap-2 text-gray-600 hover:text-pink-600 transition-colors hover:cursor-pointer"
@@ -554,7 +539,7 @@ export default function MeiDetailPage({
               <div className="quinhentos:hidden flex flex-col items-center justify-center gap-6 mt-6 col-span-full">
                 <div className="flex items-center gap-6">
                   <a
-                    href={meiDetails.instagram}
+                    href={formatInstagramUrl(meiDetails.instagram)}
                     target="_blank"
                     rel="noopener noreferrer"
                     className="flex items-center gap-2 text-gray-600 hover:text-pink-600 transition-colors"
@@ -626,9 +611,6 @@ export default function MeiDetailPage({
                   <span>{meiDetails.contatoEstabelecimento}</span>
                 </div>
 
-                {/* ==================================
-                       ⬇️ NOVO BLOCO ADICIONADO ⬇️
-                    ================================== */}
                 {deliveryOptionsToShow.length > 0 && (
                   <div className="pt-4">
                     <h4 className="text-sm font-semibold text-gray-500 mb-2">
@@ -646,23 +628,15 @@ export default function MeiDetailPage({
                     </div>
                   </div>
                 )}
-                {/* ==================================
-                       ⬆️ FIM DO NOVO BLOCO ⬆️
-                    ================================== */}
               </div>
               <div className="w-full h-fit bg-gray-50 rounded-3xl border border-gray-200 overflow-hidden milecem:col-span-3">
                 <div className="p-5 md:p-8 text-gray-700">
-                  {/* ==================================
-                         ⬇️ TÍTULO ADICIONADO ⬇️
-                      ================================== */}
                   {bairrosToShow.length > 0 && (
                     <h4 className="text-lg font-semibold text-gray-800 mb-4">
                       Bairros Atendidos:
                     </h4>
                   )}
-                  {/* ==================================
-                         ⬆️ FIM DA ADIÇÃO ⬆️
-                      ================================== */}
+
                   <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
                     {areasVisiveis.map((area, index) =>
                       area === "SHOW_MORE_BUTTON" ? (
@@ -702,9 +676,8 @@ export default function MeiDetailPage({
                 Avaliações
               </h3>
 
-              {/* 11. SUBSTITUA o 'AvaliacaoModalButton' por um 'Button' simples */}
               <Button
-                onClick={handleNewReviewClick} // <-- Chama o novo handler
+                onClick={handleNewReviewClick}
                 className="rounded-full px-6 hover:cursor-pointer hover:text-white bg-gradient-to-br from-[#017DB9] to-[#22c362] text-white font-semibold shadow-md hover:scale-105 hover:shadow-lg active:scale-95 transition-all mb-4"
               >
                 Deixe sua avaliação
@@ -717,24 +690,20 @@ export default function MeiDetailPage({
                       {paginatedReviews
                         .slice()
                         .reverse()
-                        // 12. SUBSTITUA O MAP INLINE PELO COMPONENTE
                         .map((review, index) => (
-                          // Este é o componente que você me enviou
                           <ReviewComment
                             key={review.avaliacoesId}
                             review={review}
-                            // 13. PASSE AS PROPS CORRETAS
-                            onReplyClick={handleReplyClick} // <--- PASSE A FUNÇÃO
+                            onReplyClick={handleReplyClick}
                             onDeleteClick={handleDeleteClick}
                             currentUser={
                               user ? { usuarioId: user.usuarioId } : null
                             }
-                            allowReply={true} // <-- Permite que este nível tenha "Responder"
+                            allowReply={true}
                           />
                         ))}
                     </div>
 
-                    {/* ... (Paginação continua perfeita) ... */}
                     {totalPages > 1 && (
                       <div className="pt-4 flex justify-end rounded-lg">
                         <Pagination>
@@ -773,7 +742,6 @@ export default function MeiDetailPage({
                 )}
               </div>
 
-              {/* ... (AlertDialog para deletar continua perfeito) ... */}
               <AlertDialog
                 open={isDeleteDialogOpen}
                 onOpenChange={setIsDeleteDialogOpen}
@@ -808,9 +776,6 @@ export default function MeiDetailPage({
         </div>
       </motion.main>
 
-      {/* 14. ADICIONE O MODAL DE RESPOSTA (controlado pela página)
-          Este modal será invisível até que 'handleReplyClick' ou 'handleNewReviewClick' sejam chamados
-      */}
       {meiDetails && (
         <AvaliacaoModal
           isOpen={modalState.open}
