@@ -452,7 +452,7 @@ export default function MeiDetailPage({
               className="flex items-center gap-1.5 text-sm text-gray-600 hover:text-[#017DB9] transition-colors p-2 rounded-lg -mr-3 sm:mr-8 md:mr-12 lg:mr-36"
               title="Copiar link do perfil"
             >
-              <span className="font-medium">Compartilhar</span>
+              <span className="font-medium">Compartilhar Perfil</span>
               <Share2 className="w-4 h-4" />
             </button>
 
