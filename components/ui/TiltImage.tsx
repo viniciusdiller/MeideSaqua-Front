@@ -1,5 +1,3 @@
-// components/TiltImage.tsx
-
 "use client";
 
 import React, { useRef } from "react";
@@ -70,14 +68,17 @@ export const TiltImage = ({
         transformStyle: "preserve-3d",
         transform,
       }}
-      className="w-fit h-fit"
+      // CORREÇÃO AQUI: Mudamos de 'w-fit h-fit' para classes responsivas
+      className="relative flex items-center justify-center max-w-full max-h-full"
     >
       <Image
         src={src}
         alt={alt}
         width={width}
         height={height}
+        // Garante que a imagem respeite o container pai
         className={`rounded-3xl border-2 border-gray-200 object-cover ${className}`}
+        style={{ width: 'auto', height: 'auto', maxWidth: '100%', maxHeight: '100%' }}
       />
     </motion.div>
   );
