@@ -811,20 +811,23 @@ const AdminDashboard: React.FC = () => {
         </Modal>
       )}
 
-      <AdminEstabelecimentoModal
-        estabelecimento={selectedItem}
-        visible={isEditModalVisible}
-        onClose={(shouldRefresh: boolean) => {
-          setIsEditModalVisible(false);
-          if (shouldRefresh) {
-            setModalVisible(false);
-            setSelectedItem(null);
-            fetchData();
-          }
-        }}
-        mode="edit-and-approve"
-        onEditAndApprove={handleEditAndApproveSubmit}
-      />
+      {isEditModalVisible && (
+        <AdminEstabelecimentoModal
+          estabelecimento={selectedItem}
+          visible={isEditModalVisible}
+          onClose={(shouldRefresh: boolean) => {
+            setIsEditModalVisible(false);
+            if (shouldRefresh) {
+              setModalVisible(false);
+              setSelectedItem(null);
+              fetchData();
+            }
+          }}
+          mode="edit-and-approve"
+          onEditAndApprove={handleEditAndApproveSubmit}
+        />
+      )}
+
       <Modal
         title="Confirmar Rejeição"
         open={isRejectModalVisible}

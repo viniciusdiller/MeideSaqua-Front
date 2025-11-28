@@ -31,7 +31,7 @@ import {
   categorias,
   areasAtuacao,
   tagsPorCategoria,
-  canaisDeVendaOpcoes
+  canaisDeVendaOpcoes,
 } from "@/app/cadastro-mei/page";
 import dynamic from "next/dynamic";
 import "react-quill/dist/quill.snow.css";
@@ -256,6 +256,7 @@ const AdminEstabelecimentoModal: React.FC<AdminEstabelecimentoModalProps> = ({
       open={visible}
       onCancel={() => onClose(false)}
       width={900}
+      destroyOnClose={true}
       footer={[
         <Button key="cancel" onClick={() => onClose(false)}>
           Cancelar
@@ -444,28 +445,28 @@ const AdminEstabelecimentoModal: React.FC<AdminEstabelecimentoModalProps> = ({
           </Form.Item>
 
           <Form.Item name="venda" label="Canais de Venda">
-          <Select 
-            mode="multiple" 
-            placeholder="Selecione os canais de venda"
-            allowClear
-          >
-            {/* Usamos a constante importada */}
-            {canaisDeVendaOpcoes.map((opt) => (
-              <Option key={opt.value} value={opt.value}>
-                {opt.label}
-              </Option>
-            ))}
-          </Select>
-        </Form.Item>
+            <Select
+              mode="multiple"
+              placeholder="Selecione os canais de venda"
+              allowClear
+            >
+              {/* Usamos a constante importada */}
+              {canaisDeVendaOpcoes.map((opt) => (
+                <Option key={opt.value} value={opt.value}>
+                  {opt.label}
+                </Option>
+              ))}
+            </Select>
+          </Form.Item>
 
-        <Form.Item 
-          name="escala" 
-          label="Nota de Impacto (0-10)"
-          help="Nota que o usuário deu sobre o impacto da plataforma."
-        >
-          {/* Usamos o Rate (estrelas) da antd com 10 estrelas */}
-          <Rate count={10} />
-        </Form.Item>
+          <Form.Item
+            name="escala"
+            label="Nota de Impacto (0-10)"
+            help="Nota que o usuário deu sobre o impacto da plataforma."
+          >
+            {/* Usamos o Rate (estrelas) da antd com 10 estrelas */}
+            <Rate count={10} />
+          </Form.Item>
 
           <Title level={5} className="mt-4">
             Gerenciamento de Imagens

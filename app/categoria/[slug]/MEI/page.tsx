@@ -183,7 +183,8 @@ export default function MeiDetailPage({
     if (typeof window !== "undefined") {
       navigator.clipboard.writeText(window.location.href);
       toast.success("Link copiado para a área de transferência!", {
-        description: "Agora você pode compartilhar esse perfil com quem quiser.",
+        description:
+          "Agora você pode compartilhar esse perfil com quem quiser.",
         duration: 3000,
       });
     }
@@ -429,9 +430,8 @@ export default function MeiDetailPage({
         animate={{ y: "0%", opacity: 1 }}
         transition={{ duration: 0.6, ease: "easeOut" }}
       >
-     <div className="bg-white/80 backdrop-blur-md border-b border-gray-200/80">
+        <div className="bg-white/80 backdrop-blur-md border-b border-gray-200/80">
           <div className="relative w-full px-4 sm:px-6 py-3 flex items-center justify-between">
-            
             {/* Esquerda: Botão Voltar */}
             <Link
               href={`/categoria/${categorySlug}`}
@@ -455,7 +455,6 @@ export default function MeiDetailPage({
               <span className="font-medium">Compartilhar Perfil</span>
               <Share2 className="w-4 h-4" />
             </button>
-
           </div>
         </div>
       </motion.header>
@@ -546,24 +545,26 @@ export default function MeiDetailPage({
                 </div>
               </div>
               <div className="flex items-center justify-center md:col-span-1">
-  {/* Container com tamanho fixo/máximo definido e overflow hidden */}
-             <div className="flex items-center justify-center md:col-span-1">
-  {/* Container com tamanho fixo/máximo definido e overflow hidden */}
-  <div className="relative w-48 h-48 md:w-56 md:h-56 desktop:w-64 desktop:h-64 bg-white rounded-2xl flex items-center justify-center p-4 overflow-hidden">
-    <TiltImage
-      src={
-        (meiDetails.logoUrl &&
-          `${API_URL}/${normalizeImagePath(meiDetails.logoUrl)}`) ||
-        "/LogoMeideSaqua.png"
-      }
-      alt={`Logo de ${meiDetails.nomeFantasia}`}
-      width={500}
-      height={500}
-      className="w-full h-full object-contain"
-    />
-  </div>
-</div>
-            </div>
+                {/* Container com tamanho fixo/máximo definido e overflow hidden */}
+                <div className="flex items-center justify-center md:col-span-1">
+                  {/* Container com tamanho fixo/máximo definido e overflow hidden */}
+                  <div className="relative w-48 h-48 md:w-56 md:h-56 desktop:w-64 desktop:h-64 bg-white rounded-2xl flex items-center justify-center p-4 overflow-hidden">
+                    <TiltImage
+                      src={
+                        (meiDetails.logoUrl &&
+                          `${API_URL}/${normalizeImagePath(
+                            meiDetails.logoUrl
+                          )}`) ||
+                        "/LogoMeideSaqua.png"
+                      }
+                      alt={`Logo de ${meiDetails.nomeFantasia}`}
+                      width={500}
+                      height={500}
+                      className="w-full h-full object-contain"
+                    />
+                  </div>
+                </div>
+              </div>
               <div className="quinhentos:hidden flex flex-col items-center justify-center gap-6 mt-6 col-span-full">
                 <div className="flex items-center gap-6">
                   <a
@@ -598,23 +599,25 @@ export default function MeiDetailPage({
               </div>
             </div>
           </motion.section>
-
-          <motion.section
-            className="bg-white p-6 rounded-3xl shadow-lg md:mx-auto md:max-w-[85%] space-y-6"
-            variants={itemVariants}
-          >
-            <div>
-              <h3 className="text-2xl font-bold text-gray-900 mb-2 border-l-4 border-[#017DB9] pl-3">
-                Portfólio
-              </h3>
-              <p className="text-sm text-gray-600">
-                Clique em uma imagem para visualizar em tamanho completo
-              </p>
-            </div>
-            <div className="bg-gray-50 p-4 sm:p-6 rounded-2xl shadow-md border border-gray-200">
-              <ImageGrid items={portfolioImages} />
-            </div>
-          </motion.section>
+          {Array.isArray(portfolioImages) &&
+            portfolioImages.some((item) => item && item.img) && (
+              <motion.section
+                className="bg-white p-6 rounded-3xl shadow-lg md:mx-auto md:max-w-[85%] space-y-6"
+                variants={itemVariants}
+              >
+                <div>
+                  <h3 className="text-2xl font-bold text-gray-900 mb-2 border-l-4 border-[#017DB9] pl-3">
+                    Portfólio
+                  </h3>
+                  <p className="text-sm text-gray-600">
+                    Clique em uma imagem para visualizar em tamanho completo
+                  </p>
+                </div>
+                <div className="bg-gray-50 p-4 sm:p-6 rounded-2xl shadow-md border border-gray-200">
+                  <ImageGrid items={portfolioImages} />
+                </div>
+              </motion.section>
+            )}
 
           <AnimatedSection>
             <div className="bg-white p-6 rounded-3xl shadow-lg md:mx-auto md:max-w-[85%] grid grid-cols-1 milecem:grid-cols-4 gap-8">
