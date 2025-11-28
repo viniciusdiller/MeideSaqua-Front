@@ -19,8 +19,11 @@ import {
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { ArrowLeftOutlined, CommentOutlined } from "@ant-design/icons";
-import { getAllActiveEstablishments } from "@/lib/api"; //
-import { Estabelecimento } from "@/types/Interface-Estabelecimento"; //
+import {
+  getAllActiveEstablishments,
+  adminGetReviewsByEstablishment,
+} from "@/lib/api";
+import { Estabelecimento } from "@/types/Interface-Estabelecimento";
 
 const { Title, Text } = Typography;
 const { Search } = Input;
@@ -31,7 +34,7 @@ const API_URL = process.env.NEXT_PUBLIC_API_URL;
 const PAGE_SIZE = 6;
 
 const getFullImageUrl = (path: string): string => {
-  if (!path) return "/placeholder-logo.png"; //
+  if (!path) return "/logo_mei_redonda.png";
   const normalizedPath = path.replace(/\\/g, "/");
   const cleanPath = normalizedPath.startsWith("/")
     ? normalizedPath.substring(1)
@@ -60,9 +63,41 @@ const AdminGerenciarComentariosPage: React.FC = () => {
       return;
     }
     try {
-      const data = await getAllActiveEstablishments(token);
-      setEstabelecimentos(data);
-      setFilteredEstabelecimentos(data);
+      const allEstabelecimentos = await getAllActiveEstablishments(token);
+
+      const estabelecimentosComComentarios: Estabelecimento[] = [];
+
+      for (const est of allEstabelecimentos) {
+        try {
+          const response = await adminGetReviewsByEstablishment(
+            String(est.estabelecimentoId),
+            token
+          );
+
+          let reviewsList = [];
+          if (Array.isArray(response)) {
+            reviewsList = response;
+          } else if (response && Array.isArray(response.data)) {
+            reviewsList = response.data;
+          } else if (response && Array.isArray(response.reviews)) {
+            reviewsList = response.reviews;
+          } else if (response && Array.isArray(response.avaliacoes)) {
+            reviewsList = response.avaliacoes;
+          }
+
+          if (reviewsList.length > 0) {
+            estabelecimentosComComentarios.push(est);
+          }
+        } catch (error) {
+          console.error(
+            `Erro ao verificar reviews do estabelecimento ${est.estabelecimentoId}:`,
+            error
+          );
+        }
+      }
+
+      setEstabelecimentos(estabelecimentosComComentarios);
+      setFilteredEstabelecimentos(estabelecimentosComComentarios);
     } catch (error: any) {
       message.error(error.message || "Falha ao buscar estabelecimentos.");
     } finally {
@@ -74,7 +109,6 @@ const AdminGerenciarComentariosPage: React.FC = () => {
     fetchData();
   }, [fetchData]);
 
-  // A busca usa apenas 'nomeFantasia' e 'categoria'
   const handleSearch = (value: string) => {
     const lowerCaseValue = value.toLowerCase();
     const filtered = estabelecimentos.filter(

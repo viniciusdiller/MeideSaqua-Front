@@ -1203,14 +1203,17 @@ const CadastroMEIPage: React.FC = () => {
         </Row>
         <Row gutter={24}>
           <Col xs={24} md={12}>
-            <Form.Item label="Sua Logo" help="Envie 1 imagem para o perfil.">
+            <Form.Item
+              label="Sua Logo"
+              help="Envie 1 imagem para o perfil. (.png, .jpg, .jpeg)"
+            >
               <Upload
                 customRequest={customUploadAction}
                 fileList={logoFileList}
                 onChange={handleLogoChange}
                 listType="picture"
                 maxCount={1}
-                accept="image/png, image/jpeg, image/webp"
+                accept="image/png, image/jpeg, image/jpg"
               >
                 <Button icon={<UploadOutlined />}>Carregar Logo</Button>
               </Upload>
@@ -1219,7 +1222,7 @@ const CadastroMEIPage: React.FC = () => {
           <Col xs={24} md={12}>
             <Form.Item
               label="Imagens do seu Produto ou Serviço"
-              help="Envie até 4 imagens."
+              help="Envie até 4 imagens. (.png, .jpg, .jpeg)"
             >
               <Upload
                 customRequest={customUploadAction}
@@ -1228,7 +1231,7 @@ const CadastroMEIPage: React.FC = () => {
                 listType="picture"
                 multiple
                 maxCount={4}
-                accept="image/png, image/jpeg, image/webp"
+                accept="image/png, image/jpeg, image/jpg image/webp"
               >
                 <Button icon={<UploadOutlined />}>Carregar Portfólio</Button>
               </Upload>
@@ -1446,7 +1449,7 @@ const CadastroMEIPage: React.FC = () => {
 
         <Form.Item
           label="Nova Logo (Opcional)"
-          help="Envie 1 nova imagem para substituir a logo atual."
+          help="Envie 1 nova imagem para substituir a logo atual. (.png, .jpg, .jpeg)"
         >
           <Upload
             customRequest={customUploadAction}
@@ -1454,7 +1457,7 @@ const CadastroMEIPage: React.FC = () => {
             onChange={handleLogoChange}
             listType="picture"
             maxCount={1}
-            accept="image/png, image/jpeg, image/webp"
+            accept="image/png, image/jpeg, image/jpg image/webp"
           >
             <Button icon={<UploadOutlined />}>Carregar Nova Logo</Button>
           </Upload>
@@ -1574,7 +1577,7 @@ const CadastroMEIPage: React.FC = () => {
         <Form.Item
           name="portfolio"
           label="Novas Fotos do Portfólio (até 4)"
-          help="As imagens enviadas aqui irão substituir as atuais."
+          help="As imagens enviadas aqui irão substituir as atuais. (.png, .jpg, .jpeg)"
         >
           <Upload
             customRequest={customUploadAction}
@@ -1583,7 +1586,7 @@ const CadastroMEIPage: React.FC = () => {
             listType="picture"
             multiple
             maxCount={4}
-            accept="image/png, image/jpeg, image/webp"
+            accept="image/png, image/jpeg, image/jpg image/webp"
           >
             <Button icon={<UploadOutlined />}>Carregar Novas Imagens</Button>
           </Upload>
