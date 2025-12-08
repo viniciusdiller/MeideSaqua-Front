@@ -324,3 +324,19 @@ export function formatarDataParaMesAno(dateString: string): string {
     year: "numeric",
   }).format(data);
 }
+export const adminExportEstabelecimentos = async (token: string) => {
+  const response = await fetch(`${API_URL}/api/admin/exportar-estabelecimentos`, {
+    method: "GET",
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  });
+
+  if (!response.ok) {
+    const errorData = await response.json().catch(() => ({}));
+    throw new Error(errorData.message || "Falha ao exportar estabelecimentos");
+  }
+
+  // Retorna o Blob do arquivo para download
+  return response.blob();
+};

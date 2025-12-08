@@ -23,13 +23,15 @@ import {
   ArrowLeftOutlined,
   EditOutlined,
   DeleteOutlined,
+  DownloadOutlined, // <--- 1. Importação do ícone de download
 } from "@ant-design/icons";
 import {
-  getAllActiveEstablishments, // <-- API MeideSaquá
-  adminDeleteEstablishment, // <-- API MeideSaquá
+  getAllActiveEstablishments,
+  adminDeleteEstablishment,
+  adminExportEstabelecimentos, // <--- 2. Importação da função de exportação
 } from "@/lib/api";
-import AdminEstabelecimentoModal from "@/components/AdminEstabelecimentoModal"; // <-- Modal MeideSaquá
-import { Estabelecimento } from "@/types/Interface-Estabelecimento"; // <-- Interface MeideSaquá
+import AdminEstabelecimentoModal from "@/components/AdminEstabelecimentoModal";
+import { Estabelecimento } from "@/types/Interface-Estabelecimento";
 
 const { Title, Text } = Typography;
 const { Search } = Input;
@@ -37,7 +39,7 @@ const { TabPane } = Tabs;
 const { useBreakpoint } = Grid;
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL;
-const PAGE_SIZE = 6; // 6 estabelecimentos por página (em cada aba)
+const PAGE_SIZE = 6;
 
 const getFullImageUrl = (path: string): string => {
   if (!path) return "";
@@ -60,6 +62,7 @@ const EstabelecimentosAtivosPage: React.FC = () => {
     null
   );
   const [isEditModalVisible, setIsEditModalVisible] = useState(false);
+  const [exporting, setExporting] = useState(false); // <--- 3. Novo estado para controlar o loading do botão exportar
   const [currentPage, setCurrentPage] = useState(1);
   const router = useRouter();
   const screens = useBreakpoint();
@@ -73,7 +76,6 @@ const EstabelecimentosAtivosPage: React.FC = () => {
       return;
     }
     try {
-      // Usando a API do MeideSaquá
       const data = await getAllActiveEstablishments(token);
       setEstabelecimentos(data);
       setFilteredEstabelecimentos(data);
@@ -88,6 +90,37 @@ const EstabelecimentosAtivosPage: React.FC = () => {
     fetchData();
   }, [fetchData]);
 
+  // --- 4. Função para lidar com a exportação ---
+  const handleExport = async () => {
+    const token = localStorage.getItem("admin_token");
+    if (!token) {
+      message.error("Sessão expirada.");
+      return;
+    }
+
+    setExporting(true);
+    try {
+      const blob = await adminExportEstabelecimentos(token);
+
+      // Cria um link temporário para forçar o download do arquivo
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = `estabelecimentos_MeiDeSaqua_${new Date().toISOString().split("T")[0]}.csv`;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      window.URL.revokeObjectURL(url);
+
+      message.success("Relatório gerado com sucesso!");
+    } catch (error: any) {
+      console.error(error);
+      message.error("Erro ao gerar relatório. Tente novamente.");
+    } finally {
+      setExporting(false);
+    }
+  };
+
   const handleSearch = (value: string) => {
     const lowerCaseValue = value.toLowerCase();
     const filtered = estabelecimentos.filter(
@@ -97,7 +130,7 @@ const EstabelecimentosAtivosPage: React.FC = () => {
         p.categoria.toLowerCase().includes(lowerCaseValue)
     );
     setFilteredEstabelecimentos(filtered);
-    setCurrentPage(1); // Reseta a paginação ao buscar
+    setCurrentPage(1);
   };
 
   const openEditModal = (est: Estabelecimento) => {
@@ -109,7 +142,7 @@ const EstabelecimentosAtivosPage: React.FC = () => {
     setIsEditModalVisible(false);
     setSelectedItem(null);
     if (shouldRefresh) {
-      fetchData(); // Recarrega os dados se o modal salvar
+      fetchData();
     }
   };
 
@@ -122,22 +155,19 @@ const EstabelecimentosAtivosPage: React.FC = () => {
 
     setLoading(true);
     try {
-      // Usando a API de delete do MeideSaquá
       await adminDeleteEstablishment(estId, token);
       message.success("Estabelecimento excluído com sucesso!");
-      fetchData(); // Recarrega os dados
+      fetchData();
     } catch (error: any) {
       message.error(error.message || "Falha ao excluir o estabelecimento.");
       setLoading(false);
     }
   };
 
-  // Reseta a página ao trocar de aba
   const handleTabChange = () => {
     setCurrentPage(1);
   };
 
-  // Agrupa os estabelecimentos por Categoria
   const groupedEstabelecimentos = filteredEstabelecimentos.reduce(
     (acc, est) => {
       const categoria = est.categoria || "Sem Categoria";
@@ -150,7 +180,6 @@ const EstabelecimentosAtivosPage: React.FC = () => {
     {} as { [key: string]: Estabelecimento[] }
   );
 
-  // Ordena as categorias alfabeticamente
   const sortedCategories = Object.keys(groupedEstabelecimentos).sort((a, b) =>
     a.localeCompare(b)
   );
@@ -159,11 +188,24 @@ const EstabelecimentosAtivosPage: React.FC = () => {
 
   return (
     <div className="p-4 md:p-8">
-      <Link href="/admin/dashboard" passHref>
-        <Button icon={<ArrowLeftOutlined />} type="text" className="mb-4">
-          Voltar ao Dashboard
+      {/* 5. Cabeçalho Atualizado com Botão de Exportar */}
+      <div className="flex justify-between items-center mb-4 flex-wrap gap-4">
+        <Link href="/admin/dashboard" passHref>
+          <Button icon={<ArrowLeftOutlined />} type="text">
+            Voltar ao Dashboard
+          </Button>
+        </Link>
+
+        <Button
+          type="primary"
+          icon={<DownloadOutlined />}
+          onClick={handleExport}
+          loading={exporting}
+          className="bg-green-600 hover:!bg-green-700 border-green-600 hover:!border-green-700"
+        >
+          Exportar Planilha (CSV)
         </Button>
-      </Link>
+      </div>
 
       <Title level={2} className="mb-6">
         Gerenciar Estabelecimentos Ativos ({filteredEstabelecimentos.length})
@@ -183,19 +225,15 @@ const EstabelecimentosAtivosPage: React.FC = () => {
           <Empty description="Nenhum estabelecimento ativo encontrado." />
         ) : (
           <Tabs
-            defaultActiveKey="todos" // Inicia na aba "Todos"
+            defaultActiveKey="todos"
             tabPosition={tabPosition}
             onChange={handleTabChange}
           >
-            {/* ==================================
-                  ⬇️ ABA "TODOS" ⬇️
-                ================================== */}
             <TabPane
               tab={`Todos (${filteredEstabelecimentos.length})`}
               key="todos"
             >
               {(() => {
-                // Lógica de paginação para a aba "Todos"
                 const totalCount = filteredEstabelecimentos.length;
                 const estabelecimentosToShow = filteredEstabelecimentos.slice(
                   (currentPage - 1) * PAGE_SIZE,
@@ -247,9 +285,6 @@ const EstabelecimentosAtivosPage: React.FC = () => {
                                 />
                               }
                               title={est.nomeFantasia}
-                              // ==================================
-                              //   ⬇️ 1. ALTERAÇÃO AQUI (ABA TODOS) ⬇️
-                              // ==================================
                               description={
                                 <>
                                   <Text>
@@ -276,7 +311,6 @@ const EstabelecimentosAtivosPage: React.FC = () => {
                       ))}
                     </Row>
 
-                    {/* Renderiza o componente de paginação da aba "Todos" */}
                     {totalCount > PAGE_SIZE && (
                       <div className="mt-6 text-center">
                         <Pagination
@@ -293,11 +327,7 @@ const EstabelecimentosAtivosPage: React.FC = () => {
               })()}
             </TabPane>
 
-            {/* ==================================
-                  ⬇️ ABAS DE CATEGORIA ⬇️
-                ================================== */}
             {sortedCategories.map((categoria) => {
-              // Lógica de paginação por aba
               const allEstabelecimentosForCat =
                 groupedEstabelecimentos[categoria];
               const totalCount = allEstabelecimentosForCat.length;
@@ -354,9 +384,6 @@ const EstabelecimentosAtivosPage: React.FC = () => {
                               />
                             }
                             title={est.nomeFantasia}
-                            // ==================================
-                            //   ⬇️ 2. ALTERAÇÃO AQUI (ABAS DE CATEGORIA) ⬇️
-                            // ==================================
                             description={
                               <>
                                 <Text>
@@ -383,7 +410,6 @@ const EstabelecimentosAtivosPage: React.FC = () => {
                     ))}
                   </Row>
 
-                  {/* Renderiza o componente de paginação da aba */}
                   {totalCount > PAGE_SIZE && (
                     <div className="mt-6 text-center">
                       <Pagination
@@ -402,13 +428,11 @@ const EstabelecimentosAtivosPage: React.FC = () => {
         )}
       </Spin>
 
-      {/* Modal de Edição do MeideSaquá */}
       <AdminEstabelecimentoModal
         estabelecimento={selectedItem}
         visible={isEditModalVisible}
         onClose={handleModalClose}
         mode="edit-only"
-        // Passa uma função vazia pois o modal "edit-only" não usa
         onEditAndApprove={async () => {}}
       />
     </div>
