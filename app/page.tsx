@@ -1,6 +1,6 @@
 "use client";
 import Image from "next/image";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { motion } from "framer-motion";
 import Link from "next/link";
 import { ArrowUp } from "lucide-react";
@@ -8,6 +8,7 @@ import ImageCarousel from "../components/ImageCarousel";
 import { Search } from "lucide-react";
 import ButtonWrapper from "../components/ui/button-home";
 import FaleConoscoButton from "@/components/FaleConoscoButton";
+import { registrarVisualizacao } from "@/lib/api";
 
 export { categories };
 const categories = [
@@ -113,6 +114,16 @@ export default function HomePage() {
   const [visibleCards, setVisibleCards] = useState(0);
   const [searchTerm, setSearchTerm] = useState("");
   const [showScrollTop, setShowScrollTop] = useState(false);
+
+  const jaContabilizou = useRef(false);
+
+  useEffect(() => {
+    if (!jaContabilizou.current) {
+      jaContabilizou.current = true;
+
+      registrarVisualizacao("HOME");
+    }
+  }, []);
 
   useEffect(() => {
     const totalItems = categories.length + 1;

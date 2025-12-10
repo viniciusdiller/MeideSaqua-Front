@@ -23,12 +23,13 @@ import {
   ArrowLeftOutlined,
   EditOutlined,
   DeleteOutlined,
-  DownloadOutlined, // <--- 1. Importação do ícone de download
+  DownloadOutlined,
+  BarChartOutlined, // <--- 1. Importação do ícone de gráfico
 } from "@ant-design/icons";
 import {
   getAllActiveEstablishments,
   adminDeleteEstablishment,
-  adminExportEstabelecimentos, // <--- 2. Importação da função de exportação
+  adminExportEstabelecimentos,
 } from "@/lib/api";
 import AdminEstabelecimentoModal from "@/components/AdminEstabelecimentoModal";
 import { Estabelecimento } from "@/types/Interface-Estabelecimento";
@@ -62,7 +63,7 @@ const EstabelecimentosAtivosPage: React.FC = () => {
     null
   );
   const [isEditModalVisible, setIsEditModalVisible] = useState(false);
-  const [exporting, setExporting] = useState(false); // <--- 3. Novo estado para controlar o loading do botão exportar
+  const [exporting, setExporting] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
   const router = useRouter();
   const screens = useBreakpoint();
@@ -90,7 +91,6 @@ const EstabelecimentosAtivosPage: React.FC = () => {
     fetchData();
   }, [fetchData]);
 
-  // --- 4. Função para lidar com a exportação ---
   const handleExport = async () => {
     const token = localStorage.getItem("admin_token");
     if (!token) {
@@ -102,11 +102,12 @@ const EstabelecimentosAtivosPage: React.FC = () => {
     try {
       const blob = await adminExportEstabelecimentos(token);
 
-      // Cria um link temporário para forçar o download do arquivo
       const url = window.URL.createObjectURL(blob);
       const a = document.createElement("a");
       a.href = url;
-      a.download = `estabelecimentos_MeiDeSaqua_${new Date().toISOString().split("T")[0]}.csv`;
+      a.download = `estabelecimentos_MeiDeSaqua_${
+        new Date().toISOString().split("T")[0]
+      }.csv`;
       document.body.appendChild(a);
       a.click();
       a.remove();
@@ -188,7 +189,7 @@ const EstabelecimentosAtivosPage: React.FC = () => {
 
   return (
     <div className="p-4 md:p-8">
-      {/* 5. Cabeçalho Atualizado com Botão de Exportar */}
+      {/* Cabeçalho Atualizado com Botões */}
       <div className="flex justify-between items-center mb-4 flex-wrap gap-4">
         <Link href="/admin/dashboard" passHref>
           <Button icon={<ArrowLeftOutlined />} type="text">
@@ -196,15 +197,24 @@ const EstabelecimentosAtivosPage: React.FC = () => {
           </Button>
         </Link>
 
-        <Button
-          type="primary"
-          icon={<DownloadOutlined />}
-          onClick={handleExport}
-          loading={exporting}
-          className="bg-green-600 hover:!bg-green-700 border-green-600 hover:!border-green-700"
-        >
-          Exportar Planilha (CSV)
-        </Button>
+        {/* Grupo de Ações à Direita */}
+        <div className="flex gap-2">
+          {/* Botão para página de Indicadores */}
+          <Link href="/admin/indicadores" passHref>
+            <Button icon={<BarChartOutlined />}>Ver Indicadores</Button>
+          </Link>
+
+          {/* Botão de Exportar */}
+          <Button
+            type="primary"
+            icon={<DownloadOutlined />}
+            onClick={handleExport}
+            loading={exporting}
+            className="bg-green-600 hover:!bg-green-700 border-green-600 hover:!border-green-700"
+          >
+            Exportar Planilha (CSV)
+          </Button>
+        </div>
       </div>
 
       <Title level={2} className="mb-6">

@@ -1,9 +1,34 @@
 // EPAÇO MEI
+"use client";
 import Link from "next/link";
 import React from "react";
 import Image from "next/image";
+import { registrarVisualizacao } from "@/lib/api";
+import { useEffect, useRef } from "react";
 
 export default function SobrePage() {
+  const jaContabilizou = useRef(false);
+
+  useEffect(() => {
+    if (!jaContabilizou.current) {
+      jaContabilizou.current = true;
+      registrarVisualizacao("ESPACO_MEI");
+    }
+  }, []);
+
+  const handleCursoClick = (nomeCurso: string) => {
+    const idCurso =
+      "CURSO_" +
+      nomeCurso
+        .normalize("NFD")
+        .replace(/[\u0300-\u036f]/g, "")
+        .replace(/[^a-zA-Z0-9 ]/g, "")
+        .replace(/\s+/g, "_")
+        .toUpperCase();
+
+    registrarVisualizacao(idCurso);
+  };
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-300 to-blue-800 py-20 px-6 sm:px-12">
       <div className="max-w-5xl mx-auto bg-white rounded-3xl shadow-lg p-10 sm:p-16">
@@ -77,6 +102,9 @@ export default function SobrePage() {
               target="_blank"
               rel="noopener noreferrer"
               className="group block text-center"
+              onClick={() =>
+                handleCursoClick("Como agir de maneira empreendedora")
+              }
             >
               <div className="overflow-hidden rounded-lg border border-gray-200 group-hover:shadow-xl transition-shadow duration-300">
                 <Image
@@ -97,6 +125,7 @@ export default function SobrePage() {
               target="_blank"
               rel="noopener noreferrer"
               className="group block text-center"
+              onClick={() => handleCursoClick("Empreender na prática")}
             >
               <div className="overflow-hidden rounded-lg border border-gray-200 group-hover:shadow-xl transition-shadow duration-300">
                 <Image
@@ -117,6 +146,11 @@ export default function SobrePage() {
               target="_blank"
               rel="noopener noreferrer"
               className="group block text-center"
+              onClick={() =>
+                handleCursoClick(
+                  "Como formalizar seu negócio como microempreendedor individual"
+                )
+              }
             >
               <div className="overflow-hidden rounded-lg border border-gray-200 group-hover:shadow-xl transition-shadow duration-300">
                 <Image
@@ -137,6 +171,9 @@ export default function SobrePage() {
               target="_blank"
               rel="noopener noreferrer"
               className="group block text-center"
+              onClick={() =>
+                handleCursoClick("Empreendedorismo como opção de carreira")
+              }
             >
               <div className="overflow-hidden rounded-lg border border-gray-200 group-hover:shadow-xl transition-shadow duration-300">
                 <Image
@@ -157,6 +194,7 @@ export default function SobrePage() {
               target="_blank"
               rel="noopener noreferrer"
               className="group block text-center"
+              onClick={() => handleCursoClick("Aprender a empreender")}
             >
               <div className="overflow-hidden rounded-lg border border-gray-200 group-hover:shadow-xl transition-shadow duration-300">
                 <Image
@@ -177,6 +215,11 @@ export default function SobrePage() {
               target="_blank"
               rel="noopener noreferrer"
               className="group block text-center"
+              onClick={() =>
+                handleCursoClick(
+                  "Como ser um(a) empreendedor(a) mais eficiente"
+                )
+              }
             >
               <div className="overflow-hidden rounded-lg border border-gray-200 group-hover:shadow-xl transition-shadow duration-300">
                 <Image
@@ -197,6 +240,9 @@ export default function SobrePage() {
               target="_blank"
               rel="noopener noreferrer"
               className="group block text-center"
+              onClick={() =>
+                handleCursoClick("Curso pelo whatsApp: Meu Negócio Online")
+              }
             >
               <div className="overflow-hidden rounded-lg border border-gray-200 group-hover:shadow-xl transition-shadow duration-300">
                 <Image
@@ -217,6 +263,11 @@ export default function SobrePage() {
               target="_blank"
               rel="noopener noreferrer"
               className="group block text-center"
+              onClick={() =>
+                handleCursoClick(
+                  "Fluxo de caixa como ferramenta de gestão para o seu negócio"
+                )
+              }
             >
               <div className="overflow-hidden rounded-lg border border-gray-200 group-hover:shadow-xl transition-shadow duration-300">
                 <Image
@@ -306,7 +357,8 @@ export default function SobrePage() {
                     rel="noopener noreferrer"
                     className="text-gray-700 hover:underline hover:text-blue-600"
                   >
-                    Avenida Saquarema, 5.481, Bacaxá - Saquarema - RJ, 28994-711 (Central do Cidadão)
+                    Avenida Saquarema, 5.481, Bacaxá - Saquarema - RJ, 28994-711
+                    (Central do Cidadão)
                   </a>
                 </li>
               </ul>

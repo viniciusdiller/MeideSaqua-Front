@@ -324,13 +324,17 @@ export function formatarDataParaMesAno(dateString: string): string {
     year: "numeric",
   }).format(data);
 }
+
 export const adminExportEstabelecimentos = async (token: string) => {
-  const response = await fetch(`${API_URL}/api/admin/exportar-estabelecimentos`, {
-    method: "GET",
-    headers: {
-      Authorization: `Bearer ${token}`,
-    },
-  });
+  const response = await fetch(
+    `${API_URL}/api/admin/exportar-estabelecimentos`,
+    {
+      method: "GET",
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    }
+  );
 
   if (!response.ok) {
     const errorData = await response.json().catch(() => ({}));
@@ -340,3 +344,36 @@ export const adminExportEstabelecimentos = async (token: string) => {
   // Retorna o Blob do arquivo para download
   return response.blob();
 };
+
+export async function getAdminStats(token: string) {
+  const res = await fetch(`${API_URL}/api/admin/dashboard-stats`, {
+    method: "GET",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${token}`,
+    },
+  });
+
+  if (!res.ok) {
+    throw new Error("Falha ao buscar estatísticas");
+  }
+
+  return res.json();
+}
+
+// Adicione também esta função para registrar visualizações (home e categorias)
+export async function registrarVisualizacao(identificador: string) {
+  try {
+    await fetch(
+      `${API_URL}/api/estabelecimentos/visualizacao/${identificador}`,
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+      }
+    );
+  } catch (error) {
+    console.error("Erro ao registrar visualização", error);
+  }
+}

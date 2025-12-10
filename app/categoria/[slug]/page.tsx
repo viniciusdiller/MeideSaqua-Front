@@ -1,6 +1,6 @@
 // app/categoria/[slug]/page.tsx
 "use client";
-import { useState, useEffect, useMemo } from "react"; // 1. Adicionado useMemo
+import { useState, useEffect, useMemo, useRef } from "react"; // 1. Adicionado useMemo
 import { motion } from "framer-motion";
 import Link from "next/link";
 import {
@@ -20,8 +20,8 @@ import ModernCarousel from "@/components/ModernCarousel";
 import { getAllEstablishments } from "@/lib/api";
 import { Button } from "@/components/ui/button";
 import FormattedDescription from "@/components/FormattedDescription";
-// import MeiDetailPage from "./MEI/page"; // <-- REMOVIDO. Esta página não renderiza mais o detalhe.
-import { Pagination, Empty } from "antd"; // 2. Adicionado Pagination e Empty
+import { registrarVisualizacao } from "@/lib/api";
+import { Pagination, Empty } from "antd";
 
 interface PageProps {
   params: {
@@ -44,10 +44,19 @@ const getImageUrl = (path?: string) => {
 
 export default function CategoryPage({ params }: PageProps) {
   const [locations, setLocations] = useState<any[]>([]);
-  // const [selectedLocation, setSelectedLocation] = useState<any>(null); // <-- REMOVIDO.
+
   const [isLoading, setIsLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
-  const [currentPage, setCurrentPage] = useState(1); // 5. Adicionado estado da página
+  const [currentPage, setCurrentPage] = useState(1);
+
+  const decodedSlug = decodeURIComponent(params.slug);
+  const jaContabilizou = useRef(false);
+  useEffect(() => {
+    if (decodedSlug && !jaContabilizou.current) {
+      jaContabilizou.current = true;
+      registrarVisualizacao(decodedSlug);
+    }
+  }, [decodedSlug]);
 
   useEffect(() => {
     const fetchLocations = async () => {
