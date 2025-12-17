@@ -18,6 +18,7 @@ import {
   getEstablishmentById,
   deleteReview,
   formatarDataParaMesAno,
+  registrarVisualizacao,
 } from "@/lib/api";
 import AvaliacaoModal from "@/components/Pop-up Coments";
 import { ReviewComment } from "@/components/ReviewComments";
@@ -182,6 +183,7 @@ export default function MeiDetailPage({
   const handleCopyLink = () => {
     if (typeof window !== "undefined") {
       navigator.clipboard.writeText(window.location.href);
+      registrarVisualizacao("PROFILE_SHARE");
       toast.success("Link copiado para a área de transferência!", {
         description:
           "Agora você pode compartilhar esse perfil com quem quiser.",

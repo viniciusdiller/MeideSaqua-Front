@@ -30,6 +30,7 @@ import {
   CloseOutlined,
   DatabaseOutlined,
   CommentOutlined,
+  HomeOutlined,
 } from "@ant-design/icons";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -689,6 +690,20 @@ const AdminDashboard: React.FC = () => {
           >
             Painel de Administração
           </Title>
+          </div>
+
+          <div className="flex flex-col md:flex-row md:justify-between md:items-center mb-6 gap-4">
+            {/* --- NOVO BOTÃO DE VOLTAR PARA HOME --- */}
+            <Link href="/" passHref>
+              <Button
+                icon={<HomeOutlined />}
+                size="large"
+                className={isMobile ? "w-full" : ""}
+              >
+                Home
+              </Button>
+            </Link>
+            {/* ------------------------------------- */}
 
           <div className="flex flex-col md:flex-row gap-2 w-full md:w-auto">
             <Link href="/admin/estabelecimentos-ativos" passHref>

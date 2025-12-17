@@ -1,4 +1,4 @@
-// EPAÇO MEI
+// ESPAÇO MEI
 "use client";
 import Link from "next/link";
 import React from "react";
@@ -27,6 +27,11 @@ export default function SobrePage() {
         .toUpperCase();
 
     registrarVisualizacao(idCurso);
+  };
+
+  // --- NOVA FUNÇÃO: Rastrear cliques nos links de contato/gov ---
+  const handleLinkClick = (id: string) => {
+    registrarVisualizacao(id);
   };
 
   return (
@@ -216,9 +221,7 @@ export default function SobrePage() {
               rel="noopener noreferrer"
               className="group block text-center"
               onClick={() =>
-                handleCursoClick(
-                  "Como ser um(a) empreendedor(a) mais eficiente"
-                )
+                handleCursoClick("Como ser um(a) empreendedor(a) mais eficiente")
               }
             >
               <div className="overflow-hidden rounded-lg border border-gray-200 group-hover:shadow-xl transition-shadow duration-300">
@@ -303,6 +306,8 @@ export default function SobrePage() {
                   target="_blank"
                   rel="noopener noreferrer"
                   className="text-blue-600 hover:underline"
+                  // TRACKING DO LINK GOV
+                  onClick={() => handleLinkClick("LINK_GOV")}
                 >
                   https://www.gov.br/empresas-e-negocios/pt-br/empreendedor
                 </a>{" "}
@@ -317,6 +322,8 @@ export default function SobrePage() {
                     target="_blank"
                     rel="noopener noreferrer"
                     className="text-gray-700 hover:underline hover:text-blue-600"
+                    // TRACKING DO WHATSAPP
+                    onClick={() => handleLinkClick("LINK_WPP")}
                   >
                     (22) 92005-2534
                   </a>
@@ -326,6 +333,8 @@ export default function SobrePage() {
                   <a
                     href="mailto:saladoempreendedor@saquarema.rj.gov.br"
                     className="text-gray-700 hover:underline hover:text-blue-600"
+                    // TRACKING DO EMAIL
+                    onClick={() => handleLinkClick("LINK_EMAIL")}
                   >
                     <span className="sm:hidden">
                       saladoempreendedor
