@@ -347,7 +347,7 @@ const campoLabels: { [key: string]: string } = {
 
   // Seção "Contato e Localização"
   contatoEstabelecimento: "Telefone / WhatsApp do Estabelecimento",
-  endereco: "Endereço Físico (se houver)",
+  endereco: "Endereço Físico do estabelecimento (se houver)",
   areasAtuacao: "Áreas de Atuação",
 
   // Seção "Detalhes e Mídia"
@@ -1099,7 +1099,7 @@ const CadastroMEIPage: React.FC = () => {
             onChange={(e) => handleMaskChange(e, maskPhone)}
           />
         </Form.Item>
-        <Form.Item name="endereco" label="Endereço Físico (se houver)">
+        <Form.Item name="endereco" label="Endereço Físico do estabelecimento (se houver)">
           <Input
             name="endereco"
             placeholder="Este endereço aparecerá no perfil do seu negócio, para o público."
