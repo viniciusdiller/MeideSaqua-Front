@@ -31,6 +31,7 @@ import {
   DatabaseOutlined,
   CommentOutlined,
   HomeOutlined,
+  TeamOutlined,
 } from "@ant-design/icons";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -118,7 +119,7 @@ const AdminDashboard: React.FC = () => {
   });
   const [modalVisible, setModalVisible] = useState(false);
   const [selectedItem, setSelectedItem] = useState<Estabelecimento | null>(
-    null
+    null,
   );
   const router = useRouter();
   const [isActionLoading, setIsActionLoading] = useState(false);
@@ -317,7 +318,7 @@ const AdminDashboard: React.FC = () => {
 
   const handleAction = async (
     action: "approve" | "reject",
-    motivoRejeicao?: string
+    motivoRejeicao?: string,
   ) => {
     if (!selectedItem) return;
 
@@ -344,7 +345,7 @@ const AdminDashboard: React.FC = () => {
 
       const response = await fetch(
         `${API_URL}/api/admin/${action}/${selectedItem.estabelecimentoId}`,
-        fetchOptions
+        fetchOptions,
       );
 
       if (!response.ok) {
@@ -355,7 +356,7 @@ const AdminDashboard: React.FC = () => {
         } catch (e) {
           console.error("Erro não-JSON da API:", errorText);
           throw new Error(
-            "Falha na comunicação com o servidor. (Recebeu HTML)"
+            "Falha na comunicação com o servidor. (Recebeu HTML)",
           );
         }
       }
@@ -367,7 +368,7 @@ const AdminDashboard: React.FC = () => {
         const newData = { ...prevData };
         (Object.keys(newData) as Array<keyof PendingData>).forEach((key) => {
           newData[key] = newData[key].filter(
-            (item) => item.estabelecimentoId !== selectedItem.estabelecimentoId
+            (item) => item.estabelecimentoId !== selectedItem.estabelecimentoId,
           );
         });
         return newData;
@@ -421,7 +422,7 @@ const AdminDashboard: React.FC = () => {
       await adminUpdateEstablishment(
         selectedItem.estabelecimentoId,
         formData,
-        token
+        token,
       );
 
       setIsEditModalVisible(false);
@@ -440,7 +441,7 @@ const AdminDashboard: React.FC = () => {
     status: "pendente_atualizacao" | "pendente_exclusao",
     alertType: "info" | "error",
     title: string,
-    keysToFilter: string[] = []
+    keysToFilter: string[] = [],
   ) => {
     if (
       !selectedItem ||
@@ -491,7 +492,7 @@ const AdminDashboard: React.FC = () => {
       .sort(
         (a, b) =>
           (fieldConfig[a.newKey]?.order ?? 999) -
-          (fieldConfig[b.newKey]?.order ?? 999)
+          (fieldConfig[b.newKey]?.order ?? 999),
       );
 
     const titleColor = alertType === "info" ? "#0050b3" : "#d4380d";
@@ -547,13 +548,13 @@ const AdminDashboard: React.FC = () => {
   const renderList = (
     title: string,
     listData: Estabelecimento[],
-    listKey: keyof PendingData
+    listKey: keyof PendingData,
   ) => {
     const totalCount = listData.length;
     const currentPage = currentPages[listKey];
     const pagedData = listData.slice(
       (currentPage - 1) * DASHBOARD_PAGE_SIZE,
-      currentPage * DASHBOARD_PAGE_SIZE
+      currentPage * DASHBOARD_PAGE_SIZE,
     );
 
     return (
@@ -628,7 +629,7 @@ const AdminDashboard: React.FC = () => {
                 >
                   {renderValue(key, value)}
                 </Descriptions.Item>
-              )
+              ),
           )}
         </Descriptions>
       </Card>
@@ -666,15 +667,15 @@ const AdminDashboard: React.FC = () => {
       .filter(([key]) => key !== "dados_atualizacao" && key !== "status")
       .sort(
         ([keyA], [keyB]) =>
-          (fieldConfig[keyA]?.order ?? 999) - (fieldConfig[keyB]?.order ?? 999)
+          (fieldConfig[keyA]?.order ?? 999) - (fieldConfig[keyB]?.order ?? 999),
       );
 
     const entriesResponsavel = allEntries.filter(([key]) =>
-      keysResponsavel.includes(key)
+      keysResponsavel.includes(key),
     );
     const entriesMei = allEntries.filter(([key]) => keysMei.includes(key));
     const entriesMetadados = allEntries.filter(
-      ([key]) => !keysResponsavel.includes(key) && !keysMei.includes(key)
+      ([key]) => !keysResponsavel.includes(key) && !keysMei.includes(key),
     );
 
     return { entriesResponsavel, entriesMei, entriesMetadados };
@@ -690,20 +691,20 @@ const AdminDashboard: React.FC = () => {
           >
             Painel de Administração
           </Title>
-          </div>
+        </div>
 
-          <div className="flex flex-col md:flex-row md:justify-between md:items-center mb-6 gap-4">
-            {/* --- NOVO BOTÃO DE VOLTAR PARA HOME --- */}
-            <Link href="/" passHref>
-              <Button
-                icon={<HomeOutlined />}
-                size="large"
-                className={isMobile ? "w-full" : ""}
-              >
-                Home
-              </Button>
-            </Link>
-            {/* ------------------------------------- */}
+        <div className="flex flex-col md:flex-row md:justify-between md:items-center mb-6 gap-4">
+          {/* --- NOVO BOTÃO DE VOLTAR PARA HOME --- */}
+          <Link href="/" passHref>
+            <Button
+              icon={<HomeOutlined />}
+              size="large"
+              className={isMobile ? "w-full" : ""}
+            >
+              Home
+            </Button>
+          </Link>
+          {/* ------------------------------------- */}
 
           <div className="flex flex-col md:flex-row gap-2 w-full md:w-auto">
             <Link href="/admin/estabelecimentos-ativos" passHref>
@@ -716,7 +717,6 @@ const AdminDashboard: React.FC = () => {
                 Gerenciar Estabelecimentos Ativos
               </Button>
             </Link>
-
             <Link href="/admin/comentarios" passHref>
               <Button
                 icon={<CommentOutlined />}
@@ -725,6 +725,21 @@ const AdminDashboard: React.FC = () => {
                 className={isMobile ? "w-full" : ""}
               >
                 Gerenciar Comentários
+              </Button>
+            </Link>
+
+            <Link href="/admin/usuarios" passHref>
+              <Button
+                icon={<TeamOutlined />}
+                size="large"
+                style={{
+                  backgroundColor: "#52c41a",
+                  color: "#fff",
+                  borderColor: "#52c41a",
+                }}
+                className={isMobile ? "w-full" : ""}
+              >
+                Gerenciar Usuários
               </Button>
             </Link>
           </div>
@@ -801,7 +816,7 @@ const AdminDashboard: React.FC = () => {
 
                 {renderDescriptionGroup(
                   "1. Identificação do Responsável",
-                  entriesResponsavel
+                  entriesResponsavel,
                 )}
 
                 {renderDescriptionGroup("2. Identificação do Mei", entriesMei)}
@@ -815,13 +830,13 @@ const AdminDashboard: React.FC = () => {
             "pendente_exclusao",
             "error",
             "Solicitação de Exclusão",
-            ["estabelecimentoId", "confirmacao"]
+            ["estabelecimentoId", "confirmacao"],
           )}
           {renderDiffTable(
             "pendente_atualizacao",
             "info",
             "Dados para Atualizar",
-            ["motivoExclusao", "venda", "escala"]
+            ["motivoExclusao", "venda", "escala"],
           )}
         </Modal>
       )}

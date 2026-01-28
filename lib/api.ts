@@ -82,7 +82,7 @@ export const confirmAccount = (token: string) =>
 
 export const updateUserProfile = (
   data: { nomeCompleto?: string; email?: string },
-  token: string
+  token: string,
 ) =>
   fetchApi("/api/users/profile", {
     method: "POST",
@@ -94,7 +94,7 @@ export const updateUserProfile = (
 
 export const changeUserPassword = (
   data: { currentPassword?: string; newPassword?: string },
-  token: string
+  token: string,
 ) =>
   fetchApi("/api/users/password", {
     method: "PUT",
@@ -254,7 +254,7 @@ export const adminDeleteEstablishment = (id: number, token: string) =>
 export const adminUpdateEstablishment = (
   id: number,
   data: FormData,
-  token: string
+  token: string,
 ) =>
   fetchApi(`/api/admin/estabelecimento/${id}`, {
     method: "PATCH",
@@ -270,7 +270,7 @@ export const adminUpdateEstablishment = (
 export const adminEditAndApproveEstablishment = (
   id: number,
   data: FormData,
-  token: string
+  token: string,
 ) =>
   fetchApi(`/api/admin/edit-and-approve/${id}`, {
     method: "POST",
@@ -310,7 +310,7 @@ export const removeEmojis = (text: string): string => {
   if (!text) return "";
   return text.replace(
     /[\u{1F600}-\u{1F64F}\u{1F300}-\u{1F5FF}\u{1F680}-\u{1F6FF}\u{1F700}-\u{1F77F}\u{1F780}-\u{1F7FF}\u{1F800}-\u{1F8FF}\u{1F900}-\u{1F9FF}\u{1FA00}-\u{1FA6F}\u{1FA70}-\u{1FAFF}\u{2600}-\u{26FF}\u{2700}-\u{27BF}]/gu,
-    ""
+    "",
   );
 };
 
@@ -333,7 +333,7 @@ export const adminExportEstabelecimentos = async (token: string) => {
       headers: {
         Authorization: `Bearer ${token}`,
       },
-    }
+    },
   );
 
   if (!response.ok) {
@@ -371,9 +371,58 @@ export async function registrarVisualizacao(identificador: string) {
         headers: {
           "Content-Type": "application/json",
         },
-      }
+      },
     );
   } catch (error) {
     console.error("Erro ao registrar visualização", error);
   }
 }
+
+// ADMIN- USUÁRIOS ==================================================
+export const getAllUsers = (token: string) =>
+  fetchApi("/api/admin/users", {
+    method: "GET",
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  });
+
+export const adminUpdateUser = (id: number, data: any, token: string) =>
+  fetchApi(`/api/admin/users/${id}`, {
+    method: "PUT",
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+    body: JSON.stringify(data),
+  });
+
+export const adminDeleteUser = (id: number, token: string) =>
+  fetchApi(`/api/admin/users/${id}`, {
+    method: "DELETE",
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  });
+
+export const adminChangeUserPassword = (
+  id: number,
+  newPassword: string,
+  token: string,
+) =>
+  fetchApi(`/api/admin/users/${id}/password`, {
+    method: "PATCH",
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+    body: JSON.stringify({ newPassword }),
+  });
+
+export const adminResendConfirmation = (id: number, token: string) =>
+  fetchApi(`/api/admin/users/${id}/resend-confirmation`, {
+    method: "POST",
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  });
+
+// ==================================================================
