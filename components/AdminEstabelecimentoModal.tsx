@@ -17,8 +17,15 @@ import {
   Tag,
   Popconfirm,
   Rate,
+  Upload,
 } from "antd";
-import { CloseOutlined, QuestionCircleOutlined } from "@ant-design/icons";
+import {
+  CloseOutlined,
+  QuestionCircleOutlined,
+  UploadOutlined,
+  FilePdfOutlined,
+  FileImageOutlined,
+} from "@ant-design/icons";
 import {
   adminUpdateEstablishment,
   adminEditAndApproveEstablishment,
@@ -26,7 +33,7 @@ import {
 import {
   Estabelecimento,
   ImagemProduto,
-} from "@/types/Interface-Estabelecimento"; // Isto agora está correto
+} from "@/types/Interface-Estabelecimento";
 import {
   categorias,
   areasAtuacao,
@@ -59,7 +66,7 @@ const quillModules = {
   ],
 };
 
-const { Title } = Typography;
+const { Title, Text } = Typography;
 const { TextArea } = Input;
 const { Option } = Select;
 
@@ -84,15 +91,20 @@ const AdminEstabelecimentoModal: React.FC<AdminEstabelecimentoModalProps> = ({
   const [editForm] = Form.useForm();
   const [outrasAlteracoes, setOutrasAlteracoes] = useState<string | null>(null);
 
+  // Estados para Imagens e Arquivos
   const [currentLogo, setCurrentLogo] = useState<string | null>(null);
   const [currentPortfolio, setCurrentPortfolio] = useState<ImagemProduto[]>([]);
+  const [currentCcmei, setCurrentCcmei] = useState<string | null>(null);
+
   const [portfolioToDelete, setPortfolioToDelete] = useState<string[]>([]);
   const [logoToDelete, setLogoToDelete] = useState<boolean>(false);
+  const [ccmeiToDelete, setCcmeiToDelete] = useState<boolean>(false);
+
+  const [newCcmeiFile, setNewCcmeiFile] = useState<File | null>(null);
   const [allTags, setAllTags] = useState<string[]>([]);
 
-  // A função que corrige o bug da imagem quebrada
   const getFullImageUrl = (
-    path: string | null | undefined
+    path: string | null | undefined,
   ): string | undefined => {
     if (!path) return undefined;
     if (path.startsWith("http") || path.startsWith("blob:")) {
@@ -113,13 +125,13 @@ const AdminEstabelecimentoModal: React.FC<AdminEstabelecimentoModalProps> = ({
 
     if (estabelecimento) {
       let dataToEdit: any = { ...estabelecimento };
+
+      // Valores iniciais (atuais do banco)
       let finalLogoUrl = estabelecimento.logoUrl || null;
-
-      // --- CORREÇÃO AQUI ---
-      // Usar 'produtosImg' (do backend/interface) em vez de 'imagensProduto'
+      let finalCcmeiUrl = estabelecimento.ccmeiUrl || null;
       let finalPortfolioImgs = estabelecimento.produtosImg || [];
-      // --- FIM DA CORREÇÃO ---
 
+      // Se for uma atualização pendente, sobrescreve com os dados da solicitação
       if (
         estabelecimento.status === "pendente_atualizacao" &&
         estabelecimento.dados_atualizacao
@@ -129,12 +141,17 @@ const AdminEstabelecimentoModal: React.FC<AdminEstabelecimentoModalProps> = ({
           ...estabelecimento.dados_atualizacao,
         };
         setOutrasAlteracoes(
-          estabelecimento.dados_atualizacao.outrasAlteracoes || null
+          estabelecimento.dados_atualizacao.outrasAlteracoes || null,
         );
+
+        // Atualiza URLs com os novos valores pendentes, se existirem
         finalLogoUrl = estabelecimento.dados_atualizacao.logo || finalLogoUrl;
+        finalCcmeiUrl =
+          estabelecimento.dados_atualizacao.ccmei || finalCcmeiUrl;
+
         if (estabelecimento.dados_atualizacao.produtos) {
           finalPortfolioImgs = estabelecimento.dados_atualizacao.produtos.map(
-            (url: string) => ({ url: url })
+            (url: string) => ({ url: url }),
           );
         }
         delete dataToEdit.outrasAlteracoes;
@@ -142,7 +159,7 @@ const AdminEstabelecimentoModal: React.FC<AdminEstabelecimentoModalProps> = ({
         setOutrasAlteracoes(null);
       }
 
-      // Lógica (que já tínhamos) para filtrar o logo do portfólio
+      // Filtra logo do portfólio (lógica legado)
       const normalize = (path: string | null | undefined): string => {
         if (!path) return "";
         return path
@@ -152,7 +169,6 @@ const AdminEstabelecimentoModal: React.FC<AdminEstabelecimentoModalProps> = ({
       };
 
       const normalizedLogoPath = normalize(finalLogoUrl);
-
       const filteredPortfolio = finalPortfolioImgs.filter((img) => {
         if (!img || !img.url) return false;
         if (normalizedLogoPath === "") return true;
@@ -160,11 +176,15 @@ const AdminEstabelecimentoModal: React.FC<AdminEstabelecimentoModalProps> = ({
       });
 
       setCurrentLogo(finalLogoUrl);
-      setCurrentPortfolio(filteredPortfolio); // Agora 'filteredPortfolio' deve ter as imagens corretas
+      setCurrentCcmei(finalCcmeiUrl);
+      setCurrentPortfolio(filteredPortfolio);
 
       setPortfolioToDelete([]);
       setLogoToDelete(false);
+      setCcmeiToDelete(false);
+      setNewCcmeiFile(null);
 
+      // Tratamento de Arrays/Strings
       if (typeof dataToEdit.areasAtuacao === "string") {
         dataToEdit.areasAtuacao = dataToEdit.areasAtuacao
           .split(",")
@@ -186,9 +206,12 @@ const AdminEstabelecimentoModal: React.FC<AdminEstabelecimentoModalProps> = ({
       editForm.resetFields();
       setOutrasAlteracoes(null);
       setCurrentLogo(null);
+      setCurrentCcmei(null);
       setCurrentPortfolio([]);
       setPortfolioToDelete([]);
       setLogoToDelete(false);
+      setCcmeiToDelete(false);
+      setNewCcmeiFile(null);
     }
   }, [estabelecimento, visible, editForm]);
 
@@ -214,6 +237,15 @@ const AdminEstabelecimentoModal: React.FC<AdminEstabelecimentoModalProps> = ({
       formData.append("logoUrl", "DELETE");
     }
 
+    if (ccmeiToDelete) {
+      formData.append("ccmeiUrl", "DELETE");
+    }
+
+    // Adiciona o novo arquivo CCMEI se selecionado
+    if (newCcmeiFile) {
+      formData.append("ccmei", newCcmeiFile);
+    }
+
     if (portfolioToDelete.length > 0) {
       formData.append("urlsParaExcluir", JSON.stringify(portfolioToDelete));
     }
@@ -233,7 +265,7 @@ const AdminEstabelecimentoModal: React.FC<AdminEstabelecimentoModalProps> = ({
         await adminUpdateEstablishment(
           estabelecimento.estabelecimentoId,
           formData,
-          token
+          token,
         );
         message.success("Estabelecimento atualizado com sucesso!");
       }
@@ -244,6 +276,10 @@ const AdminEstabelecimentoModal: React.FC<AdminEstabelecimentoModalProps> = ({
     } finally {
       setIsEditLoading(false);
     }
+  };
+
+  const isPdf = (url: string | null) => {
+    return url?.toLowerCase().endsWith(".pdf");
   };
 
   return (
@@ -450,7 +486,6 @@ const AdminEstabelecimentoModal: React.FC<AdminEstabelecimentoModalProps> = ({
               placeholder="Selecione os canais de venda"
               allowClear
             >
-              {/* Usamos a constante importada */}
               {canaisDeVendaOpcoes.map((opt) => (
                 <Option key={opt.value} value={opt.value}>
                   {opt.label}
@@ -464,15 +499,15 @@ const AdminEstabelecimentoModal: React.FC<AdminEstabelecimentoModalProps> = ({
             label="Nota de Impacto (0-10)"
             help="Nota que o usuário deu sobre o impacto da plataforma."
           >
-            {/* Usamos o Rate (estrelas) da antd com 10 estrelas */}
             <Rate count={10} />
           </Form.Item>
 
           <Title level={5} className="mt-4">
-            Gerenciamento de Imagens
+            Gerenciamento de Imagens e Documentos
           </Title>
           <Row gutter={16}>
-            <Col span={12}>
+            {/* LOGO */}
+            <Col xs={24} md={8}>
               <Title level={5} style={{ fontSize: "16px" }}>
                 Logo
               </Title>
@@ -488,7 +523,7 @@ const AdminEstabelecimentoModal: React.FC<AdminEstabelecimentoModalProps> = ({
                     borderRadius: "8px",
                     opacity: logoToDelete ? 0.5 : 1,
                   }}
-                  fallback="/logo_mei_redonda.png" //
+                  fallback="/logo_mei_redonda.png"
                 />
                 {currentLogo && (
                   <Popconfirm
@@ -521,9 +556,147 @@ const AdminEstabelecimentoModal: React.FC<AdminEstabelecimentoModalProps> = ({
                 </Tag>
               )}
             </Col>
-            <Col span={12}>
+
+            {/* CCMEI */}
+            <Col xs={24} md={8}>
               <Title level={5} style={{ fontSize: "16px" }}>
-                Imagens do Portfólio (Produtos)
+                CCMEI
+              </Title>
+              <div
+                style={{
+                  display: "flex",
+                  flexDirection: "column",
+                  gap: "10px",
+                  alignItems: "flex-start",
+                }}
+              >
+                {currentCcmei ? (
+                  <div
+                    style={{
+                      position: "relative",
+                      border: "1px solid #d9d9d9",
+                      borderRadius: "8px",
+                      padding: "10px",
+                      opacity: ccmeiToDelete ? 0.5 : 1,
+                      width: "150px",
+                      height: "150px",
+                      display: "flex",
+                      flexDirection: "column",
+                      justifyContent: "center",
+                      alignItems: "center",
+                      textAlign: "center",
+                      backgroundColor: "#f9f9f9",
+                    }}
+                  >
+                    {isPdf(currentCcmei) ? (
+                      <>
+                        <FilePdfOutlined
+                          style={{ fontSize: "40px", color: "red" }}
+                        />
+                        <Text style={{ fontSize: "12px", marginTop: "5px" }}>
+                          Documento PDF
+                        </Text>
+                        <a
+                          href={getFullImageUrl(currentCcmei)}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          style={{ fontSize: "12px", marginTop: "5px" }}
+                        >
+                          Visualizar
+                        </a>
+                      </>
+                    ) : (
+                      <>
+                        <AntdImage
+                          src={getFullImageUrl(currentCcmei)}
+                          alt="CCMEI"
+                          style={{
+                            width: "100%",
+                            height: "100px",
+                            objectFit: "contain",
+                          }}
+                        />
+                      </>
+                    )}
+
+                    <Popconfirm
+                      title="Remover este CCMEI?"
+                      okText="Remover"
+                      cancelText="Cancelar"
+                      okType="danger"
+                      placement="topRight"
+                      onConfirm={() => {
+                        setCcmeiToDelete(true);
+                        setCurrentCcmei(null);
+                        setNewCcmeiFile(null);
+                        message.info("CCMEI marcado para remoção.");
+                      }}
+                    >
+                      <Button
+                        type="primary"
+                        danger
+                        icon={<CloseOutlined />}
+                        style={{ position: "absolute", top: 5, right: 5 }}
+                        size="small"
+                      />
+                    </Popconfirm>
+                  </div>
+                ) : (
+                  <div
+                    style={{
+                      width: "150px",
+                      height: "150px",
+                      border: "1px dashed #d9d9d9",
+                      borderRadius: "8px",
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      color: "#aaa",
+                    }}
+                  >
+                    Sem CCMEI
+                  </div>
+                )}
+
+                {ccmeiToDelete && (
+                  <Tag color="red" style={{ width: "100%" }}>
+                    CCMEI será removido.
+                  </Tag>
+                )}
+
+                <Upload
+                  beforeUpload={(file) => {
+                    setNewCcmeiFile(file);
+                    // Reseta status de exclusão caso usuário faça upload de um novo
+                    setCcmeiToDelete(false);
+                    // Simula visualização temporária se for imagem
+                    if (file.type.startsWith("image/")) {
+                      setCurrentCcmei(URL.createObjectURL(file));
+                    } else {
+                      // Se for PDF ou outro, apenas mostramos que foi selecionado
+                      message.success(`Arquivo ${file.name} selecionado.`);
+                    }
+                    return false; // Impede upload automático do antd
+                  }}
+                  showUploadList={false}
+                  maxCount={1}
+                >
+                  <Button icon={<UploadOutlined />}>
+                    {currentCcmei ? "Substituir CCMEI" : "Adicionar CCMEI"}
+                  </Button>
+                </Upload>
+                {newCcmeiFile && (
+                  <Text type="success" style={{ fontSize: "12px" }}>
+                    Novo arquivo: {newCcmeiFile.name}
+                  </Text>
+                )}
+              </div>
+            </Col>
+
+            {/* PORTFOLIO */}
+            <Col xs={24} md={8}>
+              <Title level={5} style={{ fontSize: "16px" }}>
+                Imagens do Portfólio
               </Title>
               <div style={{ display: "flex", flexWrap: "wrap", gap: "10px" }}>
                 {currentPortfolio.length > 0 ? (
@@ -556,7 +729,7 @@ const AdminEstabelecimentoModal: React.FC<AdminEstabelecimentoModalProps> = ({
                         onConfirm={() => {
                           setPortfolioToDelete((prev) => [...prev, img.url]);
                           setCurrentPortfolio((prev) =>
-                            prev.filter((i) => i.url !== img.url)
+                            prev.filter((i) => i.url !== img.url),
                           );
                           message.info("Imagem marcada para remoção.");
                         }}

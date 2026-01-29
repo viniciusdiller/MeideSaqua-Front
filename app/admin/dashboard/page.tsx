@@ -32,10 +32,15 @@ import {
   CommentOutlined,
   HomeOutlined,
   TeamOutlined,
+  FilePdfOutlined, // Certifique-se de importar este ícone se ainda não estiver
 } from "@ant-design/icons";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { getPendingAdminRequests, adminUpdateEstablishment } from "@/lib/api";
+import {
+  getPendingAdminRequests,
+  adminUpdateEstablishment,
+  adminEditAndApproveEstablishment, // <--- IMPORTADO AQUI
+} from "@/lib/api";
 import AdminEstabelecimentoModal from "@/components/AdminEstabelecimentoModal";
 import { Estabelecimento } from "@/types/Interface-Estabelecimento";
 import FormattedDescription from "@/components/FormattedDescription";
@@ -152,6 +157,23 @@ const AdminDashboard: React.FC = () => {
       return <Text type="secondary">Não informado</Text>;
     }
 
+    // --- NOVA LÓGICA DE DATA ---
+    if (key === "createdAt" || key === "updatedAt") {
+      try {
+        const dateObj = new Date(value);
+        return dateObj.toLocaleString("pt-BR", {
+          day: "2-digit",
+          month: "2-digit",
+          year: "numeric",
+          hour: "2-digit",
+          minute: "2-digit",
+        });
+      } catch (e) {
+        return String(value);
+      }
+    }
+    // ---------------------------
+
     // --- LÓGICA PARA TORNAR LINKS CLICÁVEIS ---
     if (key === "website") {
       const urlString = String(value);
@@ -232,14 +254,17 @@ const AdminDashboard: React.FC = () => {
 
       if (isPdf) {
         return (
-          <a
-            href={fileUrl}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="text-blue-700 font-semibold underline"
-          >
-            Ver Certificado (PDF)
-          </a>
+          <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+            <FilePdfOutlined style={{ fontSize: "24px", color: "red" }} />
+            <a
+              href={fileUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-blue-700 font-semibold underline"
+            >
+              Ver Certificado (PDF)
+            </a>
+          </div>
         );
       }
       return <Image src={fileUrl} alt={`CCMEI`} width={150} />;
@@ -407,6 +432,7 @@ const AdminDashboard: React.FC = () => {
     setIsEditModalVisible(true);
   };
 
+  // --- FUNÇÃO ATUALIZADA PARA USAR adminEditAndApproveEstablishment ---
   const handleEditAndApproveSubmit = async (formData: FormData) => {
     if (!selectedItem) return;
 
@@ -419,7 +445,9 @@ const AdminDashboard: React.FC = () => {
     }
 
     try {
-      await adminUpdateEstablishment(
+      // Usando a rota específica de "Editar e Aprovar" (POST) em vez de apenas Update (PATCH)
+      // Isso garante que o status mude para ATIVO
+      await adminEditAndApproveEstablishment(
         selectedItem.estabelecimentoId,
         formData,
         token,
@@ -428,10 +456,10 @@ const AdminDashboard: React.FC = () => {
       setIsEditModalVisible(false);
       setModalVisible(false);
       setSelectedItem(null);
-      fetchData();
+      fetchData(); // Recarrega para remover da lista de pendentes
     } catch (error: any) {
       setIsActionLoading(false);
-      throw error;
+      throw error; // O erro será pego e exibido pelo Modal
     } finally {
       setIsActionLoading(false);
     }
@@ -641,6 +669,7 @@ const AdminDashboard: React.FC = () => {
       "nomeResponsavel",
       "cpfResponsavel",
       "emailEstabelecimento",
+      "createdAt", // Adicionamos aqui para aparecer no grupo
     ];
     const keysMei = [
       "estabelecimentoId",
