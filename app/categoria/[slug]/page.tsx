@@ -280,7 +280,7 @@ export default function CategoryPage({ params }: PageProps) {
                         src={
                             location.logoUrl 
                            ? getImageUrl(location.logoUrl) 
-                          : "/Logo_mei_redonda.png"
+                          : "/logo_mei_redonda.png"
                             }
                         alt={`Logo de ${location.nomeFantasia}`}
                         fill
