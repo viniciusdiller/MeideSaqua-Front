@@ -426,3 +426,41 @@ export const adminResendConfirmation = (id: number, token: string) =>
   });
 
 // ==================================================================
+
+export const getCursos = () => fetchApi("/api/cursos");
+
+export const createCurso = (data: any, token: string) =>
+  fetchApi("/api/cursos", {
+    method: "POST",
+    headers: { Authorization: `Bearer ${token}` },
+    body: JSON.stringify(data),
+  });
+
+export const updateCurso = (id: number, data: any, token: string) =>
+  fetchApi(`/api/cursos/${id}`, {
+    method: "PUT",
+    headers: { Authorization: `Bearer ${token}` },
+    body: JSON.stringify(data),
+  });
+
+export const deleteCurso = (id: number, token: string) =>
+  fetchApi(`/api/cursos/${id}`, {
+    method: "DELETE",
+    headers: { Authorization: `Bearer ${token}` },
+  });
+
+export const uploadImage = async (file: File) => {
+  const formData = new FormData();
+  formData.append("file", file);
+
+  const response = await fetch(
+    `${process.env.NEXT_PUBLIC_API_URL}/api/files/upload`,
+    {
+      method: "POST",
+      body: formData,
+    },
+  );
+
+  if (!response.ok) throw new Error("Erro no upload");
+  return response.json();
+};

@@ -21,6 +21,8 @@ import {
   Select,
   Pagination,
   Grid,
+  Dropdown,
+  type MenuProps,
 } from "antd";
 import {
   UserAddOutlined,
@@ -32,14 +34,16 @@ import {
   CommentOutlined,
   HomeOutlined,
   TeamOutlined,
-  FilePdfOutlined, // Certifique-se de importar este ícone se ainda não estiver
+  FilePdfOutlined,
+  MenuOutlined,
+  ReadOutlined,
 } from "@ant-design/icons";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import {
   getPendingAdminRequests,
   adminUpdateEstablishment,
-  adminEditAndApproveEstablishment, // <--- IMPORTADO AQUI
+  adminEditAndApproveEstablishment,
 } from "@/lib/api";
 import AdminEstabelecimentoModal from "@/components/AdminEstabelecimentoModal";
 import { Estabelecimento } from "@/types/Interface-Estabelecimento";
@@ -723,8 +727,7 @@ const AdminDashboard: React.FC = () => {
         </div>
 
         <div className="flex flex-col md:flex-row md:justify-between md:items-center mb-6 gap-4">
-          {/* --- NOVO BOTÃO DE VOLTAR PARA HOME --- */}
-          <Link href="/" passHref>
+          <Link href="/" target="_blank" passHref>
             <Button
               icon={<HomeOutlined />}
               size="large"
@@ -733,44 +736,84 @@ const AdminDashboard: React.FC = () => {
               Home
             </Button>
           </Link>
-          {/* ------------------------------------- */}
 
-          <div className="flex flex-col md:flex-row gap-2 w-full md:w-auto">
-            <Link href="/admin/estabelecimentos-ativos" passHref>
+          <div className="w-full md:w-auto">
+            <Dropdown
+              menu={{
+                items: [
+                  {
+                    key: "estabelecimentos",
+                    icon: (
+                      <DatabaseOutlined className="text-blue-500 text-2xl" />
+                    ),
+                    label: (
+                      <Link
+                        href="/admin/estabelecimentos-ativos"
+                        className="text-base ml-2"
+                      >
+                        Gerenciar Estabelecimentos
+                      </Link>
+                    ),
+                  },
+                  {
+                    type: "divider",
+                  },
+                  {
+                    key: "comentarios",
+                    icon: (
+                      <CommentOutlined className="text-[#3C6AB2] text-2xl" />
+                    ),
+                    label: (
+                      <Link
+                        href="/admin/comentarios"
+                        className="text-base ml-2"
+                      >
+                        Gerenciar Comentários
+                      </Link>
+                    ),
+                  },
+                  {
+                    type: "divider",
+                  },
+                  {
+                    key: "usuarios",
+                    icon: <TeamOutlined className="text-[#52c41a] text-2xl" />,
+                    label: (
+                      <Link href="/admin/usuarios" className="text-base ml-2">
+                        Gerenciar Usuários
+                      </Link>
+                    ),
+                  },
+                  {
+                    type: "divider",
+                  },
+                  {
+                    key: "cursos",
+                    icon: <ReadOutlined className="text-orange-500 text-2xl" />,
+                    label: (
+                      <Link href="/admin/cursos" className="text-base ml-2">
+                        Gerenciar Cursos & Capacitações
+                      </Link>
+                    ),
+                  },
+                ],
+              }}
+              trigger={["click"]}
+              placement="bottomRight"
+            >
               <Button
                 type="primary"
-                icon={<DatabaseOutlined />}
+                icon={<MenuOutlined className="text-xl" />}
                 size="large"
-                className={isMobile ? "w-full" : ""}
-              >
-                Gerenciar Estabelecimentos Ativos
-              </Button>
-            </Link>
-            <Link href="/admin/comentarios" passHref>
-              <Button
-                icon={<CommentOutlined />}
-                size="large"
-                style={{ backgroundColor: "#3C6AB2", color: "#fff" }}
-                className={isMobile ? "w-full" : ""}
-              >
-                Gerenciar Comentários
-              </Button>
-            </Link>
-
-            <Link href="/admin/usuarios" passHref>
-              <Button
-                icon={<TeamOutlined />}
-                size="large"
+                className={isMobile ? "w-full h-12 text-lg" : "h-10"}
                 style={{
-                  backgroundColor: "#52c41a",
-                  color: "#fff",
-                  borderColor: "#52c41a",
+                  backgroundColor: "#017DB9",
+                  borderColor: "#017DB9",
                 }}
-                className={isMobile ? "w-full" : ""}
               >
-                Gerenciar Usuários
+                Menu Administrativo
               </Button>
-            </Link>
+            </Dropdown>
           </div>
         </div>
 

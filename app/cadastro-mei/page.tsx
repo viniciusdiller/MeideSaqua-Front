@@ -81,7 +81,7 @@ const onFinishFailed = (errorInfo: any) => {
     })
     .filter(
       (value: string, index: number, self: string[]) =>
-        self.indexOf(value) === index
+        self.indexOf(value) === index,
     );
 
   if (labelsComErro.length > 0) {
@@ -100,7 +100,7 @@ const stripEmojis = (value: string) => {
   if (!value) return "";
   return value.replace(
     /([\u2700-\u27BF]|[\uE000-\uF8FF]|\uD83C[\uDC00-\uDFFF]|\uD83D[\uDC00-\uDFFF]|[\u2011-\u26FF]|\uD83E[\uDD10-\uDDFF])/g,
-    ""
+    "",
   );
 };
 
@@ -523,7 +523,7 @@ const CadastroMEIPage: React.FC = () => {
 
   // Handler centralizado para limpeza de Emojis
   const handleStripEmojiChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>,
   ) => {
     const { name, value } = e.target;
     form.setFieldsValue({ [name]: stripEmojis(value) });
@@ -531,7 +531,7 @@ const CadastroMEIPage: React.FC = () => {
 
   const handleMaskChange = (
     e: React.ChangeEvent<HTMLInputElement>,
-    maskFn: (value: string) => string
+    maskFn: (value: string) => string,
   ) => {
     const { name, value } = e.target;
     const cleanedValue = stripEmojis(value);
@@ -607,7 +607,7 @@ const CadastroMEIPage: React.FC = () => {
       setFlowStep("submitted");
     } catch (error: any) {
       message.error(
-        error.message || "Ocorreu um erro. Por favor, tente novamente."
+        error.message || "Ocorreu um erro. Por favor, tente novamente.",
       );
     } finally {
       setLoading(false);
@@ -676,7 +676,7 @@ const CadastroMEIPage: React.FC = () => {
       setFlowStep("submitted");
     } catch (error: any) {
       message.error(
-        error.message || "Ocorreu um erro ao enviar a atualização."
+        error.message || "Ocorreu um erro ao enviar a atualização.",
       );
     } finally {
       setLoading(false);
@@ -733,7 +733,7 @@ const CadastroMEIPage: React.FC = () => {
       setFlowStep("submitted");
     } catch (error: any) {
       message.error(
-        error.message || "Ocorreu um erro ao solicitar a exclusão."
+        error.message || "Ocorreu um erro ao solicitar a exclusão.",
       );
     } finally {
       setLoading(false);
@@ -821,8 +821,8 @@ const CadastroMEIPage: React.FC = () => {
     if (textContentLength > MAX_QUILL_LENGTH) {
       return Promise.reject(
         new Error(
-          `A descrição não pode ter mais de ${MAX_QUILL_LENGTH} caracteres (atualmente com ${textContentLength}).`
-        )
+          `A descrição não pode ter mais de ${MAX_QUILL_LENGTH} caracteres (atualmente com ${textContentLength}).`,
+        ),
       );
     }
 
@@ -968,7 +968,7 @@ const CadastroMEIPage: React.FC = () => {
                       return Promise.resolve();
                     }
                     return Promise.reject(
-                      new Error("Envie o Certificado CCMEI (PDF ou Imagem)!")
+                      new Error("Envie o Certificado CCMEI (PDF ou Imagem)!"),
                     );
                   },
                 }),
@@ -1099,7 +1099,10 @@ const CadastroMEIPage: React.FC = () => {
             onChange={(e) => handleMaskChange(e, maskPhone)}
           />
         </Form.Item>
-        <Form.Item name="endereco" label="Endereço Físico do estabelecimento (se houver)">
+        <Form.Item
+          name="endereco"
+          label="Endereço Físico do estabelecimento (se houver)"
+        >
           <Input
             name="endereco"
             placeholder="Este endereço aparecerá no perfil do seu negócio, para o público."
@@ -1223,6 +1226,9 @@ const CadastroMEIPage: React.FC = () => {
             <Form.Item
               label="Imagens do seu Produto ou Serviço"
               help="Envie até 4 imagens. (.png, .jpg, .jpeg)"
+              rules={[
+                { required: true, message: "Por favor, Adicione imagens!" },
+              ]}
             >
               <Upload
                 customRequest={customUploadAction}
@@ -1246,7 +1252,7 @@ const CadastroMEIPage: React.FC = () => {
                   value
                     ? Promise.resolve()
                     : Promise.reject(
-                        new Error("Você precisa confirmar esta caixa.")
+                        new Error("Você precisa confirmar esta caixa."),
                       ),
               },
             ]}
@@ -1417,7 +1423,7 @@ const CadastroMEIPage: React.FC = () => {
                       return Promise.resolve();
                     }
                     return Promise.reject(
-                      new Error("Envie o Certificado CCMEI (PDF ou Imagem)!")
+                      new Error("Envie o Certificado CCMEI (PDF ou Imagem)!"),
                     );
                   },
                 }),
@@ -1600,7 +1606,7 @@ const CadastroMEIPage: React.FC = () => {
                 value
                   ? Promise.resolve()
                   : Promise.reject(
-                      new Error("Você precisa confirmar esta caixa.")
+                      new Error("Você precisa confirmar esta caixa."),
                     ),
             },
           ]}
@@ -1727,7 +1733,7 @@ const CadastroMEIPage: React.FC = () => {
                       return Promise.resolve();
                     }
                     return Promise.reject(
-                      new Error("Envie o Certificado CCMEI (PDF ou Imagem)!")
+                      new Error("Envie o Certificado CCMEI (PDF ou Imagem)!"),
                     );
                   },
                 }),
@@ -1785,7 +1791,7 @@ const CadastroMEIPage: React.FC = () => {
                 value
                   ? Promise.resolve()
                   : Promise.reject(
-                      new Error("Você precisa confirmar a exclusão!")
+                      new Error("Você precisa confirmar a exclusão!"),
                     ),
             },
           ]}

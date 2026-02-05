@@ -3,17 +3,35 @@
 import Link from "next/link";
 import React from "react";
 import Image from "next/image";
-import { registrarVisualizacao } from "@/lib/api";
-import { useEffect, useRef } from "react";
+import { registrarVisualizacao, getCursos } from "@/lib/api";
+import { useEffect, useRef, useState } from "react";
+
+interface CursoData {
+  id: number;
+  titulo: string;
+  link: string;
+  imagemUrl: string;
+}
 
 export default function SobrePage() {
   const jaContabilizou = useRef(false);
+  const [cursos, setCursos] = useState<CursoData[]>([]);
 
   useEffect(() => {
     if (!jaContabilizou.current) {
       jaContabilizou.current = true;
       registrarVisualizacao("ESPACO_MEI");
     }
+
+    const loadCursos = async () => {
+      try {
+        const data = await getCursos();
+        if (Array.isArray(data)) setCursos(data);
+      } catch (error) {
+        console.error("Erro ao buscar cursos", error);
+      }
+    };
+    loadCursos();
   }, []);
 
   const handleCursoClick = (nomeCurso: string) => {
@@ -29,7 +47,6 @@ export default function SobrePage() {
     registrarVisualizacao(idCurso);
   };
 
-  // --- NOVA FUNÇÃO: Rastrear cliques nos links de contato/gov ---
   const handleLinkClick = (id: string) => {
     registrarVisualizacao(id);
   };
@@ -69,7 +86,6 @@ export default function SobrePage() {
           </div>
         </section>
 
-        {/* --- SEÇÃO DE CONTEÚDO PRINCIPAL --- */}
         <section className="mt-8 border-t pt-6">
           <p className="text-gray-700 leading-relaxed text-lg mt-4">
             Nesse espaço serão divulgadas capacitações, cursos, oficinas e
@@ -93,202 +109,47 @@ export default function SobrePage() {
           </p>
         </section>
 
-        {/* --- CURSOS --- */}
         <section className="mt-12 border-t pt-6">
           <h2 className="text-3xl font-bold text-center mb-10">
             <span className="bg-gradient-to-r from-[#017DB9] to-[#22c362] bg-clip-text text-transparent">
               Cursos e Capacitações disponíveis:
             </span>
           </h2>
+
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
-            {/* Exemplo de Item Clicável */}
-            <Link
-              href="https://sebrae.com.br/sites/PortalSebrae/cursosonline/como-agir-de-maneira-empreendedora,2ac0b8a6a28bb610VgnVCM1000004c00210aRCRD"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="group block text-center"
-              onClick={() =>
-                handleCursoClick("Como agir de maneira empreendedora")
-              }
-            >
-              <div className="overflow-hidden rounded-lg border border-gray-200 group-hover:shadow-xl transition-shadow duration-300">
-                <Image
-                  src="/Cursos/Como agir de maneira empreendedora.png"
-                  alt="Logo do Sebrae"
-                  width={400}
-                  height={300}
-                  className="w-full h-auto object-cover transform group-hover:scale-105 transition-transform duration-300"
-                />
-              </div>
-              <p className="mt-3 text-md font-semibold text-gray-800 group-hover:text-blue-600 transition-colors duration-300">
-                Como agir de maneira empreendedora
+            {cursos.length > 0 ? (
+              cursos.map((curso) => (
+                <Link
+                  key={curso.id}
+                  href={curso.link}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="group block text-center"
+                  onClick={() => handleCursoClick(curso.titulo)}
+                >
+                  <div className="overflow-hidden rounded-lg border border-gray-200 group-hover:shadow-xl transition-shadow duration-300 relative aspect-[4/3]">
+                    <Image
+                      src={curso.imagemUrl}
+                      alt={curso.titulo}
+                      width={400}
+                      height={300}
+                      className="w-full h-full object-cover transform group-hover:scale-105 transition-transform duration-300"
+                      onError={(e) => {}}
+                    />
+                  </div>
+                  <p className="mt-3 text-md font-semibold text-gray-800 group-hover:text-blue-600 transition-colors duration-300">
+                    {curso.titulo}
+                  </p>
+                </Link>
+              ))
+            ) : (
+              <p className="col-span-4 text-center text-gray-500">
+                Carregando cursos ou nenhum curso disponível no momento.
               </p>
-            </Link>
-
-            <Link
-              href="https://sebrae.com.br/sites/PortalSebrae/cursosonline/empreender-na-pratica,2e7a4dadbe612810VgnVCM100000d701210aRCRD"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="group block text-center"
-              onClick={() => handleCursoClick("Empreender na prática")}
-            >
-              <div className="overflow-hidden rounded-lg border border-gray-200 group-hover:shadow-xl transition-shadow duration-300">
-                <Image
-                  src="/Cursos/Empreender na prática.png"
-                  alt="Logo da AgeRio"
-                  width={400}
-                  height={300}
-                  className="w-full h-auto object-cover transform group-hover:scale-105 transition-transform duration-300"
-                />
-              </div>
-              <p className="mt-3 text-md font-semibold text-gray-800 group-hover:text-blue-600 transition-colors duration-300">
-                Empreender na prática
-              </p>
-            </Link>
-
-            <Link
-              href="https://sebrae.com.br/sites/PortalSebrae/cursosonline/como-formalizar-seu-negocio-como-mei,3180b8a6a28bb610VgnVCM1000004c00210aRCRD"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="group block text-center"
-              onClick={() =>
-                handleCursoClick(
-                  "Como formalizar seu negócio como microempreendedor individual"
-                )
-              }
-            >
-              <div className="overflow-hidden rounded-lg border border-gray-200 group-hover:shadow-xl transition-shadow duration-300">
-                <Image
-                  src="/Cursos/Como formalizar seu negócio como microempreendedor individual.png"
-                  alt="Logo da JUCERJA"
-                  width={400}
-                  height={300}
-                  className="w-full h-auto object-cover transform group-hover:scale-105 transition-transform duration-300"
-                />
-              </div>
-              <p className="mt-3 text-md font-semibold text-gray-800 group-hover:text-blue-600 transition-colors duration-300">
-                Como formalizar seu negócio como microempreendedor individual
-              </p>
-            </Link>
-
-            <Link
-              href="https://sebrae.com.br/sites/PortalSebrae/cursosonline/empreendedorismo-como-opcao-de-carreira,7e70b8a6a28bb610VgnVCM1000004c00210aRCRD"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="group block text-center"
-              onClick={() =>
-                handleCursoClick("Empreendedorismo como opção de carreira")
-              }
-            >
-              <div className="overflow-hidden rounded-lg border border-gray-200 group-hover:shadow-xl transition-shadow duration-300">
-                <Image
-                  src="/Cursos/Empreendedorismo como opção de carreira.png"
-                  alt="Logo do Portal do Empreendedor"
-                  width={400}
-                  height={300}
-                  className="w-full h-auto object-cover transform group-hover:scale-105 transition-transform duration-300"
-                />
-              </div>
-              <p className="mt-3 text-md font-semibold text-gray-800 group-hover:text-blue-600 transition-colors duration-300">
-                Empreendedorismo como opção de carreira
-              </p>
-            </Link>
-
-            <Link
-              href="https://capacitabr.portaldoempreendedor.gov.br/cursos/1/372000001028"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="group block text-center"
-              onClick={() => handleCursoClick("Aprender a empreender")}
-            >
-              <div className="overflow-hidden rounded-lg border border-gray-200 group-hover:shadow-xl transition-shadow duration-300">
-                <Image
-                  src="/Cursos/Imagem-gov.jpg"
-                  alt="Logo da Prefeitura de Saquarema"
-                  width={400}
-                  height={300}
-                  className="w-full h-auto object-cover transform group-hover:scale-105 transition-transform duration-300"
-                />
-              </div>
-              <p className="mt-3 text-md font-semibold text-gray-800 group-hover:text-blue-600 transition-colors duration-300">
-                Aprender a empreender
-              </p>
-            </Link>
-
-            <Link
-              href="https://capacitabr.portaldoempreendedor.gov.br/cursos/5/C02"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="group block text-center"
-              onClick={() =>
-                handleCursoClick("Como ser um(a) empreendedor(a) mais eficiente")
-              }
-            >
-              <div className="overflow-hidden rounded-lg border border-gray-200 group-hover:shadow-xl transition-shadow duration-300">
-                <Image
-                  src="/Cursos/Imagem-gov.jpg"
-                  alt="Logo do Simples Nacional"
-                  width={400}
-                  height={300}
-                  className="w-full h-auto object-cover transform group-hover:scale-105 transition-transform duration-300"
-                />
-              </div>
-              <p className="mt-3 text-md font-semibold text-gray-800 group-hover:text-blue-600 transition-colors duration-300">
-                Como ser um(a) empreendedor(a) mais eficiente
-              </p>
-            </Link>
-
-            <Link
-              href="https://capacitabr.portaldoempreendedor.gov.br/cursos/5/C11"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="group block text-center"
-              onClick={() =>
-                handleCursoClick("Curso pelo whatsApp: Meu Negócio Online")
-              }
-            >
-              <div className="overflow-hidden rounded-lg border border-gray-200 group-hover:shadow-xl transition-shadow duration-300">
-                <Image
-                  src="/Cursos/Imagem-gov.jpg"
-                  alt="Logo do Simples Nacional"
-                  width={400}
-                  height={300}
-                  className="w-full h-auto object-cover transform group-hover:scale-105 transition-transform duration-300"
-                />
-              </div>
-              <p className="mt-3 text-md font-semibold text-gray-800 group-hover:text-blue-600 transition-colors duration-300">
-                Curso pelo whatsApp: Meu Negócio Online
-              </p>
-            </Link>
-
-            <Link
-              href="https://capacitabr.portaldoempreendedor.gov.br/cursos/1/372000005124"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="group block text-center"
-              onClick={() =>
-                handleCursoClick(
-                  "Fluxo de caixa como ferramenta de gestão para o seu negócio"
-                )
-              }
-            >
-              <div className="overflow-hidden rounded-lg border border-gray-200 group-hover:shadow-xl transition-shadow duration-300">
-                <Image
-                  src="/Cursos/Imagem-gov.jpg"
-                  alt="Logo do Simples Nacional"
-                  width={400}
-                  height={300}
-                  className="w-full h-auto object-cover transform group-hover:scale-105 transition-transform duration-300"
-                />
-              </div>
-              <p className="mt-3 text-md font-semibold text-gray-800 group-hover:text-blue-600 transition-colors duration-300">
-                Fluxo de caixa como ferramenta de gestão para o seu negócio
-              </p>
-            </Link>
+            )}
           </div>
         </section>
 
-        {/* --- SEÇÃO DE PERGUNTAS FREQUENTES --- */}
         <section className="mt-12 border-t pt-6">
           <div className="space-y-8">
             <section>
@@ -306,7 +167,6 @@ export default function SobrePage() {
                   target="_blank"
                   rel="noopener noreferrer"
                   className="text-blue-600 hover:underline"
-                  // TRACKING DO LINK GOV
                   onClick={() => handleLinkClick("LINK_GOV")}
                 >
                   https://www.gov.br/empresas-e-negocios/pt-br/empreendedor
@@ -322,7 +182,6 @@ export default function SobrePage() {
                     target="_blank"
                     rel="noopener noreferrer"
                     className="text-gray-700 hover:underline hover:text-blue-600"
-                    // TRACKING DO WHATSAPP
                     onClick={() => handleLinkClick("LINK_WPP")}
                   >
                     (22) 92005-2534
@@ -333,7 +192,6 @@ export default function SobrePage() {
                   <a
                     href="mailto:saladoempreendedor@saquarema.rj.gov.br"
                     className="text-gray-700 hover:underline hover:text-blue-600"
-                    // TRACKING DO EMAIL
                     onClick={() => handleLinkClick("LINK_EMAIL")}
                   >
                     <span className="sm:hidden">
