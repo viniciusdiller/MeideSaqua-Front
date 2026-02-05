@@ -277,7 +277,11 @@ export default function CategoryPage({ params }: PageProps) {
                     {/* 14. LOGO ADICIONADA (Nova Feature) */}
                     <div className="absolute top-4 right-4 w-12 h-12 rounded-full overflow-hidden bg-gray-100 border-2 border-white shadow-sm z-10">
                       <Image
-                        src={getImageUrl(location.logoUrl)}
+                        src={
+                            location.logoUrl 
+                           ? getImageUrl(location.logoUrl) 
+                          : "/Logo_mei_redonda.png"
+                            }
                         alt={`Logo de ${location.nomeFantasia}`}
                         fill
                         sizes="48px"
