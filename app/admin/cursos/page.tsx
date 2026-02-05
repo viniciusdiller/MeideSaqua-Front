@@ -335,6 +335,7 @@ const AdminCursos = () => {
                     onChange={handleFileChange}
                     beforeUpload={() => false}
                     className="w-full"
+                    accept="image/png, image/jpeg, image/jpg image/webp"
                   >
                     <Button icon={<UploadOutlined />} block size="large">
                       Selecionar Arquivo
