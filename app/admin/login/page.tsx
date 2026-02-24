@@ -26,7 +26,6 @@ const AdminLoginPage: React.FC = () => {
       const data = await response.json();
 
       if (response.ok && data.token) {
-        // Armazena o token no localStorage para ser usado em outras páginas
         localStorage.setItem("admin_token", data.token);
         message.success("Login bem-sucedido!");
         router.push("/admin/dashboard");
