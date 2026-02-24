@@ -47,14 +47,14 @@ function ResetPasswordFormComponent() {
     try {
       await resetPassword({ token, newPassword: password });
       toast.success(
-        "Senha redefinida com sucesso! A redirecionar para o login..."
+        "Senha redefinida com sucesso! Redirecionando para o login...",
       );
       setTimeout(() => {
         window.location.href = "/login";
       }, 2000);
     } catch (err) {
       toast.error(
-        "Erro ao redefinir a senha. O token pode ser inválido ou ter expirado."
+        "Erro ao redefinir a senha. O token pode ser inválido ou ter expirado.",
       );
       console.error(err);
     } finally {
@@ -88,9 +88,7 @@ function ResetPasswordFormComponent() {
         <Card className="rounded-2xl border border-[#017DB9]/70 bg-white shadow-lg">
           <CardHeader className="text-center">
             <CardTitle className="text-2xl">Redefinir a sua Senha</CardTitle>
-            <CardDescription>
-              Insira a sua nova senha abaixo.
-            </CardDescription>
+            <CardDescription>Insira a sua nova senha abaixo.</CardDescription>
           </CardHeader>
           <form onSubmit={handlePasswordReset}>
             <CardContent className="space-y-4">
@@ -111,7 +109,9 @@ function ResetPasswordFormComponent() {
                     type="button"
                     onClick={() => setShowPassword(!showPassword)}
                     className="absolute inset-y-0 right-0 flex items-center pr-3 text-gray-400 hover:text-gray-600"
-                    aria-label={showPassword ? "Esconder senha" : "Mostrar senha"}
+                    aria-label={
+                      showPassword ? "Esconder senha" : "Mostrar senha"
+                    }
                   >
                     {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
                   </button>
@@ -119,7 +119,7 @@ function ResetPasswordFormComponent() {
               </div>
               <div className="space-y-2">
                 <Label htmlFor="confirmPassword">Confirmar Nova Senha</Label>
-                 <div className="relative">
+                <div className="relative">
                   <Input
                     id="confirmPassword"
                     type={showPassword ? "text" : "password"}
@@ -130,11 +130,13 @@ function ResetPasswordFormComponent() {
                     disabled={isLoading}
                     className="w-full py-2 pr-10 rounded-2xl border border-gray-200 bg-white shadow-sm focus:ring-2 focus:border-[#22c362]/70 transition-all duration-300 placeholder:text-gray-400"
                   />
-                   <button
+                  <button
                     type="button"
                     onClick={() => setShowPassword(!showPassword)}
                     className="absolute inset-y-0 right-0 flex items-center pr-3 text-gray-400 hover:text-gray-600"
-                    aria-label={showPassword ? "Esconder senha" : "Mostrar senha"}
+                    aria-label={
+                      showPassword ? "Esconder senha" : "Mostrar senha"
+                    }
                   >
                     {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
                   </button>
@@ -177,4 +179,3 @@ export default function RedefinirSenhaPage() {
     </Suspense>
   );
 }
-
