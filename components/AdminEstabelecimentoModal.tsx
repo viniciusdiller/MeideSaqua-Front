@@ -39,7 +39,7 @@ import {
   areasAtuacao,
   tagsPorCategoria,
   canaisDeVendaOpcoes,
-} from "@/app/cadastro-mei/page";
+} from "@/constants/mei-options";
 import dynamic from "next/dynamic";
 import "react-quill/dist/quill.snow.css";
 import "@/app/cadastro-mei/quill-styles.css";
@@ -456,7 +456,7 @@ const AdminEstabelecimentoModal: React.FC<AdminEstabelecimentoModalProps> = ({
             <ReactQuill
               theme="snow"
               modules={quillModules}
-              placeholder="Descreva o projeto em detalhes, você pode usar negrito, itálico..."
+              placeholder="Descreva o estabelecimento em detalhes, você pode usar negrito, itálico..."
               style={{ minHeight: "10px" }}
             />
           </Form.Item>
