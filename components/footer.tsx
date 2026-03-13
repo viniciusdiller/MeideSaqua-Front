@@ -33,21 +33,10 @@ const Footer = () => {
               <li className="flex items-center justify-center gap-3 hover:text-blue-600 transition-colors">
                 <Mail size={16} />
                 <a
-                  href="mailto:saladoempreendedor@saquarema.rj.gov.br"
+                  href="mailto:sac-lab.isa@saquarema.rj.gov.br"
                   className="text-gray-700 hover:underline hover:text-blue-600"
                 >
-                  <span>meidesaqua@gmail.com</span>
-                </a>
-              </li>
-              <li className="flex items-center justify-center gap-3 hover:underline hover:text-blue-600 transition-colors">
-                <Phone size={16} />
-                <a
-                  href="https://wa.me/+5522996018024"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="hover:underline hover:text-blue-600 transition-colors"
-                >
-                  <span>(22) 99601-8024</span>
+                  <span>sac-lab.isa@saquarema.rj.gov.br</span>
                 </a>
               </li>
               <li>
