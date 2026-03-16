@@ -19,5 +19,6 @@ export interface Estabelecimento {
   status: string;
   venda?: string;
   escala?: number;
+  ativo?: boolean;
   [key: string]: any;
 }

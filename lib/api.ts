@@ -237,6 +237,27 @@ export const getAllActiveEstablishments = (token: string) =>
     },
   });
 
+export const adminGetAllEstablishmentsGeral = (token: string) =>
+  fetchApi("/api/admin/estabelecimentos-geral", {
+    method: "GET",
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  });
+
+export const adminToggleEstablishmentStatus = (
+  id: number,
+  ativo: boolean,
+  token: string,
+) =>
+  fetchApi(`/api/admin/estabelecimento/${id}/status`, {
+    method: "PUT",
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+    body: JSON.stringify({ ativo }),
+  });
+
 /**
  * [ADMIN] Deleta (desativa) um estabelecimento.
  */

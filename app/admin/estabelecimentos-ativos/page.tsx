@@ -24,12 +24,15 @@ import {
   EditOutlined,
   DeleteOutlined,
   DownloadOutlined,
-  BarChartOutlined, // <--- 1. Importação do ícone de gráfico
+  BarChartOutlined,
+  StopOutlined,
+  CheckCircleOutlined,
 } from "@ant-design/icons";
 import {
-  getAllActiveEstablishments,
+  adminGetAllEstablishmentsGeral, // <--- Nova chamada de API (busca todos)
   adminDeleteEstablishment,
   adminExportEstabelecimentos,
+  adminToggleEstablishmentStatus, // <--- Nova chamada de API (muda o status)
 } from "@/lib/api";
 import AdminEstabelecimentoModal from "@/components/AdminEstabelecimentoModal";
 import { Estabelecimento } from "@/types/Interface-Estabelecimento";
@@ -54,13 +57,13 @@ const getFullImageUrl = (path: string): string => {
 const EstabelecimentosAtivosPage: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [estabelecimentos, setEstabelecimentos] = useState<Estabelecimento[]>(
-    []
+    [],
   );
   const [filteredEstabelecimentos, setFilteredEstabelecimentos] = useState<
     Estabelecimento[]
   >([]);
   const [selectedItem, setSelectedItem] = useState<Estabelecimento | null>(
-    null
+    null,
   );
   const [isEditModalVisible, setIsEditModalVisible] = useState(false);
   const [exporting, setExporting] = useState(false);
@@ -77,7 +80,8 @@ const EstabelecimentosAtivosPage: React.FC = () => {
       return;
     }
     try {
-      const data = await getAllActiveEstablishments(token);
+      // Usando a nova função que traz ATIVOS e INATIVOS
+      const data = await adminGetAllEstablishmentsGeral(token);
       setEstabelecimentos(data);
       setFilteredEstabelecimentos(data);
     } catch (error: any) {
@@ -97,22 +101,17 @@ const EstabelecimentosAtivosPage: React.FC = () => {
       message.error("Sessão expirada.");
       return;
     }
-
     setExporting(true);
     try {
       const blob = await adminExportEstabelecimentos(token);
-
       const url = window.URL.createObjectURL(blob);
       const a = document.createElement("a");
       a.href = url;
-      a.download = `estabelecimentos_MeiDeSaqua_${
-        new Date().toISOString().split("T")[0]
-      }.csv`;
+      a.download = `estabelecimentos_MeiDeSaqua_${new Date().toISOString().split("T")[0]}.csv`;
       document.body.appendChild(a);
       a.click();
       a.remove();
       window.URL.revokeObjectURL(url);
-
       message.success("Relatório gerado com sucesso!");
     } catch (error: any) {
       console.error(error);
@@ -128,7 +127,7 @@ const EstabelecimentosAtivosPage: React.FC = () => {
       (p) =>
         p.nomeFantasia.toLowerCase().includes(lowerCaseValue) ||
         (p.cnpj || "").toLowerCase().includes(lowerCaseValue) ||
-        p.categoria.toLowerCase().includes(lowerCaseValue)
+        p.categoria.toLowerCase().includes(lowerCaseValue),
     );
     setFilteredEstabelecimentos(filtered);
     setCurrentPage(1);
@@ -142,22 +141,45 @@ const EstabelecimentosAtivosPage: React.FC = () => {
   const handleModalClose = (shouldRefresh: boolean) => {
     setIsEditModalVisible(false);
     setSelectedItem(null);
-    if (shouldRefresh) {
-      fetchData();
-    }
+    if (shouldRefresh) fetchData();
   };
 
-  const handleDelete = async (estId: number) => {
+  // Nova função para Desativar/Reativar (Soft Delete)
+  const handleToggleStatus = async (est: Estabelecimento) => {
     const token = localStorage.getItem("admin_token");
     if (!token) {
       message.error("Autenticação expirada.");
       return;
     }
+    setLoading(true);
+    try {
+      await adminToggleEstablishmentStatus(
+        est.estabelecimentoId,
+        !est.ativo,
+        token,
+      );
+      message.success(
+        `Estabelecimento ${est.ativo ? "desativado" : "reativado"} com sucesso!`,
+      );
+      fetchData();
+    } catch (error: any) {
+      message.error(
+        error.message || "Falha ao alterar o status do estabelecimento.",
+      );
+      setLoading(false);
+    }
+  };
 
+  // Exclusão definitiva (Hard Delete do BD)
+  const handleDeleteDefinitivo = async (estId: number) => {
+    const token = localStorage.getItem("admin_token");
+    if (!token) return;
     setLoading(true);
     try {
       await adminDeleteEstablishment(estId, token);
-      message.success("Estabelecimento excluído com sucesso!");
+      message.success(
+        "Estabelecimento excluído permanentemente do banco de dados!",
+      );
       fetchData();
     } catch (error: any) {
       message.error(error.message || "Falha ao excluir o estabelecimento.");
@@ -169,42 +191,183 @@ const EstabelecimentosAtivosPage: React.FC = () => {
     setCurrentPage(1);
   };
 
+  // Agrupamentos
+  const ativos = filteredEstabelecimentos.filter((est) => est.ativo);
+  const inativos = filteredEstabelecimentos.filter((est) => !est.ativo);
+
   const groupedEstabelecimentos = filteredEstabelecimentos.reduce(
     (acc, est) => {
       const categoria = est.categoria || "Sem Categoria";
-      if (!acc[categoria]) {
-        acc[categoria] = [];
-      }
+      if (!acc[categoria]) acc[categoria] = [];
       acc[categoria].push(est);
       return acc;
     },
-    {} as { [key: string]: Estabelecimento[] }
+    {} as { [key: string]: Estabelecimento[] },
   );
 
   const sortedCategories = Object.keys(groupedEstabelecimentos).sort((a, b) =>
-    a.localeCompare(b)
+    a.localeCompare(b),
   );
-
   const tabPosition = screens.md ? "left" : "top";
+
+  // Função isolada para renderizar os Cards dinamicamente e deixar o código limpo
+  const renderEstabelecimentosGrid = (lista: Estabelecimento[]) => {
+    const totalCount = lista.length;
+    const estabelecimentosToShow = lista.slice(
+      (currentPage - 1) * PAGE_SIZE,
+      currentPage * PAGE_SIZE,
+    );
+
+    if (totalCount === 0) {
+      return (
+        <Empty description="Nenhum estabelecimento encontrado nesta aba." />
+      );
+    }
+
+    return (
+      <>
+        <Row gutter={[16, 16]}>
+          {estabelecimentosToShow.map((est) => (
+            <Col xs={24} md={12} lg={8} key={est.estabelecimentoId}>
+              <Card
+                hoverable
+                // Aplica filtro de cor cinza caso esteja inativo
+                className={
+                  !est.ativo
+                    ? "grayscale opacity-80 bg-gray-50 border-gray-300"
+                    : ""
+                }
+                actions={[
+                  <Button
+                    type="text"
+                    icon={<EditOutlined />}
+                    onClick={() => openEditModal(est)}
+                    className="hover:!bg-blue-500 hover:!text-white text-blue-500"
+                  >
+                    Editar
+                  </Button>,
+                  <Popconfirm
+                    key="toggle"
+                    title={
+                      est.ativo
+                        ? "Desativar Estabelecimento"
+                        : "Reativar Estabelecimento"
+                    }
+                    description={
+                      est.ativo
+                        ? "Ocultar este estabelecimento do site público?"
+                        : "Voltar a exibir este estabelecimento no site público?"
+                    }
+                    onConfirm={() => handleToggleStatus(est)}
+                    okText="Sim"
+                    cancelText="Não"
+                  >
+                    <Button
+                      type="text"
+                      icon={
+                        est.ativo ? <StopOutlined /> : <CheckCircleOutlined />
+                      }
+                      className={
+                        est.ativo
+                          ? "hover:!bg-orange-500 hover:!text-white text-orange-500"
+                          : "hover:!bg-green-500 hover:!text-white text-green-600"
+                      }
+                    >
+                      {est.ativo ? "Desativar" : "Reativar"}
+                    </Button>
+                  </Popconfirm>,
+                  <Popconfirm
+                    key="delete"
+                    title="Excluir"
+                    description="ATENÇÃO: Deseja apagar definitivamente? Isso não pode ser desfeito."
+                    onConfirm={() =>
+                      handleDeleteDefinitivo(est.estabelecimentoId)
+                    }
+                    okText="Sim, Apagar"
+                    cancelText="Não"
+                    okButtonProps={{ danger: true }}
+                  >
+                    <Button
+                      type="text"
+                      danger
+                      icon={<DeleteOutlined />}
+                      className="hover:!bg-red-500 hover:!text-white"
+                    >
+                      Excluir
+                    </Button>
+                  </Popconfirm>,
+                ]}
+              >
+                <Card.Meta
+                  avatar={<Avatar src={getFullImageUrl(est.logoUrl || "")} />}
+                  title={
+                    <span className="flex items-center gap-2">
+                      <span
+                        className={
+                          !est.ativo ? "line-through text-gray-500" : ""
+                        }
+                      >
+                        {est.nomeFantasia}
+                      </span>
+                      {!est.ativo && (
+                        <span className="text-red-500 text-xs font-normal border border-red-500 rounded px-1">
+                          Inativo
+                        </span>
+                      )}
+                    </span>
+                  }
+                  description={
+                    <>
+                      <Text>
+                        <strong>ID:</strong> {est.estabelecimentoId}
+                      </Text>
+                      <br />
+                      <Text>
+                        <strong>CNPJ:</strong> {est.cnpj}
+                      </Text>
+                      <br />
+                      <Text>
+                        <strong>Responsável:</strong> {est.nomeResponsavel}
+                      </Text>
+                      <br />
+                      <Text>
+                        <strong>Categoria:</strong> {est.categoria}
+                      </Text>
+                    </>
+                  }
+                />
+              </Card>
+            </Col>
+          ))}
+        </Row>
+
+        {totalCount > PAGE_SIZE && (
+          <div className="mt-6 text-center">
+            <Pagination
+              current={currentPage}
+              pageSize={PAGE_SIZE}
+              total={totalCount}
+              onChange={(page) => setCurrentPage(page)}
+              showSizeChanger={false}
+            />
+          </div>
+        )}
+      </>
+    );
+  };
 
   return (
     <div className="p-4 md:p-8">
-      {/* Cabeçalho Atualizado com Botões */}
       <div className="flex justify-between items-center mb-4 flex-wrap gap-4">
         <Link href="/admin/dashboard" passHref>
           <Button icon={<ArrowLeftOutlined />} type="text">
             Voltar ao Dashboard
           </Button>
         </Link>
-
-        {/* Grupo de Ações à Direita */}
         <div className="flex gap-2">
-          {/* Botão para página de Indicadores */}
           <Link href="/admin/indicadores" passHref>
             <Button icon={<BarChartOutlined />}>Ver Indicadores</Button>
           </Link>
-
-          {/* Botão de Exportar */}
           <Button
             type="primary"
             icon={<DownloadOutlined />}
@@ -232,205 +395,56 @@ const EstabelecimentosAtivosPage: React.FC = () => {
 
       <Spin spinning={loading}>
         {filteredEstabelecimentos.length === 0 && !loading ? (
-          <Empty description="Nenhum estabelecimento ativo encontrado." />
+          <Empty description="Nenhum estabelecimento encontrado com este filtro." />
         ) : (
           <Tabs
-            defaultActiveKey="todos"
+            defaultActiveKey="geral"
             tabPosition={tabPosition}
             onChange={handleTabChange}
           >
+            {/* Abas Principais de Status (Geral, Ativos, Inativos) */}
             <TabPane
-              tab={`Todos (${filteredEstabelecimentos.length})`}
-              key="todos"
+              tab={
+                <span className="font-semibold text-gray-700">
+                  Geral ({filteredEstabelecimentos.length})
+                </span>
+              }
+              key="geral"
             >
-              {(() => {
-                const totalCount = filteredEstabelecimentos.length;
-                const estabelecimentosToShow = filteredEstabelecimentos.slice(
-                  (currentPage - 1) * PAGE_SIZE,
-                  currentPage * PAGE_SIZE
-                );
-
-                return (
-                  <>
-                    <Row gutter={[16, 16]}>
-                      {estabelecimentosToShow.map((est) => (
-                        <Col xs={24} md={12} lg={8} key={est.estabelecimentoId}>
-                          <Card
-                            hoverable
-                            actions={[
-                              <Button
-                                type="text"
-                                icon={<EditOutlined />}
-                                onClick={() => openEditModal(est)}
-                                className="hover:!bg-blue-500 hover:!text-white"
-                              >
-                                Editar
-                              </Button>,
-                              <Popconfirm
-                                key="delete"
-                                title="Excluir Estabelecimento"
-                                description="Tem certeza que deseja excluir este MEI? Esta ação não pode ser desfeita."
-                                onConfirm={() =>
-                                  handleDelete(est.estabelecimentoId)
-                                }
-                                okText="Sim, Excluir"
-                                cancelText="Não"
-                                okButtonProps={{ danger: true }}
-                              >
-                                <Button
-                                  type="text"
-                                  danger
-                                  icon={<DeleteOutlined />}
-                                  className="hover:!bg-red-500 hover:!text-white"
-                                >
-                                  Excluir
-                                </Button>
-                              </Popconfirm>,
-                            ]}
-                          >
-                            <Card.Meta
-                              avatar={
-                                <Avatar
-                                  src={getFullImageUrl(est.logoUrl || "")}
-                                />
-                              }
-                              title={est.nomeFantasia}
-                              description={
-                                <>
-                                  <Text>
-                                    <strong>ID:</strong> {est.estabelecimentoId}
-                                  </Text>
-                                  <br />
-                                  <Text>
-                                    <strong>CNPJ:</strong> {est.cnpj}
-                                  </Text>
-                                  <br />
-                                  <Text>
-                                    <strong>Responsável:</strong>{" "}
-                                    {est.nomeResponsavel}
-                                  </Text>
-                                  <br />
-                                  <Text>
-                                    <strong>Categoria:</strong> {est.categoria}
-                                  </Text>
-                                </>
-                              }
-                            />
-                          </Card>
-                        </Col>
-                      ))}
-                    </Row>
-
-                    {totalCount > PAGE_SIZE && (
-                      <div className="mt-6 text-center">
-                        <Pagination
-                          current={currentPage}
-                          pageSize={PAGE_SIZE}
-                          total={totalCount}
-                          onChange={(page) => setCurrentPage(page)}
-                          showSizeChanger={false}
-                        />
-                      </div>
-                    )}
-                  </>
-                );
-              })()}
+              {renderEstabelecimentosGrid(filteredEstabelecimentos)}
             </TabPane>
 
-            {sortedCategories.map((categoria) => {
-              const allEstabelecimentosForCat =
-                groupedEstabelecimentos[categoria];
-              const totalCount = allEstabelecimentosForCat.length;
-              const estabelecimentosToShow = allEstabelecimentosForCat.slice(
-                (currentPage - 1) * PAGE_SIZE,
-                currentPage * PAGE_SIZE
-              );
+            <TabPane
+              tab={
+                <span className="font-semibold text-green-600">
+                  Ativos ({ativos.length})
+                </span>
+              }
+              key="ativos"
+            >
+              {renderEstabelecimentosGrid(ativos)}
+            </TabPane>
 
+            <TabPane
+              tab={
+                <span className="font-semibold text-red-500">
+                  Inativos ({inativos.length})
+                </span>
+              }
+              key="inativos"
+            >
+              {renderEstabelecimentosGrid(inativos)}
+            </TabPane>
+
+            {/* Abas dinâmicas das Categorias (como você já tinha) */}
+            {sortedCategories.map((categoria) => {
+              const catList = groupedEstabelecimentos[categoria];
               return (
                 <TabPane
-                  tab={`${categoria} (${allEstabelecimentosForCat.length})`}
+                  tab={`${categoria} (${catList.length})`}
                   key={categoria}
                 >
-                  <Row gutter={[16, 16]}>
-                    {estabelecimentosToShow.map((est) => (
-                      <Col xs={24} md={12} lg={8} key={est.estabelecimentoId}>
-                        <Card
-                          hoverable
-                          actions={[
-                            <Button
-                              type="text"
-                              icon={<EditOutlined />}
-                              onClick={() => openEditModal(est)}
-                              className="hover:!bg-blue-500 hover:!text-white"
-                            >
-                              Editar
-                            </Button>,
-                            <Popconfirm
-                              key="delete"
-                              title="Excluir Estabelecimento"
-                              description="Tem certeza que deseja excluir este MEI? Esta ação não pode ser desfeita."
-                              onConfirm={() =>
-                                handleDelete(est.estabelecimentoId)
-                              }
-                              okText="Sim, Excluir"
-                              cancelText="Não"
-                              okButtonProps={{ danger: true }}
-                            >
-                              <Button
-                                type="text"
-                                danger
-                                icon={<DeleteOutlined />}
-                                className="hover:!bg-red-500 hover:!text-white"
-                              >
-                                Excluir
-                              </Button>
-                            </Popconfirm>,
-                          ]}
-                        >
-                          <Card.Meta
-                            avatar={
-                              <Avatar
-                                src={getFullImageUrl(est.logoUrl || "")}
-                              />
-                            }
-                            title={est.nomeFantasia}
-                            description={
-                              <>
-                                <Text>
-                                  <strong>ID:</strong> {est.estabelecimentoId}
-                                </Text>
-                                <br />
-                                <Text>
-                                  <strong>CNPJ:</strong> {est.cnpj}
-                                </Text>
-                                <br />
-                                <Text>
-                                  <strong>Responsável:</strong>{" "}
-                                  {est.nomeResponsavel}
-                                </Text>
-                                <br />
-                                <Text>
-                                  <strong>Categoria:</strong> {est.categoria}
-                                </Text>
-                              </>
-                            }
-                          />
-                        </Card>
-                      </Col>
-                    ))}
-                  </Row>
-
-                  {totalCount > PAGE_SIZE && (
-                    <div className="mt-6 text-center">
-                      <Pagination
-                        current={currentPage}
-                        pageSize={PAGE_SIZE}
-                        total={totalCount}
-                        onChange={(page) => setCurrentPage(page)}
-                        showSizeChanger={false}
-                      />
-                    </div>
-                  )}
+                  {renderEstabelecimentosGrid(catList)}
                 </TabPane>
               );
             })}
