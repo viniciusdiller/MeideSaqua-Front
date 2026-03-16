@@ -47,7 +47,7 @@ export default function RootLayout({
   return (
     <html lang="pt-BR">
       <head>
-        <AccessibilityStyles /> {/* 2. ADICIONE O COMPONENTE DE ESTILOS AQUI */}
+        <AccessibilityStyles />
       </head>
       <body
         className={`${poppins.variable} bg-white flex flex-col min-h-screen`}

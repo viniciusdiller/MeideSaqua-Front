@@ -433,10 +433,19 @@ export default function RegisterForm({ form, onFinish, loading }: any) {
           </Col>
           <Col xs={24} md={12}>
             <Form.Item
+              name="portfolio"
               label="Imagens do seu Produto ou Serviço"
               help="Envie até 4 imagens. (.png, .jpg, .jpeg)"
               rules={[
                 { required: true, message: "Por favor, Adicione imagens!" },
+                () => ({
+                  validator(_, value) {
+                    if (portfolioFileList.length > 0) return Promise.resolve();
+                    return Promise.reject(
+                      new Error("Por favor, Adicione pelo menos uma imagem!"),
+                    );
+                  },
+                }),
               ]}
             >
               <Upload

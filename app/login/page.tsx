@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -18,7 +18,14 @@ import { loginUser } from "@/lib/api";
 import { AnimatePresence } from "framer-motion";
 import { Notification, NotificationType } from "@/components/ui/notification";
 import { useAuth } from "@/context/AuthContext";
-import { ArrowLeft, Loader2, Eye, EyeOff } from "lucide-react";
+import {
+  ArrowLeft,
+  Loader2,
+  Eye,
+  EyeOff,
+  AlertCircle,
+  Mail,
+} from "lucide-react";
 
 export default function LoginPage() {
   const [emailOrUsername, setEmailOrUsername] = useState("");
@@ -26,6 +33,10 @@ export default function LoginPage() {
   const [notifications, setNotifications] = useState<NotificationType[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
+  const [showResend, setShowResend] = useState(false);
+  const [isResending, setIsResending] = useState(false);
+  const [countdown, setCountdown] = useState(0);
+
   const { login } = useAuth();
 
   const addNotification = (text: string, type: "success" | "error") => {
@@ -60,18 +71,56 @@ export default function LoginPage() {
     } catch (err: any) {
       const errorMessage = err?.response?.data?.message || err.message;
 
-      if (errorMessage.includes("Conta não ativada")) {
-        addNotification(
-          "Sua conta ainda não foi verificada. Por favor, confirme seu e-mail antes de entrar.",
-          "error"
-        );
+      if (errorMessage.includes("não foi verificada")) {
+        addNotification(errorMessage, "error");
+        setShowResend(true);
       } else {
-        addNotification("Email/usuário ou senha inválidos. Tente novamente.", "error");
+        addNotification(
+          errorMessage || "Email/usuário ou senha inválidos. Tente novamente.",
+          "error",
+        );
       }
 
       console.error(err);
     } finally {
       setIsLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    if (countdown > 0) {
+      const timerId = setTimeout(() => setCountdown(countdown - 1), 1000);
+      return () => clearTimeout(timerId);
+    }
+  }, [countdown]);
+
+  const handleResendEmail = async () => {
+    setIsResending(true);
+    try {
+      const response = await fetch(
+        `${process.env.NEXT_PUBLIC_API_URL}/api/auth/resend-confirmation`,
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ username: emailOrUsername }),
+        },
+      );
+
+      const data = await response.json();
+
+      if (response.ok) {
+        addNotification(
+          "E-mail reenviado com sucesso! Verifique sua caixa de entrada.",
+          "success",
+        );
+        setCountdown(60);
+      } else {
+        addNotification(data.message || "Erro ao reenviar e-mail.", "error");
+      }
+    } catch (error) {
+      addNotification("Erro de conexão ao tentar reenviar o e-mail.", "error");
+    } finally {
+      setIsResending(false);
     }
   };
 
@@ -116,8 +165,8 @@ export default function LoginPage() {
             <CardHeader className="text-center">
               <CardTitle className="text-2xl">Efetue o Login</CardTitle>
               <CardDescription>
-                Entre com sua credencial para avaliar o perfil de um MEI ou cadastrar
-                seu negócio na plataforma.
+                Entre com sua credencial para avaliar o perfil de um MEI ou
+                cadastrar seu negócio na plataforma.
               </CardDescription>
             </CardHeader>
             <form onSubmit={handleLogin}>
@@ -168,6 +217,46 @@ export default function LoginPage() {
                     </button>
                   </div>
                 </div>
+
+                {showResend && (
+                  <div className="mt-2 p-4 bg-blue-50/80 border border-blue-100 rounded-xl flex flex-col items-center text-center space-y-3 animate-in fade-in slide-in-from-top-2 duration-300">
+                    <div className="flex items-center gap-2 text-blue-800 font-medium text-sm">
+                      <AlertCircle className="w-4 h-4 text-blue-600" />
+                      Conta não ativada
+                    </div>
+                    <p className="text-xs text-blue-700/80">
+                      Enviamos um link de confirmação para o seu e-mail. Não
+                      encontrou?
+                    </p>
+
+                    {countdown > 0 ? (
+                      <div className="py-2 px-4 bg-blue-100/50 rounded-lg text-xs font-medium text-blue-700 flex items-center gap-2">
+                        <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                        Aguarde {countdown}s para reenviar
+                      </div>
+                    ) : (
+                      <Button
+                        type="button"
+                        onClick={handleResendEmail}
+                        disabled={isResending}
+                        variant="outline"
+                        className="h-9 px-4 text-xs font-medium text-[#017DB9] border-[#017DB9]/30 hover:bg-blue-100 hover:text-[#017DB9] hover:border-[#017DB9] rounded-lg transition-all w-full"
+                      >
+                        {isResending ? (
+                          <span className="flex items-center gap-2">
+                            <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                            Enviando...
+                          </span>
+                        ) : (
+                          <span className="flex items-center gap-2">
+                            <Mail className="w-3.5 h-3.5" />
+                            Reenviar e-mail
+                          </span>
+                        )}
+                      </Button>
+                    )}
+                  </div>
+                )}
               </CardContent>
               <CardFooter className="flex flex-col items-center space-y-4">
                 <Button
