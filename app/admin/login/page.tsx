@@ -27,6 +27,9 @@ const AdminLoginPage: React.FC = () => {
 
       if (response.ok && data.token) {
         localStorage.setItem("admin_token", data.token);
+        const expiryTime = Date.now() + 28800 * 1000;
+        localStorage.setItem("admin_token_expiry", expiryTime.toString());
+        document.cookie = `admin_token=${data.token}; path=/; max-age=28800;`;
         message.success("Login bem-sucedido!");
         router.push("/admin/dashboard");
       } else {
