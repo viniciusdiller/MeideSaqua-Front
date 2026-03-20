@@ -27,6 +27,7 @@ const AdminLoginPage: React.FC = () => {
 
       if (response.ok && data.token) {
         localStorage.setItem("admin_token", data.token);
+        document.cookie = `admin_token=${data.token}; path=/; max-age=86400;`;
         message.success("Login bem-sucedido!");
         router.push("/admin/dashboard");
       } else {

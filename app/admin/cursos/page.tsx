@@ -104,8 +104,15 @@ const AdminCursos = () => {
   };
 
   useEffect(() => {
+    const token = localStorage.getItem("admin_token");
+
+    if (!token) {
+      router.push("/admin/login");
+      return;
+    }
+
     fetchCards();
-  }, []);
+  }, [router]);
 
   // Lógica de Preview de Imagem Local
   const handleFileChange = ({ fileList: newFileList }: any) => {
@@ -179,6 +186,14 @@ const AdminCursos = () => {
         },
         body: formData,
       });
+
+      if (res.status === 401 || res.status === 403) {
+        localStorage.removeItem("admin_token");
+        document.cookie = "admin_token=; path=/; max-age=0;";
+        message.error("Sua sessão expirou. Faça login novamente.");
+        router.push("/admin/login");
+        return;
+      }
 
       if (!res.ok) {
         const err = await res.json().catch(() => ({}));
