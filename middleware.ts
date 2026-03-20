@@ -15,11 +15,6 @@ export function middleware(request: NextRequest) {
     return NextResponse.redirect(new URL("/admin/login", request.url));
   }
 
-  // Se já estiver logado e tentar acessar a página de login, joga pro dashboard
-  if (isAdminRoute && isLoginPage && token) {
-    return NextResponse.redirect(new URL("/admin/dashboard", request.url));
-  }
-
   return NextResponse.next();
 }
 
