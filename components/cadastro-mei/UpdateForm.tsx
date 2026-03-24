@@ -385,7 +385,7 @@ export default function UpdateForm({ form, onFinish, loading }: any) {
         <Form.Item
           name="portfolio"
           label="Novas Fotos do Portfólio (até 4)"
-          help="As imagens enviadas aqui irão substituir as atuais. (.png, .jpg, .jpeg)"
+          help="A qualidade e quantidade de imagens enviadas aqui irão substituir as atuais."
         >
           <Upload
             customRequest={customUploadAction}
