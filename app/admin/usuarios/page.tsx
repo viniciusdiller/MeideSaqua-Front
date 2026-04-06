@@ -38,6 +38,8 @@ import {
   SendOutlined,
   LockOutlined,
   FilterOutlined,
+  DownloadOutlined,
+  HistoryOutlined,
 } from "@ant-design/icons";
 import {
   getAllUsers,
@@ -46,6 +48,7 @@ import {
   adminChangeUserPassword,
   adminResendConfirmation,
 } from "@/lib/api";
+import { AdminUserInteractionsModal } from "@/components/admin/AdminUserInteractionsModal";
 
 const { Title, Text, Paragraph } = Typography;
 const { Search } = Input;
@@ -77,6 +80,15 @@ const AdminUsuariosPage: React.FC = () => {
   const [passwordUser, setPasswordUser] = useState<User | null>(null);
   const [passwordLoading, setPasswordLoading] = useState(false);
   const [passwordForm] = Form.useForm();
+
+  const [interactionsVisible, setInteractionsVisible] = useState(false);
+  const [selectedUserForInteractions, setSelectedUserForInteractions] =
+    useState<User | null>(null);
+
+  const handleOpenInteractions = (user: User) => {
+    setSelectedUserForInteractions(user);
+    setInteractionsVisible(true);
+  };
 
   const router = useRouter();
   const screens = useBreakpoint();
@@ -271,6 +283,15 @@ const AdminUsuariosPage: React.FC = () => {
                         className="hover:text-blue-600 hover:border-blue-600"
                       />
                     </Tooltip>
+                    <Tooltip title="Interações">
+                      <Button
+                        shape="circle"
+                        icon={<HistoryOutlined />}
+                        onClick={() => handleOpenInteractions(user)}
+                        className="hover:text-purple-600 hover:border-purple-600"
+                      />
+                    </Tooltip>
+
                     <Tooltip title="Segurança">
                       <Button
                         shape="circle"
@@ -337,6 +358,35 @@ const AdminUsuariosPage: React.FC = () => {
     );
   };
 
+  const handleExportCSV = () => {
+    const headers = ["ID", "Nome Completo", "Email", "Status"];
+
+    const rows = users.map((user) => [
+      user.usuarioId,
+      `"${user.nomeCompleto}"`,
+      user.email,
+      user.enabled ? "Ativo" : "Inativo",
+    ]);
+
+    const csvContent = [
+      headers.join(";"),
+      ...rows.map((row) => row.join(";")),
+    ].join("\n");
+
+    const blob = new Blob(["\uFEFF" + csvContent], {
+      type: "text/csv;charset=utf-8;",
+    });
+    const url = window.URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = "usuarios_meidesaqua.csv";
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    window.URL.revokeObjectURL(url);
+
+    message.success("Arquivo CSV exportado com sucesso!");
+  };
   return (
     <div className="min-h-screen bg-[#f8fafc] p-4 md:p-10">
       {/* Header Section */}
@@ -389,6 +439,16 @@ const AdminUsuariosPage: React.FC = () => {
               <FilterOutlined className="mr-2" />
               {filteredUsers.length} resultados
             </Tag>
+
+            {/* NOVO BOTÃO DE EXPORTAÇÃO AQUI */}
+            <Button
+              type="primary"
+              icon={<DownloadOutlined />}
+              onClick={handleExportCSV}
+              className="bg-green-600 hover:bg-green-700 shadow-none border-none"
+            >
+              Exportar CSV
+            </Button>
           </Space>
         </div>
 
@@ -546,6 +606,12 @@ const AdminUsuariosPage: React.FC = () => {
           </Form.Item>
         </Form>
       </Modal>
+
+      <AdminUserInteractionsModal
+        visible={interactionsVisible}
+        user={selectedUserForInteractions}
+        onClose={() => setInteractionsVisible(false)}
+      />
 
       <style jsx global>{`
         .custom-tabs .ant-tabs-nav::before {

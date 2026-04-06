@@ -123,12 +123,20 @@ const EstabelecimentosAtivosPage: React.FC = () => {
 
   const handleSearch = (value: string) => {
     const lowerCaseValue = value.toLowerCase();
-    const filtered = estabelecimentos.filter(
-      (p) =>
-        p.nomeFantasia.toLowerCase().includes(lowerCaseValue) ||
+
+    const filtered = estabelecimentos.filter((p) => {
+      return (
+        (p.nomeFantasia || "").toLowerCase().includes(lowerCaseValue) ||
         (p.cnpj || "").toLowerCase().includes(lowerCaseValue) ||
-        p.categoria.toLowerCase().includes(lowerCaseValue),
-    );
+        (p.categoria || "").toLowerCase().includes(lowerCaseValue) ||
+        (p.nomeResponsavel || "").toLowerCase().includes(lowerCaseValue) ||
+        (p.estabelecimentoId ? p.estabelecimentoId.toString() : "").includes(
+          lowerCaseValue,
+        ) ||
+        (p.emailEstabelecimento || "").toLowerCase().includes(lowerCaseValue)
+      );
+    });
+
     setFilteredEstabelecimentos(filtered);
     setCurrentPage(1);
   };

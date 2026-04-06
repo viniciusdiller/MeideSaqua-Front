@@ -446,6 +446,33 @@ export const adminResendConfirmation = (id: number, token: string) =>
     },
   });
 
+export const adminGetUserInteractions = async (
+  userId: number,
+  token: string,
+) => {
+  const API_URL = process.env.NEXT_PUBLIC_API_URL;
+
+  const response = await fetch(
+    `${API_URL}/api/admin/users/${userId}/interacoes`,
+    {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+    },
+  );
+
+  if (!response.ok) {
+    const errorData = await response.json();
+    throw new Error(
+      errorData.message || "Erro ao buscar interações do usuário.",
+    );
+  }
+
+  return response.json();
+};
+
 // ==================================================================
 
 export const getCursos = () => fetchApi("/api/cursos");
