@@ -39,6 +39,7 @@ import {
   LockOutlined,
   FilterOutlined,
   DownloadOutlined,
+  HistoryOutlined,
 } from "@ant-design/icons";
 import {
   getAllUsers,
@@ -47,6 +48,7 @@ import {
   adminChangeUserPassword,
   adminResendConfirmation,
 } from "@/lib/api";
+import { AdminUserInteractionsModal } from "@/components/admin/AdminUserInteractionsModal";
 
 const { Title, Text, Paragraph } = Typography;
 const { Search } = Input;
@@ -78,6 +80,15 @@ const AdminUsuariosPage: React.FC = () => {
   const [passwordUser, setPasswordUser] = useState<User | null>(null);
   const [passwordLoading, setPasswordLoading] = useState(false);
   const [passwordForm] = Form.useForm();
+
+  const [interactionsVisible, setInteractionsVisible] = useState(false);
+  const [selectedUserForInteractions, setSelectedUserForInteractions] =
+    useState<User | null>(null);
+
+  const handleOpenInteractions = (user: User) => {
+    setSelectedUserForInteractions(user);
+    setInteractionsVisible(true);
+  };
 
   const router = useRouter();
   const screens = useBreakpoint();
@@ -272,6 +283,15 @@ const AdminUsuariosPage: React.FC = () => {
                         className="hover:text-blue-600 hover:border-blue-600"
                       />
                     </Tooltip>
+                    <Tooltip title="Interações">
+                      <Button
+                        shape="circle"
+                        icon={<HistoryOutlined />}
+                        onClick={() => handleOpenInteractions(user)}
+                        className="hover:text-purple-600 hover:border-purple-600"
+                      />
+                    </Tooltip>
+
                     <Tooltip title="Segurança">
                       <Button
                         shape="circle"
@@ -586,6 +606,12 @@ const AdminUsuariosPage: React.FC = () => {
           </Form.Item>
         </Form>
       </Modal>
+
+      <AdminUserInteractionsModal
+        visible={interactionsVisible}
+        user={selectedUserForInteractions}
+        onClose={() => setInteractionsVisible(false)}
+      />
 
       <style jsx global>{`
         .custom-tabs .ant-tabs-nav::before {
