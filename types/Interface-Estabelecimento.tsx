@@ -7,6 +7,7 @@ export interface ImagemProduto {
 export interface Estabelecimento {
   estabelecimentoId: number;
   nomeFantasia: string;
+  emailEstabelecimento: string;
   cnpj: string;
   categoria: string;
   logoUrl?: string;
