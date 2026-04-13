@@ -5,9 +5,12 @@ const API_URL = process.env.NEXT_PUBLIC_API_URL;
  * Lida com headers, FormData, e tratamento de erros 401.
  */
 async function fetchApi(path: string, options: RequestInit = {}) {
-  const headers: Record<string, string> = {
-    ...(options.headers as Record<string, string>),
-  };
+  const headers: Record<string, string> = {};
+
+  // Copia headers passados nas opções (como o Authorization)
+  if (options.headers) {
+    Object.assign(headers, options.headers);
+  }
 
   // Se o body NÃO for FormData, define Content-Type: application/json
   if (options.body && !(options.body instanceof FormData)) {
@@ -25,6 +28,9 @@ async function fetchApi(path: string, options: RequestInit = {}) {
       "Authorization"
     ];
   }
+
+  console.log("\n[FRONTEND DEBUG] Chamando API:", path);
+  console.log("[FRONTEND DEBUG] Headers que estão sendo enviados:", headers);
 
   const response = await fetch(`${API_URL}${path}`, {
     ...options,
@@ -149,6 +155,14 @@ export const getEstablishmentById = (id: string) =>
  */
 export const getReviewsByEstablishment = (id: string) =>
   fetchApi(`/api/avaliacoes/estabelecimento/${id}`);
+
+export const getMyEstablishments = (token: string) =>
+  fetchApi("/api/estabelecimentos/meus-estabelecimentos", {
+    method: "GET",
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  });
 
 // ==================================================================
 // --- Funções do Formulário CADASTRO-MEI (Requer Auth) ---
