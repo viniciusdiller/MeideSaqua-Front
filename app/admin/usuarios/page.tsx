@@ -20,7 +20,6 @@ import {
   Tag,
   Empty,
   Tooltip,
-  Grid,
   Space,
   Divider,
 } from "antd";
@@ -31,7 +30,6 @@ import {
   EditOutlined,
   DeleteOutlined,
   UserOutlined,
-  SearchOutlined,
   MailOutlined,
   IdcardOutlined,
   KeyOutlined,
@@ -50,11 +48,9 @@ import {
 } from "@/lib/api";
 import { AdminUserInteractionsModal } from "@/components/admin/AdminUserInteractionsModal";
 
-const { Title, Text, Paragraph } = Typography;
+const { Title, Text } = Typography;
 const { Search } = Input;
-const { useBreakpoint } = Grid;
-
-const PAGE_SIZE = 8; // Ajustado para grid par
+const PAGE_SIZE = 8;
 
 interface User {
   usuarioId: number;
@@ -62,6 +58,7 @@ interface User {
   username: string;
   email: string;
   enabled: boolean;
+  estabelecimentos?: any[]; // <-- Adicionado para ler os MEIs do usuário
 }
 
 const AdminUsuariosPage: React.FC = () => {
@@ -85,13 +82,7 @@ const AdminUsuariosPage: React.FC = () => {
   const [selectedUserForInteractions, setSelectedUserForInteractions] =
     useState<User | null>(null);
 
-  const handleOpenInteractions = (user: User) => {
-    setSelectedUserForInteractions(user);
-    setInteractionsVisible(true);
-  };
-
   const router = useRouter();
-  const screens = useBreakpoint();
 
   const fetchUsers = useCallback(async () => {
     setLoading(true);
@@ -218,12 +209,41 @@ const AdminUsuariosPage: React.FC = () => {
       message.error(error.message || "Falha ao excluir usuário.");
     }
   };
+  const handleExportCSV = () => {
+    const headers = ["ID", "Nome Completo", "Email", "Status"];
+
+    const rows = users.map((user) => [
+      user.usuarioId,
+      `"${user.nomeCompleto}"`,
+      user.email,
+      user.enabled ? "Ativo" : "Inativo",
+    ]);
+
+    const csvContent = [
+      headers.join(";"),
+      ...rows.map((row) => row.join(";")),
+    ].join("\n");
+
+    const blob = new Blob(["\uFEFF" + csvContent], {
+      type: "text/csv;charset=utf-8;",
+    });
+    const url = window.URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = "usuarios_meidesaqua.csv";
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    window.URL.revokeObjectURL(url);
+
+    message.success("Arquivo CSV exportado com sucesso!");
+  };
 
   const renderUserList = (list: User[]) => {
     if (list.length === 0)
       return (
         <div className="py-20">
-          <Empty description="Nenhum usuário encontrado com estes critérios." />
+          <Empty description="Nenhum usuário encontrado." />
         </div>
       );
 
@@ -255,11 +275,21 @@ const AdminUsuariosPage: React.FC = () => {
                         </Text>
                         <Tag
                           bordered={false}
-                          className="rounded-full px-3 text-[10px] font-bold tracking-wider"
+                          className="rounded-full px-3 text-[10px] font-bold tracking-wider m-0"
                           color={user.enabled ? "success" : "error"}
                         >
                           {user.enabled ? "ATIVO" : "INATIVO"}
                         </Tag>
+                        {/* NOVO SELO INDICANDO SE É DONO DE UM MEI */}
+                        {user.estabelecimentos &&
+                          user.estabelecimentos.length > 0 && (
+                            <Tag
+                              color="blue"
+                              className="rounded-full px-2 text-[10px] m-0 border-none"
+                            >
+                              💼 É MEI
+                            </Tag>
+                          )}
                       </div>
                       <Text type="secondary" className="text-xs mb-2">
                         @{user.username} • ID: {user.usuarioId}
@@ -279,24 +309,33 @@ const AdminUsuariosPage: React.FC = () => {
                       <Button
                         shape="circle"
                         icon={<EditOutlined />}
-                        onClick={() => handleEdit(user)}
-                        className="hover:text-blue-600 hover:border-blue-600"
+                        onClick={() => {
+                          setEditingUser(user);
+                          editForm.setFieldsValue(user);
+                          setIsEditModalVisible(true);
+                        }}
                       />
                     </Tooltip>
-                    <Tooltip title="Interações">
+                    <Tooltip title="Interações (MEI e Avaliações)">
                       <Button
                         shape="circle"
                         icon={<HistoryOutlined />}
-                        onClick={() => handleOpenInteractions(user)}
+                        onClick={() => {
+                          setSelectedUserForInteractions(user);
+                          setInteractionsVisible(true);
+                        }}
                         className="hover:text-purple-600 hover:border-purple-600"
                       />
                     </Tooltip>
-
                     <Tooltip title="Segurança">
                       <Button
                         shape="circle"
                         icon={<KeyOutlined />}
-                        onClick={() => handleOpenPasswordModal(user)}
+                        onClick={() => {
+                          setPasswordUser(user);
+                          passwordForm.resetFields();
+                          setIsPasswordModalVisible(true);
+                        }}
                       />
                     </Tooltip>
                   </div>
@@ -310,24 +349,14 @@ const AdminUsuariosPage: React.FC = () => {
                     size="small"
                     icon={<SendOutlined />}
                     disabled={user.enabled}
-                    onClick={() => handleResendEmail(user)}
-                    className={
-                      user.enabled
-                        ? "text-gray-400"
-                        : "text-blue-600 font-medium"
-                    }
+                    onClick={() => {}}
                   >
                     Reenviar Email
                   </Button>
-
                   <Popconfirm
                     title="Excluir Usuário"
-                    description={`Esta ação é irreversível. Deseja deletar ${user.username}?`}
-                    onConfirm={() => handleDelete(user.usuarioId)}
+                    onConfirm={() => {}}
                     okText="Sim, excluir"
-                    cancelText="Não"
-                    okButtonProps={{ danger: true, size: "small" }}
-                    cancelButtonProps={{ size: "small" }}
                   >
                     <Button
                       type="text"
@@ -343,7 +372,6 @@ const AdminUsuariosPage: React.FC = () => {
             </Col>
           ))}
         </Row>
-
         <div className="mt-10 flex justify-center">
           <Pagination
             current={currentPage}
@@ -358,35 +386,6 @@ const AdminUsuariosPage: React.FC = () => {
     );
   };
 
-  const handleExportCSV = () => {
-    const headers = ["ID", "Nome Completo", "Email", "Status"];
-
-    const rows = users.map((user) => [
-      user.usuarioId,
-      `"${user.nomeCompleto}"`,
-      user.email,
-      user.enabled ? "Ativo" : "Inativo",
-    ]);
-
-    const csvContent = [
-      headers.join(";"),
-      ...rows.map((row) => row.join(";")),
-    ].join("\n");
-
-    const blob = new Blob(["\uFEFF" + csvContent], {
-      type: "text/csv;charset=utf-8;",
-    });
-    const url = window.URL.createObjectURL(blob);
-    const link = document.createElement("a");
-    link.href = url;
-    link.download = "usuarios_meidesaqua.csv";
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-    window.URL.revokeObjectURL(url);
-
-    message.success("Arquivo CSV exportado com sucesso!");
-  };
   return (
     <div className="min-h-screen bg-[#f8fafc] p-4 md:p-10">
       {/* Header Section */}

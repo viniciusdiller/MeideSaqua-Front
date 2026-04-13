@@ -144,7 +144,7 @@ export default function PerfilPage() {
 
       if (profileData.email) {
         toast.success(
-          "Dados atualizados! Um e-mail de confirmação foi enviado para o seu novo endereço."
+          "Dados atualizados! Um e-mail de confirmação foi enviado para o seu novo endereço.",
         );
       } else {
         toast.success("Nome de usuário atualizado com sucesso!");
@@ -468,7 +468,7 @@ export default function PerfilPage() {
                         onClick={handleDeleteAccount}
                         className={cn(
                           buttonVariants({ variant: "destructive" }) +
-                            " w-fit rounded-full transition-all transform hover:scale-105 hover:bg-red-500 active:scale-95 border-2 border-transparent hover:border-red-700"
+                            " w-fit rounded-full transition-all transform hover:scale-105 hover:bg-red-500 active:scale-95 border-2 border-transparent hover:border-red-700",
                         )}
                       >
                         Continuar
