@@ -307,7 +307,15 @@ const EstabelecimentosAtivosPage: React.FC = () => {
                 ]}
               >
                 <Card.Meta
-                  avatar={<Avatar src={getFullImageUrl(est.logoUrl || "")} />}
+                  avatar={
+                    <Avatar
+                      src={
+                        est.logoUrl
+                          ? getFullImageUrl(est.logoUrl)
+                          : "/LogoMeideSaqua.png"
+                      }
+                    />
+                  }
                   title={
                     <span className="flex items-center gap-2">
                       <span

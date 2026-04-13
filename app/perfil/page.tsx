@@ -33,18 +33,21 @@ import {
 } from "@/components/ui/alert-dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Badge } from "@/components/ui/badge"; // Certifique-se de que este componente existe
 import Image from "next/image";
+import Link from "next/link";
 import { useState, useEffect } from "react";
 import { toast } from "sonner";
-import { Loader2 } from "lucide-react";
+import { Loader2, Store, Plus, AlertCircle } from "lucide-react";
 import {
   updateUserProfile,
   changeUserPassword,
   deleteUserAccount,
+  getMyEstablishments, // <-- NOVA FUNÇÃO DE API (Ver passo 2)
 } from "@/lib/api";
 import { cn } from "@/lib/utils";
 import { contemPalavrao } from "@/lib/profanityFilter";
-import { removeEmojis, containsEmoji, isValidEmail } from "@/lib/utils";
+import { removeEmojis, isValidEmail } from "@/lib/utils";
 
 export default function PerfilPage() {
   const { user, logout, isLoading, updateUser: updateUserContext } = useAuth();
@@ -55,34 +58,17 @@ export default function PerfilPage() {
   const [isProfileDialogOpen, setIsProfileDialogOpen] = useState(false);
   const [editUsername, setEditUsername] = useState("");
   const [editEmail, setEditEmail] = useState("");
-  const [isUpdatingProfile, setIsUpdatingProfile] = useState(false); // Estado de carregamento
+  const [isUpdatingProfile, setIsUpdatingProfile] = useState(false);
 
   const [currentPassword, setCurrentPassword] = useState("");
   const [newPassword, setNewPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [isPasswordDialogOpen, setIsPasswordDialogOpen] = useState(false);
-  const [isChangingPassword, setIsChangingPassword] = useState(false); // Estado de carregamento
+  const [isChangingPassword, setIsChangingPassword] = useState(false);
 
-  const handleUsernameChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const valueComEmoji = e.target.value;
-    const valueSemEmoji = removeEmojis(valueComEmoji);
-
-    if (valueComEmoji !== valueSemEmoji) {
-      toast.error("Não é possível adicionar emojis", {
-        id: "emoji-profile-toast", // ID único para evitar duplicatas
-      });
-    }
-
-    setEditUsername(valueSemEmoji);
-  };
-  const handleProfileDialogOpenChange = (open: boolean) => {
-    setIsProfileDialogOpen(open);
-    if (open && user) {
-      // Quando o modal abre, preenche os campos de edição
-      setEditUsername(user.username || "");
-      setEditEmail(user.email || "");
-    }
-  };
+  // Novos estados para os Estabelecimentos do Usuário
+  const [myMeis, setMyMeis] = useState<any[]>([]);
+  const [isLoadingMeis, setIsLoadingMeis] = useState(true);
 
   useEffect(() => {
     if (user) {
@@ -90,6 +76,45 @@ export default function PerfilPage() {
       setEmail(user.email || "");
     }
   }, [user]);
+
+  // Efeito para buscar os MEIs do usuário assim que ele estiver logado
+  useEffect(() => {
+    const fetchMeis = async () => {
+      if (!user?.token) return;
+      try {
+        setIsLoadingMeis(true);
+        const data = await getMyEstablishments(user.token);
+        setMyMeis(data || []);
+      } catch (error) {
+        console.error("Erro ao buscar MEIs:", error);
+      } finally {
+        setIsLoadingMeis(false);
+      }
+    };
+
+    fetchMeis();
+  }, [user]);
+
+  const handleUsernameChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const valueComEmoji = e.target.value;
+    const valueSemEmoji = removeEmojis(valueComEmoji);
+
+    if (valueComEmoji !== valueSemEmoji) {
+      toast.error("Não é possível adicionar emojis", {
+        id: "emoji-profile-toast",
+      });
+    }
+
+    setEditUsername(valueSemEmoji);
+  };
+
+  const handleProfileDialogOpenChange = (open: boolean) => {
+    setIsProfileDialogOpen(open);
+    if (open && user) {
+      setEditUsername(user.username || "");
+      setEditEmail(user.email || "");
+    }
+  };
 
   if (isLoading) {
     return (
@@ -137,7 +162,7 @@ export default function PerfilPage() {
       return;
     }
 
-    setIsUpdatingProfile(true); // Inicia o carregamento
+    setIsUpdatingProfile(true);
     try {
       const updatedUser = await updateUserProfile(profileData, user.token);
       updateUserContext(updatedUser);
@@ -153,7 +178,7 @@ export default function PerfilPage() {
     } catch (error: any) {
       toast.error(`Erro ao atualizar perfil: ${error.message}`);
     } finally {
-      setIsUpdatingProfile(false); // Finaliza o carregamento
+      setIsUpdatingProfile(false);
     }
   };
 
@@ -171,7 +196,7 @@ export default function PerfilPage() {
       return;
     }
 
-    setIsChangingPassword(true); // Inicia o carregamento
+    setIsChangingPassword(true);
     try {
       await changeUserPassword({ currentPassword, newPassword }, user.token);
       toast.success("Senha alterada com sucesso!");
@@ -182,7 +207,7 @@ export default function PerfilPage() {
     } catch (error: any) {
       toast.error(`Erro ao alterar senha: ${error.message}`);
     } finally {
-      setIsChangingPassword(false); // Finaliza o carregamento
+      setIsChangingPassword(false);
     }
   };
 
@@ -200,6 +225,21 @@ export default function PerfilPage() {
       }, 2000);
     } catch (error: any) {
       toast.error(`Erro ao excluir a conta: ${error.message}`);
+    }
+  };
+
+  // Função utilitária para cores do Badge
+  const getStatusColor = (status: string) => {
+    switch (status.toLowerCase()) {
+      case "ativo":
+        return "bg-green-100 text-green-800 hover:bg-green-200 border-green-200";
+      case "pendente_aprovacao":
+      case "pendente_atualizacao":
+        return "bg-yellow-100 text-yellow-800 hover:bg-yellow-200 border-yellow-200";
+      case "inativo":
+        return "bg-red-100 text-red-800 hover:bg-red-200 border-red-200";
+      default:
+        return "bg-gray-100 text-gray-800 hover:bg-gray-200 border-gray-200";
     }
   };
 
@@ -287,9 +327,7 @@ export default function PerfilPage() {
                           id="usernameEdit"
                           value={editUsername}
                           onChange={handleUsernameChange}
-                          className="mt-1  w-full py-2
-                          rounded-2xl border border-gray-200 bg-white shadow-sm
-                          focus:ring-2 focus:border-[#22c362]/70 transition-all duration-300 placeholder:text-gray-400"
+                          className="mt-1 w-full py-2 rounded-2xl border border-gray-200 bg-white shadow-sm focus:ring-2 focus:border-[#22c362]/70 transition-all duration-300 placeholder:text-gray-400"
                         />
                       </div>
                       <div>
@@ -298,9 +336,7 @@ export default function PerfilPage() {
                           id="emailEdit"
                           value={editEmail}
                           onChange={(e) => setEditEmail(e.target.value)}
-                          className="mt-1  w-full py-2
-                          rounded-2xl border border-gray-200 bg-white shadow-sm
-                          focus:ring-2 focus:border-[#22c362]/70 transition-all duration-300 placeholder:text-gray-400"
+                          className="mt-1 w-full py-2 rounded-2xl border border-gray-200 bg-white shadow-sm focus:ring-2 focus:border-[#22c362]/70 transition-all duration-300 placeholder:text-gray-400"
                         />
                       </div>
                     </div>
@@ -329,6 +365,89 @@ export default function PerfilPage() {
                     </DialogFooter>
                   </DialogContent>
                 </Dialog>
+              </CardFooter>
+            </Card>
+
+            <Card className="rounded-xl shadow-md border-blue-100">
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2 text-blue-900">
+                  <Store className="w-5 h-5 text-blue-600" />
+                  Meus Estabelecimentos
+                </CardTitle>
+                <CardDescription>
+                  Gerencie os MEIs que você possui cadastrados na plataforma.
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                {isLoadingMeis ? (
+                  <div className="flex justify-center py-6">
+                    <Loader2 className="h-6 w-6 animate-spin text-blue-400" />
+                  </div>
+                ) : myMeis.length === 0 ? (
+                  <div className="text-center py-8 bg-gray-50 rounded-lg border-2 border-dashed border-gray-200">
+                    <AlertCircle className="w-8 h-8 text-gray-400 mx-auto mb-2" />
+                    <p className="text-gray-500 text-sm">
+                      Você ainda não possui nenhum MEI vinculado à sua conta.
+                    </p>
+                  </div>
+                ) : (
+                  <div className="space-y-3">
+                    {myMeis.map((mei) => (
+                      <div
+                        key={mei.estabelecimentoId}
+                        className="flex justify-between items-center p-4 border border-gray-100 rounded-xl hover:shadow-md hover:border-blue-200 transition-all bg-white"
+                      >
+                        <div className="flex items-center gap-4">
+                          {/* NOVO: Bloco da Logo do MEI com Fallback */}
+                          <div className="w-12 h-12 rounded-full overflow-hidden border border-gray-200 flex-shrink-0 bg-white flex items-center justify-center p-1 shadow-sm">
+                            <img
+                              src={
+                                mei.logoUrl
+                                  ? `${process.env.NEXT_PUBLIC_API_URL}/${mei.logoUrl.replace(/^\/+/, "")}`
+                                  : "/LogoMeideSaqua.png" // Fallback caso não tenha logo
+                              }
+                              alt={`Logo ${mei.nomeFantasia}`}
+                              className="w-full h-full object-cover rounded-full"
+                              onError={(e) => {
+                                // Fallback de segurança caso a URL da imagem exista mas a imagem esteja quebrada no servidor
+                                (e.target as HTMLImageElement).src =
+                                  "/LogoMeideSaqua.png";
+                              }}
+                            />
+                          </div>
+
+                          <div>
+                            <h4 className="font-semibold text-gray-800">
+                              {mei.nomeFantasia}
+                            </h4>
+                            <p className="text-xs text-gray-500 mt-1">
+                              CNPJ: {mei.cnpj} <span className="mx-1">•</span>{" "}
+                              {mei.categoria}
+                            </p>
+                          </div>
+                        </div>
+
+                        <Badge
+                          className={`ml-2 text-[10px] uppercase tracking-wider ${getStatusColor(mei.status)}`}
+                        >
+                          {mei.status.replace(/_/g, " ")}
+                        </Badge>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </CardContent>
+              <CardFooter>
+                <Button
+                  asChild
+                  variant="outline"
+                  className="w-full rounded-xl border-dashed border-2 hover:border-blue-500 hover:text-blue-600 transition-colors bg-blue-50/30"
+                >
+                  <Link href="/cadastro-mei">
+                    <Plus className="w-4 h-4 mr-2" />
+                    Cadastrar Novo MEI
+                  </Link>
+                </Button>
               </CardFooter>
             </Card>
 
@@ -369,9 +488,7 @@ export default function PerfilPage() {
                           placeholder="Sua senha atual"
                           value={currentPassword}
                           onChange={(e) => setCurrentPassword(e.target.value)}
-                          className="mt-1 w-full py-2
-                          rounded-2xl border border-gray-200 bg-white shadow-sm
-                          focus:ring-2 focus:border-[#22c362]/70 transition-all duration-300 placeholder:text-gray-400"
+                          className="mt-1 w-full py-2 rounded-2xl border border-gray-200 bg-white shadow-sm focus:ring-2 focus:border-[#22c362]/70 transition-all duration-300 placeholder:text-gray-400"
                         />
                       </div>
                       <div>
@@ -382,9 +499,7 @@ export default function PerfilPage() {
                           placeholder="Digite a nova senha"
                           value={newPassword}
                           onChange={(e) => setNewPassword(e.target.value)}
-                          className="mt-1  w-full py-2
-                          rounded-2xl border border-gray-200 bg-white shadow-sm
-                          focus:ring-2 focus:border-[#22c362]/70 transition-all duration-300 placeholder:text-gray-400"
+                          className="mt-1 w-full py-2 rounded-2xl border border-gray-200 bg-white shadow-sm focus:ring-2 focus:border-[#22c362]/70 transition-all duration-300 placeholder:text-gray-400"
                         />
                       </div>
                       <div>
@@ -397,9 +512,7 @@ export default function PerfilPage() {
                           placeholder="Digite novamente sua nova senha"
                           value={confirmPassword}
                           onChange={(e) => setConfirmPassword(e.target.value)}
-                          className="mt-1  w-full py-2
-                          rounded-2xl border border-gray-200 bg-white shadow-sm
-                          focus:ring-2 focus:border-[#22c362]/70 transition-all duration-300 placeholder:text-gray-400"
+                          className="mt-1 w-full py-2 rounded-2xl border border-gray-200 bg-white shadow-sm focus:ring-2 focus:border-[#22c362]/70 transition-all duration-300 placeholder:text-gray-400"
                         />
                       </div>
                     </div>
@@ -461,7 +574,7 @@ export default function PerfilPage() {
                       </AlertDialogDescription>
                     </AlertDialogHeader>
                     <AlertDialogFooter>
-                      <AlertDialogCancel className="w-fit rounded-full  transform hover:scale-105 bg-green-500 active:scale-95 border-2 border-transparent hover:border-green-700">
+                      <AlertDialogCancel className="w-fit rounded-full transform hover:scale-105 bg-green-500 active:scale-95 border-2 border-transparent hover:border-green-700">
                         Cancelar
                       </AlertDialogCancel>
                       <AlertDialogAction

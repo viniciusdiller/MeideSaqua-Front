@@ -156,6 +156,14 @@ export const getEstablishmentById = (id: string) =>
 export const getReviewsByEstablishment = (id: string) =>
   fetchApi(`/api/avaliacoes/estabelecimento/${id}`);
 
+export const getMyEstablishments = (token: string) =>
+  fetchApi("/api/estabelecimentos/meus-estabelecimentos", {
+    method: "GET",
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  });
+
 // ==================================================================
 // --- Funções do Formulário CADASTRO-MEI (Requer Auth) ---
 // ==================================================================
