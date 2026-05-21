@@ -207,12 +207,12 @@ export default function SobrePage() {
                 <li className="pt-2">
                   <strong>Endereço 1:</strong>{" "}
                   <a
-                    href="https://www.google.com/maps/search/?api=1&query=R.+Barão+de+Saquarema,+n°+243+-+Sala+5+-+Centro,+Saquarema+-+RJ,+28990-772"
+                    href="https://www.google.com/maps/place/R.+Cec%C3%ADlia+dos+Santos+Souza,+31+-+Centro,+Saquarema+-+RJ,+28990-798/@-22.9348024,-42.493805,20z/data=!4m16!1m9!3m8!1s0x975eed1c76674d:0xb7f3c343e1217d2a!2sR.+Cec%C3%ADlia+dos+Santos+Souza,+31+-+Centro,+Saquarema+-+RJ,+28990-798!3b1!8m2!3d-22.9346909!4d-42.493739!10e5!16s%2Fg%2F11c5p5k4rt!3m5!1s0x975eed1c76674d:0xb7f3c343e1217d2a!8m2!3d-22.9346909!4d-42.493739!16s%2Fg%2F11c5p5k4rt?entry=ttu&g_ep=EgoyMDI2MDUxMy4wIKXMDSoASAFQAw%3D%3D"
                     target="_blank"
                     rel="noopener noreferrer"
                     className="text-gray-700 hover:underline hover:text-blue-600"
                   >
-                    R. Barão de Saquarema, n° 243 - Sala 5 - Centro, Saquarema -
+                    Rua Cecília dos Santos Souza, n° 31 - Centro, Saquarema -
                     RJ, 28990-772
                   </a>
                 </li>
