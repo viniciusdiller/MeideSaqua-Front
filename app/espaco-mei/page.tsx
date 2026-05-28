@@ -213,7 +213,7 @@ export default function SobrePage() {
                     className="text-gray-700 hover:underline hover:text-blue-600"
                   >
                     Rua Cecília dos Santos Souza, n° 31 - Centro, Saquarema -
-                    RJ, 28990-772
+                    RJ, 28990-756
                   </a>
                 </li>
                 <li>
