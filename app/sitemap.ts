@@ -6,9 +6,15 @@ import { MetadataRoute } from "next";
 const baseUrl = "https://meidesaqua.saquarema.rj.gov.br";
 
 // 2. URL INTERNA (para o Next.js buscar os dados no backend)
-// Em produção, ambos rodam no mesmo servidor, então o Next.js
-// pode acessar o backend via localhost:3301.
-const backendApiUrl = "https://meidesaqua.saquarema.rj.gov.br/api";
+// Prioridade:
+// - SITEMAP_API_URL (ideal para build em servidor/CI)
+// - NEXT_PUBLIC_API_URL
+// - localhost
+const backendApiUrl = (
+  process.env.SITEMAP_API_URL ||
+  process.env.NEXT_PUBLIC_API_URL ||
+  "http://localhost:3301"
+).replace(/\/+$/, "");
 
 const slugify = (text: string) => {
   if (!text) return "";
@@ -24,6 +30,53 @@ type Categoria = {
 
 type Estabelecimento = {
   estabelecimentoId: number;
+};
+
+const getErrorCode = (error: unknown): string | null => {
+  const err = error as any;
+  return err?.code || err?.cause?.code || null;
+};
+
+const getErrorMessage = (error: unknown): string => {
+  const err = error as any;
+  return (
+    err?.message ||
+    err?.cause?.message ||
+    "Erro desconhecido ao buscar dados do sitemap"
+  );
+};
+
+const fetchJsonSafe = async <T>(path: string): Promise<T | null> => {
+  try {
+    const response = await fetch(`${backendApiUrl}${path}`, {
+      next: { revalidate: 3600 },
+    });
+
+    if (!response.ok) {
+      console.warn(
+        `Sitemap: Falha ao buscar ${path}. Status: ${response.status}`,
+      );
+      return null;
+    }
+
+    return (await response.json()) as T;
+  } catch (error) {
+    const code = getErrorCode(error);
+    const message = getErrorMessage(error);
+
+    if (
+      code === "UNABLE_TO_VERIFY_LEAF_SIGNATURE" ||
+      code === "SELF_SIGNED_CERT_IN_CHAIN"
+    ) {
+      console.warn(
+        `Sitemap: Certificado SSL invalido ao acessar ${backendApiUrl}${path}. Ajuste SITEMAP_API_URL para uma URL interna HTTP/SSL valido.`,
+      );
+      return null;
+    }
+
+    console.warn(`Sitemap: Erro ao buscar ${path}: ${message}`);
+    return null;
+  }
 };
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
@@ -47,76 +100,45 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   // 2. Adicionar suas páginas dinâmicas (Categorias)
   let categoryUrls: MetadataRoute.Sitemap = [];
 
-  try {
-    // --- CORREÇÃO AQUI ---
-    // Usar backendApiUrl para o FETCH
-    const response = await fetch(
-      `${backendApiUrl}/api/estabelecimentos/categorias`,
-      {
-        next: { revalidate: 3600 },
-      }
-    );
+  const categorias = await fetchJsonSafe<Categoria[]>(
+    "/api/estabelecimentos/categorias",
+  );
 
-    if (response.ok) {
-      const categorias: Categoria[] = await response.json();
-
-      categoryUrls = categorias.map((categoria) => {
-        const slug = slugify(categoria.nome);
-        return {
-          url: `${baseUrl}/categoria/${slug}`, // URL pública
-          lastModified: new Date().toISOString(),
-          changeFrequency:
-            "weekly" as MetadataRoute.Sitemap[number]["changeFrequency"],
-          priority: 0.7,
-        };
-      });
-    } else {
-      console.error(
-        `Sitemap: Falha ao buscar categorias. Status: ${response.status}`
-      );
-    }
-  } catch (error) {
-    console.error("Sitemap: Erro de conexão ao buscar categorias:", error);
+  if (Array.isArray(categorias)) {
+    categoryUrls = categorias.map((categoria) => {
+      const slug = slugify(categoria.nome);
+      return {
+        url: `${baseUrl}/categoria/${slug}`,
+        lastModified: new Date().toISOString(),
+        changeFrequency:
+          "weekly" as MetadataRoute.Sitemap[number]["changeFrequency"],
+        priority: 0.7,
+      };
+    });
   }
 
   // 3. Adicionar páginas dinâmicas (MEIs)
   let meiUrls: MetadataRoute.Sitemap = [];
 
-  try {
-    // --- CORREÇÃO AQUI ---
-    // Usar backendApiUrl para o FETCH
-    const response = await fetch(`${backendApiUrl}/api/estabelecimentos`, {
-      next: { revalidate: 3600 },
+  const estabelecimentosResponse = await fetchJsonSafe<any>(
+    "/api/estabelecimentos",
+  );
+
+  const meisArray: Estabelecimento[] = Array.isArray(estabelecimentosResponse)
+    ? estabelecimentosResponse
+    : estabelecimentosResponse?.estabelecimentos || [];
+
+  meiUrls = meisArray
+    .filter((mei) => mei.estabelecimentoId)
+    .map((mei: Estabelecimento) => {
+      return {
+        url: `${baseUrl}/categoria/${mei.estabelecimentoId}/MEI`,
+        lastModified: new Date().toISOString(),
+        changeFrequency:
+          "weekly" as MetadataRoute.Sitemap[number]["changeFrequency"],
+        priority: 0.6,
+      };
     });
-
-    if (response.ok) {
-      const estabelecimentos: any[] = await response.json();
-
-      // Seu código para extrair o array é bom, mas vamos garantir
-      // que funciona se a API retornar { estabelecimentos: [...] } ou só [...]
-      const meisArray: Estabelecimento[] = Array.isArray(estabelecimentos)
-        ? estabelecimentos
-        : (estabelecimentos as any).estabelecimentos || [];
-
-      meiUrls = meisArray
-        .filter((mei) => mei.estabelecimentoId)
-        .map((mei: Estabelecimento) => {
-          return {
-            url: `${baseUrl}/categoria/${mei.estabelecimentoId}/MEI`, // URL pública
-            lastModified: new Date().toISOString(),
-            changeFrequency:
-              "weekly" as MetadataRoute.Sitemap[number]["changeFrequency"],
-            priority: 0.6,
-          };
-        });
-    } else {
-      console.error(
-        `Sitemap: Falha ao buscar estabelecimentos. Status: ${response.status}`
-      );
-    }
-  } catch (error) {
-    console.error("Sitemap: Erro ao buscar estabelecimentos:", error);
-  }
 
   // 4. Retornar tudo
   return [...staticUrls, ...categoryUrls, ...meiUrls];
