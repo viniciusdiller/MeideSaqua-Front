@@ -157,11 +157,24 @@ export const getReviewsByEstablishment = (id: string) =>
   fetchApi(`/api/avaliacoes/estabelecimento/${id}`);
 
 export const getMyEstablishments = (token: string) =>
-  fetchApi("/api/estabelecimentos/meus-estabelecimentos", {
+  fetchApi("/api/users/profile/estabelecimentos", {
     method: "GET",
     headers: {
       Authorization: `Bearer ${token}`,
     },
+  });
+
+export const updateMyEstablishment = (
+  id: number,
+  data: Record<string, any>,
+  token: string,
+) =>
+  fetchApi(`/api/users/profile/estabelecimentos/${id}`, {
+    method: "PUT",
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+    body: JSON.stringify(data),
   });
 
 // ==================================================================
@@ -253,6 +266,30 @@ export const getAllActiveEstablishments = (token: string) =>
 
 export const adminGetAllEstablishmentsGeral = (token: string) =>
   fetchApi("/api/admin/estabelecimentos-geral", {
+    method: "GET",
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  });
+
+export const adminGetAllActiveEstablishments = (token: string) =>
+  fetchApi("/api/admin/estabelecimentos-ativos", {
+    method: "GET",
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  });
+
+export const adminGetAllInactiveEstablishments = (token: string) =>
+  fetchApi("/api/admin/estabelecimentos-inativos", {
+    method: "GET",
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  });
+
+export const adminGetEstablishmentById = (id: number, token: string) =>
+  fetchApi(`/api/admin/estabelecimento/${id}`, {
     method: "GET",
     headers: {
       Authorization: `Bearer ${token}`,

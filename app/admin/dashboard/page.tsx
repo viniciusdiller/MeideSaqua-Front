@@ -83,6 +83,8 @@ interface PendingData {
 // fieldConfig ORIGINAL do MeideSaquá
 const fieldConfig: { [key: string]: { label: string; order: number } } = {
   // dados do responsável
+  usuarioId: { label: "ID do Usuário (Dono)", order: 0 },
+  usuario_id: { label: "ID do Usuário (Dono)", order: 0 },
   nomeResponsavel: { label: "Nome do Responsável", order: 1 },
   cpfResponsavel: { label: "CPF do Responsável", order: 2 },
   emailEstabelecimento: { label: "Email", order: 3 },
@@ -670,6 +672,8 @@ const AdminDashboard: React.FC = () => {
 
   const getGroupedEntries = (item: Estabelecimento) => {
     const keysResponsavel = [
+      "usuarioId",
+      "usuario_id",
       "nomeResponsavel",
       "cpfResponsavel",
       "emailEstabelecimento",

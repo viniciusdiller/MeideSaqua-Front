@@ -29,7 +29,8 @@ import {
   CheckCircleOutlined,
 } from "@ant-design/icons";
 import {
-  adminGetAllEstablishmentsGeral, // <--- Nova chamada de API (busca todos)
+  adminGetAllActiveEstablishments,
+  adminGetAllInactiveEstablishments,
   adminDeleteEstablishment,
   adminExportEstabelecimentos,
   adminToggleEstablishmentStatus, // <--- Nova chamada de API (muda o status)
@@ -80,10 +81,20 @@ const EstabelecimentosAtivosPage: React.FC = () => {
       return;
     }
     try {
-      // Usando a nova função que traz ATIVOS e INATIVOS
-      const data = await adminGetAllEstablishmentsGeral(token);
-      setEstabelecimentos(data);
-      setFilteredEstabelecimentos(data);
+      const [ativosData, inativosData] = await Promise.all([
+        adminGetAllActiveEstablishments(token),
+        adminGetAllInactiveEstablishments(token),
+      ]);
+
+      const merged = [...ativosData, ...inativosData];
+      const uniqueById = Array.from(
+        new Map(
+          merged.map((item) => [item.estabelecimentoId, item] as const),
+        ).values(),
+      );
+
+      setEstabelecimentos(uniqueById);
+      setFilteredEstabelecimentos(uniqueById);
     } catch (error: any) {
       message.error(error.message || "Falha ao buscar estabelecimentos.");
     } finally {
@@ -397,7 +408,7 @@ const EstabelecimentosAtivosPage: React.FC = () => {
       </div>
 
       <Title level={2} className="mb-6">
-        Gerenciar Estabelecimentos Ativos ({filteredEstabelecimentos.length})
+        Gerenciar Estabelecimentos ({filteredEstabelecimentos.length})
       </Title>
 
       <Search

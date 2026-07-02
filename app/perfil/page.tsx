@@ -36,14 +36,15 @@ import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge"; // Certifique-se de que este componente existe
 import Image from "next/image";
 import Link from "next/link";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { toast } from "sonner";
-import { Loader2, Store, Plus, AlertCircle } from "lucide-react";
+import { Loader2, Store, Plus, AlertCircle, Pencil } from "lucide-react";
 import {
   updateUserProfile,
   changeUserPassword,
   deleteUserAccount,
-  getMyEstablishments, // <-- NOVA FUNÇÃO DE API (Ver passo 2)
+  getMyEstablishments,
+  excluirEstabelecimento,
 } from "@/lib/api";
 import { cn } from "@/lib/utils";
 import { contemPalavrao } from "@/lib/profanityFilter";
@@ -69,6 +70,21 @@ export default function PerfilPage() {
   // Novos estados para os Estabelecimentos do Usuário
   const [myMeis, setMyMeis] = useState<any[]>([]);
   const [isLoadingMeis, setIsLoadingMeis] = useState(true);
+  const [isMeiDialogOpen, setIsMeiDialogOpen] = useState(false);
+  const [isUpdatingMei, setIsUpdatingMei] = useState(false);
+  const [isDeletingMei, setIsDeletingMei] = useState(false);
+  const [selectedMei, setSelectedMei] = useState<any | null>(null);
+  const [editMeiData, setEditMeiData] = useState({
+    nomeFantasia: "",
+    emailEstabelecimento: "",
+    contatoEstabelecimento: "",
+    categoria: "",
+    descricaoDiferencial: "",
+    endereco: "",
+    instagram: "",
+    website: "",
+  });
+  const [deleteReason, setDeleteReason] = useState("");
 
   useEffect(() => {
     if (user) {
@@ -77,23 +93,148 @@ export default function PerfilPage() {
     }
   }, [user]);
 
-  // Efeito para buscar os MEIs do usuário assim que ele estiver logado
-  useEffect(() => {
-    const fetchMeis = async () => {
-      if (!user?.token) return;
-      try {
-        setIsLoadingMeis(true);
-        const data = await getMyEstablishments(user.token);
-        setMyMeis(data || []);
-      } catch (error) {
-        console.error("Erro ao buscar MEIs:", error);
-      } finally {
-        setIsLoadingMeis(false);
-      }
-    };
+  const fetchMeis = useCallback(async () => {
+    if (!user?.token) return;
+    try {
+      setIsLoadingMeis(true);
+      const data = await getMyEstablishments(user.token);
+      setMyMeis(data || []);
+    } catch (error: any) {
+      console.error("Erro ao buscar estabelecimentos do perfil:", error);
+      toast.error(
+        error?.message || "Não foi possível carregar seus estabelecimentos.",
+      );
+    } finally {
+      setIsLoadingMeis(false);
+    }
+  }, [user?.token]);
 
+  useEffect(() => {
     fetchMeis();
-  }, [user]);
+  }, [fetchMeis]);
+
+  const openEditMeiDialog = (mei: any) => {
+    setSelectedMei(mei);
+    setEditMeiData({
+      nomeFantasia: mei.nomeFantasia || "",
+      emailEstabelecimento: mei.emailEstabelecimento || "",
+      contatoEstabelecimento: mei.contatoEstabelecimento || "",
+      categoria: mei.categoria || "",
+      descricaoDiferencial: mei.descricaoDiferencial || "",
+      endereco: mei.endereco || "",
+      instagram: mei.instagram || "",
+      website: mei.website || "",
+    });
+    setDeleteReason("");
+    setIsMeiDialogOpen(true);
+  };
+
+  const handleMeiFieldChange = (field: string, value: string) => {
+    setEditMeiData((prev) => ({ ...prev, [field]: value }));
+  };
+
+  const handleUpdateMei = async () => {
+    if (!user?.token) {
+      toast.error("Sessão expirada. Faça login novamente.");
+      return;
+    }
+    if (!selectedMei?.estabelecimentoId) {
+      toast.error("Estabelecimento inválido para atualização.");
+      return;
+    }
+
+    const payload: Record<string, string> = {};
+
+    Object.entries(editMeiData).forEach(([key, value]) => {
+      if (typeof value === "string" && value.trim() !== "") {
+        payload[key] = value.trim();
+      }
+    });
+
+    if (Object.keys(payload).length === 0) {
+      toast.info("Nenhum campo preenchido para atualização.");
+      return;
+    }
+
+    if (
+      payload.emailEstabelecimento &&
+      !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(payload.emailEstabelecimento)
+    ) {
+      toast.error("Informe um e-mail válido para o estabelecimento.");
+      return;
+    }
+
+    setIsUpdatingMei(true);
+    try {
+      await updateMyEstablishment(
+        selectedMei.estabelecimentoId,
+        payload,
+        user.token,
+      );
+      toast.success("Solicitação de atualização enviada com sucesso!");
+      setIsMeiDialogOpen(false);
+      setSelectedMei(null);
+      await fetchMeis();
+    } catch (error: any) {
+      toast.error(error?.message || "Erro ao atualizar estabelecimento.");
+    } finally {
+      setIsUpdatingMei(false);
+    }
+  };
+
+  const handleRequestDeleteMei = async () => {
+    if (!user?.token) {
+      toast.error("Sessão expirada. Faça login novamente.");
+      return;
+    }
+    if (!selectedMei?.estabelecimentoId) {
+      toast.error("Estabelecimento inválido para exclusão.");
+      return;
+    }
+
+    setIsDeletingMei(true);
+    try {
+      const formData = new FormData();
+      formData.append(
+        "nome_responsavel",
+        selectedMei?.nomeResponsavel || selectedMei?.nome_responsavel || "",
+      );
+      formData.append(
+        "cpf_responsavel",
+        selectedMei?.cpfResponsavel || selectedMei?.cpf_responsavel || "",
+      );
+      formData.append("cnpj", selectedMei?.cnpj || "");
+      formData.append(
+        "emailEstabelecimento",
+        selectedMei?.emailEstabelecimento || "",
+      );
+      formData.append(
+        "motivo",
+        deleteReason.trim() || "Solicitação de exclusão pelo perfil do usuário.",
+      );
+
+      if (selectedMei?.estabelecimentoId) {
+        formData.append(
+          "estabelecimentoId",
+          String(selectedMei.estabelecimentoId),
+        );
+      }
+
+      await excluirEstabelecimento(formData, user.token);
+
+      toast.success("Solicitação de exclusão enviada para análise.");
+      setIsMeiDialogOpen(false);
+      setSelectedMei(null);
+      setDeleteReason("");
+      await fetchMeis();
+    } catch (error: any) {
+      toast.error(
+        error?.message || "Não foi possível solicitar a exclusão agora.",
+      );
+    } finally {
+      setIsDeletingMei(false);
+    }
+  };
 
   const handleUsernameChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const valueComEmoji = e.target.value;
@@ -427,11 +568,22 @@ export default function PerfilPage() {
                           </div>
                         </div>
 
-                        <Badge
-                          className={`ml-2 text-[10px] uppercase tracking-wider ${getStatusColor(mei.status)}`}
-                        >
-                          {mei.status.replace(/_/g, " ")}
-                        </Badge>
+                        <div className="flex items-center gap-2">
+                          <Badge
+                            className={`ml-2 text-[10px] uppercase tracking-wider ${getStatusColor(mei.status)}`}
+                          >
+                            {mei.status.replace(/_/g, " ")}
+                          </Badge>
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => openEditMeiDialog(mei)}
+                            className="rounded-full"
+                          >
+                            <Pencil className="w-3 h-3 mr-1" />
+                            Editar
+                          </Button>
+                        </div>
                       </div>
                     ))}
                   </div>
@@ -450,6 +602,192 @@ export default function PerfilPage() {
                 </Button>
               </CardFooter>
             </Card>
+
+            <Dialog open={isMeiDialogOpen} onOpenChange={setIsMeiDialogOpen}>
+              <DialogContent className="sm:max-w-[560px]">
+                <DialogHeader>
+                  <DialogTitle>Editar Estabelecimento</DialogTitle>
+                  <DialogDescription>
+                    Atualize os dados do seu MEI. Isso enviará a solicitação para
+                    análise.
+                  </DialogDescription>
+                </DialogHeader>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 py-2">
+                  <div className="md:col-span-2">
+                    <Label htmlFor="meiNomeFantasia">Nome Fantasia</Label>
+                    <Input
+                      id="meiNomeFantasia"
+                      value={editMeiData.nomeFantasia}
+                      onChange={(e) =>
+                        handleMeiFieldChange("nomeFantasia", e.target.value)
+                      }
+                    />
+                  </div>
+
+                  <div>
+                    <Label htmlFor="meiEmail">E-mail do Estabelecimento</Label>
+                    <Input
+                      id="meiEmail"
+                      value={editMeiData.emailEstabelecimento}
+                      onChange={(e) =>
+                        handleMeiFieldChange(
+                          "emailEstabelecimento",
+                          e.target.value,
+                        )
+                      }
+                    />
+                  </div>
+
+                  <div>
+                    <Label htmlFor="meiContato">Contato</Label>
+                    <Input
+                      id="meiContato"
+                      value={editMeiData.contatoEstabelecimento}
+                      onChange={(e) =>
+                        handleMeiFieldChange(
+                          "contatoEstabelecimento",
+                          e.target.value,
+                        )
+                      }
+                    />
+                  </div>
+
+                  <div>
+                    <Label htmlFor="meiCategoria">Categoria</Label>
+                    <Input
+                      id="meiCategoria"
+                      value={editMeiData.categoria}
+                      onChange={(e) =>
+                        handleMeiFieldChange("categoria", e.target.value)
+                      }
+                    />
+                  </div>
+
+                  <div>
+                    <Label htmlFor="meiEndereco">Endereço</Label>
+                    <Input
+                      id="meiEndereco"
+                      value={editMeiData.endereco}
+                      onChange={(e) =>
+                        handleMeiFieldChange("endereco", e.target.value)
+                      }
+                    />
+                  </div>
+
+                  <div>
+                    <Label htmlFor="meiInstagram">Instagram</Label>
+                    <Input
+                      id="meiInstagram"
+                      value={editMeiData.instagram}
+                      onChange={(e) =>
+                        handleMeiFieldChange("instagram", e.target.value)
+                      }
+                    />
+                  </div>
+
+                  <div>
+                    <Label htmlFor="meiWebsite">Website</Label>
+                    <Input
+                      id="meiWebsite"
+                      value={editMeiData.website}
+                      onChange={(e) =>
+                        handleMeiFieldChange("website", e.target.value)
+                      }
+                    />
+                  </div>
+
+                  <div className="md:col-span-2">
+                    <Label htmlFor="meiDiferencial">Diferencial</Label>
+                    <Input
+                      id="meiDiferencial"
+                      value={editMeiData.descricaoDiferencial}
+                      onChange={(e) =>
+                        handleMeiFieldChange(
+                          "descricaoDiferencial",
+                          e.target.value,
+                        )
+                      }
+                    />
+                  </div>
+                </div>
+
+                <DialogFooter>
+                  <AlertDialog>
+                    <AlertDialogTrigger asChild>
+                      <Button
+                        variant="destructive"
+                        disabled={
+                          isUpdatingMei ||
+                          isDeletingMei ||
+                          selectedMei?.status === "pendente_exclusao"
+                        }
+                      >
+                        {selectedMei?.status === "pendente_exclusao"
+                          ? "Exclusão já solicitada"
+                          : "Solicitar Exclusão"}
+                      </Button>
+                    </AlertDialogTrigger>
+                    <AlertDialogContent>
+                      <AlertDialogHeader>
+                        <AlertDialogTitle>
+                          Solicitar exclusão deste estabelecimento?
+                        </AlertDialogTitle>
+                        <AlertDialogDescription>
+                          Essa solicitação será enviada para análise da equipe
+                          admin. Você pode informar um motivo opcional abaixo.
+                        </AlertDialogDescription>
+                      </AlertDialogHeader>
+
+                      <div className="py-2">
+                        <Label htmlFor="motivoExclusao">Motivo (opcional)</Label>
+                        <Input
+                          id="motivoExclusao"
+                          value={deleteReason}
+                          onChange={(e) => setDeleteReason(e.target.value)}
+                          placeholder="Ex.: encerramento das atividades"
+                          disabled={isDeletingMei}
+                        />
+                      </div>
+
+                      <AlertDialogFooter>
+                        <AlertDialogCancel disabled={isDeletingMei}>
+                          Cancelar
+                        </AlertDialogCancel>
+                        <AlertDialogAction
+                          onClick={(e) => {
+                            e.preventDefault();
+                            handleRequestDeleteMei();
+                          }}
+                          disabled={isDeletingMei}
+                          className="bg-red-600 hover:bg-red-700"
+                        >
+                          {isDeletingMei ? "Enviando..." : "Confirmar Solicitação"}
+                        </AlertDialogAction>
+                      </AlertDialogFooter>
+                    </AlertDialogContent>
+                  </AlertDialog>
+
+                  <DialogClose asChild>
+                    <Button
+                      variant="outline"
+                      disabled={isUpdatingMei || isDeletingMei}
+                    >
+                      Cancelar
+                    </Button>
+                  </DialogClose>
+                  <Button
+                    onClick={handleUpdateMei}
+                    disabled={isUpdatingMei || isDeletingMei}
+                  >
+                    {isUpdatingMei && (
+                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    )}
+                    {isUpdatingMei ? "Salvando..." : "Salvar Alterações"}
+                  </Button>
+                </DialogFooter>
+              </DialogContent>
+            </Dialog>
 
             {/* Card de Alteração de Senha */}
             <Card className="rounded-xl shadow-md">

@@ -29,6 +29,8 @@ import {
 import {
   adminUpdateEstablishment,
   adminEditAndApproveEstablishment,
+  adminGetEstablishmentById,
+  getAllUsers,
 } from "@/lib/api";
 import {
   Estabelecimento,
@@ -102,6 +104,11 @@ const AdminEstabelecimentoModal: React.FC<AdminEstabelecimentoModalProps> = ({
 
   const [newCcmeiFile, setNewCcmeiFile] = useState<File | null>(null);
   const [allTags, setAllTags] = useState<string[]>([]);
+  const [ownerInfo, setOwnerInfo] = useState<{
+    username: string | null;
+    userId: number | string | null;
+  }>({ username: null, userId: null });
+  const [isOwnerLoading, setIsOwnerLoading] = useState(false);
 
   const getFullImageUrl = (
     path: string | null | undefined,
@@ -215,6 +222,177 @@ const AdminEstabelecimentoModal: React.FC<AdminEstabelecimentoModalProps> = ({
     }
   }, [estabelecimento, visible, editForm]);
 
+  useEffect(() => {
+    const loadOwnerInfo = async () => {
+      if (!visible || !estabelecimento?.estabelecimentoId) {
+        setOwnerInfo({ username: null, userId: null });
+        return;
+      }
+
+      setIsOwnerLoading(true);
+
+      const extractOwner = (source: any) => {
+        const pickText = (...values: any[]) => {
+          const found = values.find(
+            (value) => typeof value === "string" && value.trim() !== "",
+          );
+          return found ? String(found).trim() : null;
+        };
+
+        const usernameRaw = pickText(
+          source?.username,
+          source?.usuario?.username,
+          source?.nomeUsuario,
+          source?.usuario?.nomeUsuario,
+          source?.user?.username,
+          source?.proprietario?.username,
+          source?.nomeCompleto,
+          source?.usuario?.nomeCompleto,
+          source?.user?.nomeCompleto,
+          source?.proprietario?.nomeCompleto,
+          source?.nome,
+          source?.usuario?.nome,
+          source?.user?.nome,
+          source?.proprietario?.nome,
+          source?.email,
+          source?.usuario?.email,
+          source?.user?.email,
+          source?.proprietario?.email,
+        );
+
+        const username = usernameRaw
+          ? String(usernameRaw).replace(/^@/, "")
+          : null;
+
+        const userId =
+          source?.usuarioId ??
+          source?.usuario_id ??
+          source?.usuario?.usuarioId ??
+          source?.usuario?.id ??
+          source?.user?.id ??
+          source?.proprietario?.usuarioId ??
+          null;
+
+        return { username, userId };
+      };
+
+      const isOwnerResolved = (owner: {
+        username: string | null;
+        userId: number | string | null;
+      }) => owner.username !== null || owner.userId !== null;
+
+      const fallbackOwner = extractOwner(estabelecimento);
+      setOwnerInfo(fallbackOwner);
+
+      const token = localStorage.getItem("admin_token");
+      if (!token) {
+        setIsOwnerLoading(false);
+        return;
+      }
+
+      try {
+        const details = await adminGetEstablishmentById(
+          estabelecimento.estabelecimentoId,
+          token,
+        );
+
+        const detailsOwner = isOwnerResolved(extractOwner(details))
+          ? extractOwner(details)
+          : extractOwner(details?.data);
+
+        if (isOwnerResolved(detailsOwner)) {
+          setOwnerInfo(detailsOwner);
+          return;
+        }
+
+        // Fallback extra: busca na API de usuarios e cruza pelo estabelecimentoId.
+        const usersResponse = await getAllUsers(token);
+        const usersList = Array.isArray(usersResponse)
+          ? usersResponse
+          : Array.isArray(usersResponse?.data)
+            ? usersResponse.data
+            : [];
+
+        const ownerUser = usersList.find((user: any) =>
+          Array.isArray(user?.estabelecimentos)
+            ? user.estabelecimentos.some((est: any) => {
+                const estId =
+                  est?.estabelecimentoId ?? est?.id ?? est?.estabelecimento_id;
+                return Number(estId) === Number(estabelecimento.estabelecimentoId);
+              })
+            : false,
+        );
+
+        if (ownerUser) {
+          const ownerFromUsers = {
+            username:
+              ownerUser?.username ||
+              ownerUser?.nomeCompleto ||
+              ownerUser?.nome ||
+              ownerUser?.email
+                ? String(
+                    ownerUser?.username ||
+                      ownerUser?.nomeCompleto ||
+                      ownerUser?.nome ||
+                      ownerUser?.email,
+                  ).replace(/^@/, "")
+                : null,
+            userId: ownerUser?.usuarioId ?? ownerUser?.id ?? null,
+          };
+          setOwnerInfo(ownerFromUsers);
+          return;
+        }
+
+        setOwnerInfo(fallbackOwner);
+      } catch {
+        // Se a rota de detalhe falhar, tenta mapear dono pela lista de usuarios.
+        try {
+          const usersResponse = await getAllUsers(token);
+          const usersList = Array.isArray(usersResponse)
+            ? usersResponse
+            : Array.isArray(usersResponse?.data)
+              ? usersResponse.data
+              : [];
+
+          const ownerUser = usersList.find((user: any) =>
+            Array.isArray(user?.estabelecimentos)
+              ? user.estabelecimentos.some((est: any) => {
+                  const estId =
+                    est?.estabelecimentoId ?? est?.id ?? est?.estabelecimento_id;
+                  return Number(estId) === Number(estabelecimento.estabelecimentoId);
+                })
+              : false,
+          );
+
+          if (ownerUser) {
+            setOwnerInfo({
+              username:
+                ownerUser?.username ||
+                ownerUser?.nomeCompleto ||
+                ownerUser?.nome ||
+                ownerUser?.email
+                  ? String(
+                      ownerUser?.username ||
+                        ownerUser?.nomeCompleto ||
+                        ownerUser?.nome ||
+                        ownerUser?.email,
+                    ).replace(/^@/, "")
+                  : fallbackOwner.username,
+              userId:
+                ownerUser?.usuarioId ?? ownerUser?.id ?? fallbackOwner.userId,
+            });
+          }
+        } catch {
+          // Mantem fallback silenciosamente se todas as rotas falharem.
+        }
+      } finally {
+        setIsOwnerLoading(false);
+      }
+    };
+
+    loadOwnerInfo();
+  }, [visible, estabelecimento]);
+
   const handleSubmit = async (values: any) => {
     if (!estabelecimento) return;
 
@@ -281,6 +459,23 @@ const AdminEstabelecimentoModal: React.FC<AdminEstabelecimentoModalProps> = ({
   const isPdf = (url: string | null) => {
     return url?.toLowerCase().endsWith(".pdf");
   };
+
+  const ownerUsername = ownerInfo.username;
+  const ownerUserId = ownerInfo.userId;
+  const ownerDisplayFallback =
+    estabelecimento?.nomeResponsavel ||
+    (estabelecimento as any)?.nome_responsavel ||
+    estabelecimento?.emailEstabelecimento ||
+    null;
+
+  const ownerDisplay = ownerUsername
+    ? ownerUsername.includes(" ") || ownerUsername.includes("@")
+      ? ownerUsername
+      : `@${ownerUsername}`
+    : ownerDisplayFallback ||
+      (ownerUserId !== null && ownerUserId !== undefined
+        ? `Usuario #${ownerUserId}`
+        : "@usuario nao informado");
 
   return (
     <Modal
@@ -378,6 +573,16 @@ const AdminEstabelecimentoModal: React.FC<AdminEstabelecimentoModalProps> = ({
               >
                 <Input />
               </Form.Item>
+              <div style={{ marginTop: "-12px", marginBottom: "12px" }}>
+                <Text type="secondary" style={{ display: "block" }}>
+                  {isOwnerLoading
+                    ? "Carregando usuario..."
+                    : ownerDisplay}
+                </Text>
+                <Text type="secondary" style={{ display: "block" }}>
+                  ID do usuario: {isOwnerLoading ? "..." : ownerUserId ?? "nao informado"}
+                </Text>
+              </div>
             </Col>
             <Col span={12}>
               <Form.Item
