@@ -8,9 +8,31 @@ import { useEffect, useRef, useState } from "react";
 
 interface CursoData {
   id: number;
-  titulo: string;
-  link: string;
-  imagemUrl: string;
+  cursoId?: number;
+  nome: string;
+  descricao: string | null;
+  link: string | null;
+  imagemUrl: string | null;
+  ativo: boolean;
+}
+
+const getFullImageUrl = (path: string | null | undefined) => {
+  if (!path || path.trim() === "") return "/placeholder-logo.png";
+
+  if (
+    path.startsWith("http") ||
+    path.startsWith("https") ||
+    path.startsWith("data:")
+  ) {
+    return path;
+  }
+
+  const baseUrl = process.env.NEXT_PUBLIC_API_URL || "";
+  if (!baseUrl) return path.startsWith("/") ? path : `/${path}`;
+
+  const cleanBase = baseUrl.endsWith("/") ? baseUrl.slice(0, -1) : baseUrl;
+  const cleanPath = path.startsWith("/") ? path : `/${path}`;
+  return `${cleanBase}${cleanPath}`;
 }
 
 export default function SobrePage() {
@@ -26,7 +48,9 @@ export default function SobrePage() {
     const loadCursos = async () => {
       try {
         const data = await getCursos();
-        if (Array.isArray(data)) setCursos(data);
+        if (Array.isArray(data)) {
+          setCursos(data.filter((curso) => curso.ativo !== false));
+        }
       } catch (error) {
         console.error("Erro ao buscar cursos", error);
       }
@@ -121,16 +145,22 @@ export default function SobrePage() {
               cursos.map((curso) => (
                 <Link
                   key={curso.id}
-                  href={curso.link}
+                  href={curso.link || "#"}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="group block text-center"
-                  onClick={() => handleCursoClick(curso.titulo)}
+                  onClick={(e) => {
+                    if (!curso.link) {
+                      e.preventDefault();
+                      return;
+                    }
+                    handleCursoClick(curso.nome);
+                  }}
                 >
                   <div className="overflow-hidden rounded-lg border border-gray-200 group-hover:shadow-xl transition-shadow duration-300 relative aspect-[4/3]">
                     <Image
-                      src={curso.imagemUrl}
-                      alt={curso.titulo}
+                      src={getFullImageUrl(curso.imagemUrl)}
+                      alt={curso.nome}
                       width={400}
                       height={300}
                       className="w-full h-full object-cover transform group-hover:scale-105 transition-transform duration-300"
@@ -138,7 +168,7 @@ export default function SobrePage() {
                     />
                   </div>
                   <p className="mt-3 text-md font-semibold text-gray-800 group-hover:text-blue-600 transition-colors duration-300">
-                    {curso.titulo}
+                    {curso.nome}
                   </p>
                 </Link>
               ))

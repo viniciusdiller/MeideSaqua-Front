@@ -15,6 +15,7 @@ import {
   Tag,
   Tooltip,
   Divider,
+  Switch,
 } from "antd";
 import {
   UploadOutlined,
@@ -31,15 +32,21 @@ import {
 import { useRouter } from "next/navigation";
 import Image from "next/image";
 import Link from "next/link";
+import { uploadImage } from "@/lib/api";
 
 const { Title, Text } = Typography;
 
 // Interface adaptada para Cursos
 interface CursoCard {
   id: number;
-  titulo: string;
-  link: string;
-  imagemUrl: string;
+  cursoId?: number;
+  nome: string;
+  descricao: string | null;
+  link: string | null;
+  imagemUrl: string | null;
+  ativo: boolean;
+  createdAt?: string;
+  updatedAt?: string;
 }
 
 const AdminCursos = () => {
@@ -52,12 +59,16 @@ const AdminCursos = () => {
 
   // Estado para Edição
   const [editingId, setEditingId] = useState<number | null>(null);
+  const [editingCurso, setEditingCurso] = useState<CursoCard | null>(null);
 
   // Form States
-  const [titulo, setTitulo] = useState("");
+  const [nome, setNome] = useState("");
+  const [descricao, setDescricao] = useState("");
   const [link, setLink] = useState("");
+  const [imagemUrl, setImagemUrl] = useState("");
   const [fileList, setFileList] = useState<any[]>([]);
   const [previewImage, setPreviewImage] = useState<string | null>(null);
+  const [ativo, setAtivo] = useState(true);
 
   const router = useRouter();
   const API_URL = process.env.NEXT_PUBLIC_API_URL;
@@ -94,7 +105,7 @@ const AdminCursos = () => {
 
       if (!res.ok) throw new Error("Erro ao buscar dados");
       const data = await res.json();
-      setCards(data);
+      setCards(Array.isArray(data) ? data : []);
     } catch (error) {
       console.error(error);
       message.error("Erro ao carregar cursos.");
@@ -114,45 +125,60 @@ const AdminCursos = () => {
     fetchCards();
   }, [router]);
 
-  // Lógica de Preview de Imagem Local
-  const handleFileChange = ({ fileList: newFileList }: any) => {
-    setFileList(newFileList);
-    if (newFileList.length > 0 && newFileList[0].originFileObj) {
-      const file = newFileList[0].originFileObj;
-      const reader = new FileReader();
-      reader.onload = (e) => setPreviewImage(e.target?.result as string);
-      reader.readAsDataURL(file);
-    } else {
-      if (!editingId) setPreviewImage(null);
-    }
-  };
-
   // Prepara o formulário para edição
   const handleEdit = (item: CursoCard) => {
     setEditingId(item.id);
-    setTitulo(item.titulo);
-    setLink(item.link);
+    setEditingCurso(item);
+    setNome(item.nome || "");
+    setDescricao(item.descricao || "");
+    setLink(item.link || "");
+    setImagemUrl(item.imagemUrl || "");
     setFileList([]);
     setPreviewImage(getFullImageUrl(item.imagemUrl));
+    setAtivo(Boolean(item.ativo));
 
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
   const cancelEdit = () => {
     setEditingId(null);
-    setTitulo("");
+    setEditingCurso(null);
+    setNome("");
+    setDescricao("");
     setLink("");
+    setImagemUrl("");
     setFileList([]);
+    setPreviewImage(null);
+    setAtivo(true);
+  };
+
+  const handleFileChange = ({ fileList: newFileList }: any) => {
+    setFileList(newFileList);
+
+    if (newFileList.length > 0 && newFileList[0].originFileObj) {
+      const file = newFileList[0].originFileObj as File;
+      const reader = new FileReader();
+      reader.onload = (e) => setPreviewImage((e.target?.result as string) || null);
+      reader.readAsDataURL(file);
+      return;
+    }
+
+    if (editingCurso?.imagemUrl) {
+      setPreviewImage(getFullImageUrl(editingCurso.imagemUrl));
+      return;
+    }
+
     setPreviewImage(null);
   };
 
-  const handleSubmit = async () => {
-    if (!titulo || !link) {
-      return message.warning("Título e Link são obrigatórios.");
-    }
+  const normalizeOptionalField = (value: string) => {
+    const trimmed = value.trim();
+    return trimmed === "" ? null : trimmed;
+  };
 
-    if (!editingId && fileList.length === 0) {
-      return message.warning("A imagem é obrigatória para novos cursos.");
+  const handleSubmit = async () => {
+    if (!nome.trim()) {
+      return message.warning("O campo nome é obrigatório.");
     }
 
     const token = localStorage.getItem("admin_token");
@@ -161,30 +187,81 @@ const AdminCursos = () => {
       return;
     }
 
-    const formData = new FormData();
-    formData.append("titulo", titulo);
-    formData.append("link", link);
-    if (fileList.length > 0) {
-      formData.append("file", fileList[0].originFileObj);
-    }
-
     setSubmitting(true);
     try {
       const baseUrl = API_URL || "";
       let url = `${baseUrl}/api/cursos`;
       let method = "POST";
+      let uploadedImagemUrl = imagemUrl || "";
+
+      const selectedFile = fileList[0]?.originFileObj as File | undefined;
+      if (selectedFile) {
+        const uploadResult = await uploadImage(selectedFile);
+        const possibleUrl =
+          uploadResult?.imagemUrl ||
+          uploadResult?.url ||
+          uploadResult?.path ||
+          uploadResult?.fileUrl ||
+          uploadResult?.location;
+
+        if (!possibleUrl || typeof possibleUrl !== "string") {
+          throw new Error("Falha ao processar upload da imagem.");
+        }
+
+        uploadedImagemUrl = possibleUrl;
+      }
+
+      let body: Record<string, any> = {
+        nome: nome.trim(),
+        descricao: normalizeOptionalField(descricao),
+        link: normalizeOptionalField(link),
+        imagemUrl: normalizeOptionalField(uploadedImagemUrl),
+        ativo,
+      };
 
       if (editingId) {
         url = `${baseUrl}/api/cursos/${editingId}`;
         method = "PUT";
+
+        const updateBody: Record<string, any> = {};
+        if (!editingCurso || nome.trim() !== (editingCurso.nome || "")) {
+          updateBody.nome = nome.trim();
+        }
+        if (
+          !editingCurso ||
+          normalizeOptionalField(descricao) !== editingCurso.descricao
+        ) {
+          updateBody.descricao = normalizeOptionalField(descricao);
+        }
+        if (!editingCurso || normalizeOptionalField(link) !== editingCurso.link) {
+          updateBody.link = normalizeOptionalField(link);
+        }
+        if (
+          !editingCurso ||
+          normalizeOptionalField(uploadedImagemUrl) !== editingCurso.imagemUrl
+        ) {
+          updateBody.imagemUrl = normalizeOptionalField(uploadedImagemUrl);
+        }
+        if (!editingCurso || Boolean(ativo) !== Boolean(editingCurso.ativo)) {
+          updateBody.ativo = Boolean(ativo);
+        }
+
+        if (Object.keys(updateBody).length === 0) {
+          message.warning("Nenhum campo foi alterado.");
+          setSubmitting(false);
+          return;
+        }
+
+        body = updateBody;
       }
 
       const res = await fetch(url, {
         method: method,
         headers: {
+          "Content-Type": "application/json",
           Authorization: `Bearer ${token}`,
         },
-        body: formData,
+        body: JSON.stringify(body),
       });
 
       if (res.status === 401 || res.status === 403) {
@@ -215,6 +292,11 @@ const AdminCursos = () => {
   // Deletar usando ID
   const handleDelete = async (id: number) => {
     const token = localStorage.getItem("admin_token");
+    if (!token) {
+      message.error("Você precisa estar logado.");
+      return;
+    }
+
     try {
       const baseUrl = API_URL || "";
       const res = await fetch(`${baseUrl}/api/cursos/${id}`, {
@@ -224,18 +306,21 @@ const AdminCursos = () => {
         },
       });
 
-      if (!res.ok) throw new Error("Erro ao deletar");
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({}));
+        throw new Error(err.message || "Erro ao deletar");
+      }
 
       message.success("Curso removido.");
       fetchCards();
-    } catch (error) {
-      message.error("Erro ao excluir curso.");
+    } catch (error: any) {
+      message.error(error.message || "Erro ao excluir curso.");
     }
   };
 
   // Filtragem local para a busca
   const filteredCards = cards.filter((card) =>
-    card.titulo?.toLowerCase().includes(searchText.toLowerCase()),
+    card.nome?.toLowerCase().includes(searchText.toLowerCase()),
   );
 
   return (
@@ -298,9 +383,9 @@ const AdminCursos = () => {
               <div className="flex flex-col gap-5">
                 {/* Preview da Imagem */}
                 <div className="overflow-hidden rounded-lg border border-gray-200 group-hover:shadow-xl transition-shadow duration-300 relative aspect-[4/3]">
-                  {previewImage ? (
+                  {previewImage || imagemUrl ? (
                     <Image
-                      src={previewImage}
+                      src={previewImage || getFullImageUrl(imagemUrl)}
                       alt="Preview"
                       fill
                       className="w-full h-full object-cover transform group-hover:scale-105 transition-transform duration-300"
@@ -315,20 +400,32 @@ const AdminCursos = () => {
 
                 <div>
                   <Text strong className="mb-1 block text-gray-700">
-                    Título do Curso
+                    Nome do Curso
                   </Text>
                   <Input
                     placeholder="Ex: Como Formalizar seu Negócio"
                     size="large"
-                    value={titulo}
-                    onChange={(e) => setTitulo(e.target.value)}
-                    prefix={<span className="text-gray-400 font-bold">T</span>}
+                    value={nome}
+                    onChange={(e) => setNome(e.target.value)}
+                    prefix={<span className="text-gray-400 font-bold">N</span>}
                   />
                 </div>
 
                 <div>
                   <Text strong className="mb-1 block text-gray-700">
-                    Link de Destino
+                    Descrição (Opcional)
+                  </Text>
+                  <Input.TextArea
+                    placeholder="Resumo do curso"
+                    value={descricao}
+                    onChange={(e) => setDescricao(e.target.value)}
+                    autoSize={{ minRows: 3, maxRows: 5 }}
+                  />
+                </div>
+
+                <div>
+                  <Text strong className="mb-1 block text-gray-700">
+                    Link (Opcional)
                   </Text>
                   <Input
                     placeholder="https://sebrae.com.br/..."
@@ -341,7 +438,7 @@ const AdminCursos = () => {
 
                 <div>
                   <Text strong className="mb-1 block text-gray-700">
-                    {editingId ? "Alterar Imagem (Opcional)" : "Upload da Capa"}
+                    Arquivo da Imagem (Opcional)
                   </Text>
                   <Upload
                     listType="picture"
@@ -356,6 +453,13 @@ const AdminCursos = () => {
                       Selecionar Arquivo
                     </Button>
                   </Upload>
+                </div>
+
+                <div className="flex items-center justify-between">
+                  <Text strong className="text-gray-700">
+                    Curso ativo
+                  </Text>
+                  <Switch checked={ativo} onChange={setAtivo} />
                 </div>
 
                 <Divider className="my-2" />
@@ -386,10 +490,10 @@ const AdminCursos = () => {
               title={
                 <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 py-2">
                   <span className="text-lg">
-                    Cursos Ativos ({filteredCards.length})
+                    Cursos Cadastrados ({filteredCards.length})
                   </span>
                   <Input
-                    placeholder="Buscar por título..."
+                    placeholder="Buscar por nome..."
                     prefix={<SearchOutlined className="text-gray-400" />}
                     className="w-full sm:w-64"
                     value={searchText}
@@ -451,7 +555,7 @@ const AdminCursos = () => {
                             description={
                               <div className="max-w-xs">
                                 Tem certeza que deseja excluir{" "}
-                                <b>{item.titulo}</b>?
+                                <b>{item.nome}</b>?
                                 <br />
                                 Esta ação não pode ser desfeita.
                               </div>
@@ -478,7 +582,7 @@ const AdminCursos = () => {
                           <div className="relative w-24 h-16 rounded-md overflow-hidden border border-gray-200 shadow-sm group">
                             <Image
                               src={getFullImageUrl(item.imagemUrl)}
-                              alt={item.titulo}
+                              alt={item.nome}
                               fill
                               className="object-cover transition-transform group-hover:scale-110"
                             />
@@ -487,25 +591,41 @@ const AdminCursos = () => {
                         title={
                           <div className="flex items-center gap-2">
                             <span className="font-semibold text-gray-800 text-lg">
-                              {item.titulo}
+                              {item.nome}
                             </span>
                             {editingId === item.id && (
                               <Tag color="processing" icon={<EditOutlined />}>
                                 Editando agora
                               </Tag>
                             )}
+                            {item.ativo ? (
+                              <Tag color="success">Ativo</Tag>
+                            ) : (
+                              <Tag color="default">Inativo</Tag>
+                            )}
                           </div>
                         }
                         description={
                           <div className="flex flex-col gap-1">
-                            <a
-                              href={item.link}
-                              target="_blank"
-                              rel="noreferrer"
-                              className="text-gray-500 hover:text-[#017DB9] hover:underline truncate max-w-md flex items-center gap-1 text-sm"
-                            >
-                              {item.link}
-                            </a>
+                            {item.descricao && (
+                              <Text type="secondary" className="text-sm">
+                                {item.descricao}
+                              </Text>
+                            )}
+                            {item.link ? (
+                              <a
+                                href={item.link}
+                                target="_blank"
+                                rel="noreferrer"
+                                className="text-gray-500 hover:text-[#017DB9] hover:underline truncate max-w-md flex items-center gap-1 text-sm"
+                              >
+                                {item.link}
+                              </a>
+                            ) : (
+                              <Text type="secondary" className="text-xs">
+                                Sem link
+                              </Text>
+                            )}
                             <Text type="secondary" className="text-xs">
                               ID: {item.id}
                             </Text>

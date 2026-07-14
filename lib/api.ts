@@ -1,5 +1,17 @@
 const API_URL = process.env.NEXT_PUBLIC_API_URL;
 
+function buildApiUrl(path: string) {
+  const baseUrl = API_URL || "";
+
+  if (!baseUrl) {
+    return path.startsWith("/") ? path : `/${path}`;
+  }
+
+  const cleanBase = baseUrl.endsWith("/") ? baseUrl.slice(0, -1) : baseUrl;
+  const cleanPath = path.startsWith("/") ? path : `/${path}`;
+  return `${cleanBase}${cleanPath}`;
+}
+
 /**
  * Função principal para chamadas de API.
  * Lida com headers, FormData, e tratamento de erros 401.
@@ -32,7 +44,7 @@ async function fetchApi(path: string, options: RequestInit = {}) {
   console.log("\n[FRONTEND DEBUG] Chamando API:", path);
   console.log("[FRONTEND DEBUG] Headers que estão sendo enviados:", headers);
 
-  const response = await fetch(`${API_URL}${path}`, {
+  const response = await fetch(buildApiUrl(path), {
     ...options,
     headers,
   });
@@ -552,13 +564,10 @@ export const uploadImage = async (file: File) => {
   const formData = new FormData();
   formData.append("file", file);
 
-  const response = await fetch(
-    `${process.env.NEXT_PUBLIC_API_URL}/api/files/upload`,
-    {
-      method: "POST",
-      body: formData,
-    },
-  );
+  const response = await fetch(buildApiUrl("/api/files/upload"), {
+    method: "POST",
+    body: formData,
+  });
 
   if (!response.ok) throw new Error("Erro no upload");
   return response.json();
